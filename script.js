@@ -199,22 +199,22 @@ function showStartupError(message) {
 }
 
 function setupEventListeners() {
-    // 1단계 -> 2단계
+    // 1단계 (부위 선택) -> 2단계 (문진)
     document.getElementById('next-to-step2').addEventListener('click', function() {
         if (validateStep1()) {
-            collectStep1Data();
             goToStep(2);
         }
     });
     
-    // 2단계 -> 1단계
+    // 2단계 (문진) -> 1단계 (부위 선택)
     document.getElementById('back-to-step1').addEventListener('click', function() {
         goToStep(1);
     });
     
-    // 2단계 -> 3단계 (분석)
+    // 2단계 (문진) -> 3단계 (분석)
     document.getElementById('analyze-pain').addEventListener('click', function() {
         if (validateStep2()) {
+            collectStep2Data();
             analyzePain();
             goToStep(3);
         }
@@ -380,6 +380,16 @@ function setupBodyMapEvents() {
 }
 
 function validateStep1() {
+    // 1단계: 부위 선택 검증
+    if (painData.selectedAreas.length === 0) {
+        alert('통증 부위를 하나 이상 선택해 주세요.');
+        return false;
+    }
+    return true;
+}
+
+function validateStep2() {
+    // 2단계: 문진 검증
     const description = document.getElementById('pain-description').value.trim();
     if (description.length < 3) {
         alert('가장 힘든 동작을 입력해 주세요.');
@@ -407,15 +417,7 @@ function validateStep1() {
     return true;
 }
 
-function validateStep2() {
-    if (painData.selectedAreas.length === 0) {
-        alert('통증 부위를 하나 이상 선택해 주세요.');
-        return false;
-    }
-    return true;
-}
-
-function collectStep1Data() {
+function collectStep2Data() {
     painData.questionnaire = {
         mostDifficultMovement: document.getElementById('pain-description').value,
         injuryHistory: document.querySelector('input[name="injury-history"]:checked')?.value || '',
