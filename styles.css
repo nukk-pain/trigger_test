@@ -2036,3 +2036,200 @@ input[type="range"]::-webkit-slider-thumb {
         border-width: 3px;
     }
 }
+
+/* 실시간 선택 상태 표시 개선 */
+.selection-status-bar {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+    transition: all 0.3s ease;
+}
+
+.status-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.status-icon {
+    font-size: 1.2rem;
+}
+
+#live-selection-text {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.selection-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: 10px;
+}
+
+.selection-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    animation: badgeAppear 0.3s ease;
+}
+
+@keyframes badgeAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.selection-badge:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.selection-badge .remove-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: bold;
+}
+
+.selection-badge .remove-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.2);
+}
+
+.quick-clear-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.quick-clear-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 클릭 영역 개선 */
+.clickable-area {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    stroke-width: 2;
+    opacity: 0.8;
+    filter: brightness(1);
+}
+
+.clickable-area:hover {
+    stroke: #2196F3;
+    stroke-width: 3;
+    fill: rgba(33, 150, 243, 0.4) !important;
+    opacity: 1;
+    transform-origin: center;
+    transform: scale(1.1);
+    filter: brightness(1.1) drop-shadow(0 2px 4px rgba(33, 150, 243, 0.3));
+}
+
+.clickable-area.selected {
+    fill: rgba(255, 87, 34, 0.8) !important;
+    stroke: #ff5722;
+    stroke-width: 3.5;
+    opacity: 1;
+    animation: selectedPulse 0.5s ease;
+}
+
+@keyframes selectedPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1.08); }
+}
+
+.clickable-area.selected:hover {
+    fill: rgba(255, 87, 34, 0.9) !important;
+    stroke: #e64a19;
+    transform: scale(1.12);
+    filter: brightness(1.1) drop-shadow(0 3px 6px rgba(255, 87, 34, 0.4));
+}
+
+/* 바디맵 컨테이너 개선 */
+.body-map {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    max-width: 550px;
+    width: 100%;
+    position: relative;
+}
+
+#body-svg {
+    width: 100%;
+    height: auto;
+    max-width: 450px;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+    .selection-status-bar {
+        padding: 12px 15px;
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+    
+    .status-content {
+        justify-content: center;
+    }
+    
+    .selection-badges {
+        justify-content: center;
+        margin-left: 0;
+    }
+    
+    .selection-badge {
+        font-size: 0.8rem;
+        padding: 4px 10px;
+    }
+    
+    .clickable-area:hover {
+        transform: scale(1.15);
+    }
+    
+    .body-map {
+        padding: 20px;
+    }
+}

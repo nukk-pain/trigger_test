@@ -281,6 +281,12 @@ function setupEventListeners() {
     // 선택 초기화
     document.getElementById('clear-selection').addEventListener('click', clearSelection);
     
+    // 상단 빠른 지우기 버튼
+    const quickClearBtn = document.getElementById('quick-clear');
+    if (quickClearBtn) {
+        quickClearBtn.addEventListener('click', clearSelection);
+    }
+    
     // 처음부터 다시
     document.getElementById('start-over').addEventListener('click', function() {
         resetApp();
@@ -505,44 +511,96 @@ function toggleAreaSelection(area) {
 function updateSelectedAreasList() {
     const list = document.getElementById('selected-list');
     const countElement = document.getElementById('selection-count');
-    list.innerHTML = '';
     
-    // 개수 업데이트
-    if (countElement) {
-        countElement.textContent = `${painData.selectedAreas.length}개 선택됨`;
+    // 실시간 상단 표시 업데이트
+    updateLiveSelectionDisplay();
+    
+    if (list) {
+        list.innerHTML = '';
+        
+        // 개수 업데이트
+        if (countElement) {
+            countElement.textContent = `${painData.selectedAreas.length}개 선택됨`;
+        }
+        
+        if (painData.selectedAreas.length === 0) {
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'empty-selection';
+            emptyDiv.innerHTML = `
+                <div class="empty-selection-icon">🎯</div>
+                <div>아픈 부위를 클릭해서 선택해주세요</div>
+            `;
+            list.appendChild(emptyDiv);
+            return;
+        }
+        
+        painData.selectedAreas.forEach(area => {
+            const li = document.createElement('li');
+            
+            const areaName = document.createElement('span');
+            areaName.className = 'area-name';
+            areaName.textContent = getAreaDisplayName(area);
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-area';
+            removeBtn.innerHTML = '×';
+            removeBtn.title = '제거';
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                removeSelectedArea(area);
+            });
+            
+            li.appendChild(areaName);
+            li.appendChild(removeBtn);
+            list.appendChild(li);
+        });
     }
+}
+
+function updateLiveSelectionDisplay() {
+    const liveText = document.getElementById('live-selection-text');
+    const badgesContainer = document.getElementById('live-selection-badges');
+    const quickClearBtn = document.getElementById('quick-clear');
     
+    if (!liveText || !badgesContainer) return;
+    
+    // 텍스트 업데이트
     if (painData.selectedAreas.length === 0) {
-        const emptyDiv = document.createElement('div');
-        emptyDiv.className = 'empty-selection';
-        emptyDiv.innerHTML = `
-            <div class="empty-selection-icon">🎯</div>
-            <div>아픈 부위를 클릭해서 선택해주세요</div>
-        `;
-        list.appendChild(emptyDiv);
-        return;
+        liveText.textContent = '통증 부위를 클릭해주세요';
+    } else if (painData.selectedAreas.length === 1) {
+        liveText.textContent = '1개 부위 선택됨';
+    } else {
+        liveText.textContent = `${painData.selectedAreas.length}개 부위 선택됨`;
     }
     
+    // 배지 업데이트
+    badgesContainer.innerHTML = '';
     painData.selectedAreas.forEach(area => {
-        const li = document.createElement('li');
+        const badge = document.createElement('div');
+        badge.className = 'selection-badge';
+        badge.innerHTML = `
+            <span>${getAreaDisplayName(area)}</span>
+            <span class="remove-btn" data-area="${area}">×</span>
+        `;
         
-        const areaName = document.createElement('span');
-        areaName.className = 'area-name';
-        areaName.textContent = getAreaDisplayName(area);
-        
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'remove-area';
-        removeBtn.innerHTML = '×';
-        removeBtn.title = '제거';
+        // 개별 제거 이벤트
+        const removeBtn = badge.querySelector('.remove-btn');
         removeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             removeSelectedArea(area);
         });
         
-        li.appendChild(areaName);
-        li.appendChild(removeBtn);
-        list.appendChild(li);
+        badgesContainer.appendChild(badge);
     });
+    
+    // 전체 지우기 버튼 표시/숨김
+    if (quickClearBtn) {
+        if (painData.selectedAreas.length > 0) {
+            quickClearBtn.style.display = 'block';
+        } else {
+            quickClearBtn.style.display = 'none';
+        }
+    }
 }
 
 function removeSelectedArea(areaToRemove) {
