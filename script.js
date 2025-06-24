@@ -219,15 +219,7 @@ async function initializeAPI() {
         throw new Error('API 키 설정이 필요합니다.');
     }
 
-    // API 키 유효성 테스트
-    try {
-        await window.openaiConfig.testApiKey();
-        console.log('✅ OpenAI API 연결 성공');
-    } catch (error) {
-        console.error('❌ API 키 검증 실패:', error);
-        showMandatoryAPIKeyDialog(error.message);
-        throw error;
-    }
+    console.log('✅ OpenAI API 설정 완료');
 }
 
 function showStartupError(message) {
@@ -444,12 +436,6 @@ function validateStep1() {
 
 function validateStep2() {
     // 2단계: 문진 검증
-    const description = document.getElementById('pain-description').value.trim();
-    if (description.length < 3) {
-        alert('아픈 동작을 써주세요.');
-        return false;
-    }
-    
     const injuryHistory = document.querySelector('input[name="injury-history"]:checked');
     if (!injuryHistory) {
         alert('다친 적이 있는지 선택하세요.');
