@@ -1,13 +1,19 @@
 {
-  "functions": {
-    "api/env.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/api/env",
-      "destination": "/api/env.js"
+      "src": "api/env.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/env",
+      "dest": "/api/env.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }
