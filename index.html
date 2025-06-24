@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>통증 가이드 도우미 - AI 셀프 마사지 안내</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🩺 통증 가이드 도우미</h1>
+            <p>트리거 포인트 & 근막 경선 기반 셀프 마사지 안내</p>
+            <div class="ai-status-bar">
+                <div id="ai-status" class="ai-status">
+                    <span id="ai-indicator">🤖</span>
+                    <span id="ai-text">AI 분석 시스템 로딩중...</span>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-step active" data-step="1">1단계</div>
+                <div class="progress-step" data-step="2">2단계</div>
+                <div class="progress-step" data-step="3">결과</div>
+            </div>
+        </header>
+
+        <!-- 1단계: 텍스트 기반 문진 -->
+        <section id="step1" class="step-section active">
+            <h2>📝 1단계: 통증 정보 입력</h2>
+            <p class="step-description">정확한 분석을 위해 아래 질문들에 답해주세요</p>
+            <form id="pain-questionnaire" class="questionnaire-form">
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">1</span>
+                        <h3>가장 힘든 동작은 무엇인가요?</h3>
+                    </div>
+                    <div class="question-content">
+                        <input type="text" id="pain-description" placeholder="예: 목 돌리기, 팔 들어올리기, 허리 숙이기 등"
+                            class="text-input">
+                        <small class="input-hint">일상생활에서 가장 불편함을 느끼는 동작을 적어주세요</small>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">2</span>
+                        <h3>다친 적이 있나요?</h3>
+                    </div>
+                    <div class="question-content">
+                        <div class="radio-group-enhanced">
+                            <label class="radio-option">
+                                <input type="radio" name="injury-history" value="네">
+                                <span class="radio-button"></span>
+                                <span class="option-text">네, 다친 적이 있어요</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="injury-history" value="아니오">
+                                <span class="radio-button"></span>
+                                <span class="option-text">아니오, 다친 적이 없어요</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-card sub-question" id="injury-details" style="display: none;">
+                    <div class="question-header">
+                        <span class="question-number">2-1</span>
+                        <h3>어떻게 다쳤나요?</h3>
+                    </div>
+                    <div class="question-content">
+                        <div class="injury-type-grid">
+                            <label class="injury-option">
+                                <input type="radio" name="injury-type" value="삐끗했다">
+                                <div class="injury-card">
+                                    <span class="injury-icon">🔄</span>
+                                    <span class="injury-text">삐끗했다</span>
+                                </div>
+                            </label>
+                            <label class="injury-option">
+                                <input type="radio" name="injury-type" value="넘어졌다">
+                                <div class="injury-card">
+                                    <span class="injury-icon">⬇️</span>
+                                    <span class="injury-text">넘어졌다</span>
+                                </div>
+                            </label>
+                            <label class="injury-option">
+                                <input type="radio" name="injury-type" value="부딪혔다">
+                                <div class="injury-card">
+                                    <span class="injury-icon">💥</span>
+                                    <span class="injury-text">부딪혔다</span>
+                                </div>
+                            </label>
+                            <label class="injury-option">
+                                <input type="radio" name="injury-type" value="맞았다">
+                                <div class="injury-card">
+                                    <span class="injury-icon">👊</span>
+                                    <span class="injury-text">맞았다</span>
+                                </div>
+                            </label>
+                            <label class="injury-option">
+                                <input type="radio" name="injury-type" value="기타">
+                                <div class="injury-card">
+                                    <span class="injury-icon">❓</span>
+                                    <span class="injury-text">기타</span>
+                                </div>
+                            </label>
+                        </div>
+                        <input type="text" id="injury-other" placeholder="기타 외상에 대해 자세히 입력해주세요" class="text-input"
+                            style="display: none; margin-top: 15px;">
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">3</span>
+                        <h3>얼마나 오래 아팠나요?</h3>
+                    </div>
+                    <div class="question-content">
+                        <div class="duration-timeline">
+                            <label class="timeline-option">
+                                <input type="radio" name="duration" value="며칠">
+                                <div class="timeline-card">
+                                    <span class="timeline-icon">📅</span>
+                                    <span class="timeline-text">며칠</span>
+                                    <span class="timeline-desc">1-7일</span>
+                                </div>
+                            </label>
+                            <label class="timeline-option">
+                                <input type="radio" name="duration" value="몇 주">
+                                <div class="timeline-card">
+                                    <span class="timeline-icon">📆</span>
+                                    <span class="timeline-text">몇 주</span>
+                                    <span class="timeline-desc">1-4주</span>
+                                </div>
+                            </label>
+                            <label class="timeline-option">
+                                <input type="radio" name="duration" value="몇 개월">
+                                <div class="timeline-card">
+                                    <span class="timeline-icon">🗓️</span>
+                                    <span class="timeline-text">몇 개월</span>
+                                    <span class="timeline-desc">1-12개월</span>
+                                </div>
+                            </label>
+                            <label class="timeline-option">
+                                <input type="radio" name="duration" value="몇 년">
+                                <div class="timeline-card">
+                                    <span class="timeline-icon">📊</span>
+                                    <span class="timeline-text">몇 년</span>
+                                    <span class="timeline-desc">1년 이상</span>
+                                </div>
+                            </label>
+                            <label class="timeline-option">
+                                <input type="radio" name="duration" value="최근 악화">
+                                <div class="timeline-card">
+                                    <span class="timeline-icon">📈</span>
+                                    <span class="timeline-text">최근 악화</span>
+                                    <span class="timeline-desc">기존 통증 악화</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">4</span>
+                        <h3>통증 강도는 어느 정도인가요?</h3>
+                    </div>
+                    <div class="question-content">
+                        <div class="pain-scale-container">
+                            <div class="pain-scale-labels">
+                                <span class="scale-label">전혀 아프지 않음</span>
+                                <span class="scale-label">참을 수 없는 통증</span>
+                            </div>
+                            <div class="nrs-scale-enhanced">
+                                <label class="nrs-option" data-level="mild"><input type="radio" name="nrs"
+                                        value="1"><span class="nrs-number">1</span></label>
+                                <label class="nrs-option" data-level="mild"><input type="radio" name="nrs"
+                                        value="2"><span class="nrs-number">2</span></label>
+                                <label class="nrs-option" data-level="mild"><input type="radio" name="nrs"
+                                        value="3"><span class="nrs-number">3</span></label>
+                                <label class="nrs-option" data-level="moderate"><input type="radio" name="nrs"
+                                        value="4"><span class="nrs-number">4</span></label>
+                                <label class="nrs-option" data-level="moderate"><input type="radio" name="nrs"
+                                        value="5"><span class="nrs-number">5</span></label>
+                                <label class="nrs-option" data-level="moderate"><input type="radio" name="nrs"
+                                        value="6"><span class="nrs-number">6</span></label>
+                                <label class="nrs-option" data-level="severe"><input type="radio" name="nrs"
+                                        value="7"><span class="nrs-number">7</span></label>
+                                <label class="nrs-option" data-level="severe"><input type="radio" name="nrs"
+                                        value="8"><span class="nrs-number">8</span></label>
+                                <label class="nrs-option" data-level="severe"><input type="radio" name="nrs"
+                                        value="9"><span class="nrs-number">9</span></label>
+                                <label class="nrs-option" data-level="severe"><input type="radio" name="nrs"
+                                        value="10"><span class="nrs-number">10</span></label>
+                            </div>
+                            <div class="pain-descriptions">
+                                <span class="pain-desc mild">1-3: 경미한 통증</span>
+                                <span class="pain-desc moderate">4-6: 중간 정도 통증</span>
+                                <span class="pain-desc severe">7-10: 심한 통증</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">5</span>
+                        <h3>어떻게 아픈가요?</h3>
+                        <small class="multiple-choice">여러 개 선택 가능</small>
+                    </div>
+                    <div class="question-content">
+                        <div class="pain-quality-grid">
+                            <label class="quality-option">
+                                <input type="checkbox" name="pain-quality" value="날카롭게 찌르는">
+                                <div class="quality-card">
+                                    <span class="quality-icon">⚔️</span>
+                                    <span class="quality-text">날카롭게 찌르는</span>
+                                </div>
+                            </label>
+                            <label class="quality-option">
+                                <input type="checkbox" name="pain-quality" value="무겁고 둔한">
+                                <div class="quality-card">
+                                    <span class="quality-icon">💪</span>
+                                    <span class="quality-text">무겁고 둔한</span>
+                                </div>
+                            </label>
+                            <label class="quality-option">
+                                <input type="checkbox" name="pain-quality" value="쑤시는">
+                                <div class="quality-card">
+                                    <span class="quality-icon">🌀</span>
+                                    <span class="quality-text">쑤시는</span>
+                                </div>
+                            </label>
+                            <label class="quality-option">
+                                <input type="checkbox" name="pain-quality" value="뻐근함">
+                                <div class="quality-card">
+                                    <span class="quality-icon">🧷</span>
+                                    <span class="quality-text">뻐근함</span>
+                                </div>
+                            </label>
+                            <label class="quality-option">
+                                <input type="checkbox" name="pain-quality" value="욱신거림">
+                                <div class="quality-card">
+                                    <span class="quality-icon">💫</span>
+                                    <span class="quality-text">욱신거림</span>
+                                </div>
+                            </label>
+                            <label class="quality-option">
+                                <input type="checkbox" name="pain-quality" value="타는 듯한">
+                                <div class="quality-card">
+                                    <span class="quality-icon">🔥</span>
+                                    <span class="quality-text">타는 듯한</span>
+                                </div>
+                            </label>
+                            <label class="quality-option">
+                                <input type="checkbox" name="pain-quality" value="차가운">
+                                <div class="quality-card">
+                                    <span class="quality-icon">❄️</span>
+                                    <span class="quality-text">차가운</span>
+                                </div>
+                            </label>
+                            <label class="quality-option">
+                                <input type="checkbox" name="pain-quality" value="저릿함">
+                                <div class="quality-card">
+                                    <span class="quality-icon">⚡</span>
+                                    <span class="quality-text">저릿함</span>
+                                </div>
+                            </label>
+                            <label class="quality-option">
+                                <input type="checkbox" name="pain-quality" value="기타">
+                                <div class="quality-card">
+                                    <span class="quality-icon">📋</span>
+                                    <span class="quality-text">기타</span>
+                                </div>
+                            </label>
+                        </div>
+                        <input type="text" id="pain-quality-other" placeholder="다른 느낌을 자세히 설명해주세요" class="text-input"
+                            style="display: none; margin-top: 15px;">
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">6</span>
+                        <h3>통증 패턴은 어떤가요?</h3>
+                        <small class="multiple-choice">여러 개 선택 가능</small>
+                    </div>
+                    <div class="question-content">
+                        <div class="pattern-options">
+                            <label class="pattern-option">
+                                <input type="checkbox" name="pain-pattern" value="하루 종일">
+                                <div class="pattern-card">
+                                    <span class="pattern-icon">🕑</span>
+                                    <span class="pattern-text">하루 종일</span>
+                                </div>
+                            </label>
+                            <label class="pattern-option">
+                                <input type="checkbox" name="pain-pattern" value="아침에 심함">
+                                <div class="pattern-card">
+                                    <span class="pattern-icon">🌅</span>
+                                    <span class="pattern-text">아침에 심함</span>
+                                </div>
+                            </label>
+                            <label class="pattern-option">
+                                <input type="checkbox" name="pain-pattern" value="밤에 심함">
+                                <div class="pattern-card">
+                                    <span class="pattern-icon">🌙</span>
+                                    <span class="pattern-text">밤에 심함</span>
+                                </div>
+                            </label>
+                            <label class="pattern-option">
+                                <input type="checkbox" name="pain-pattern" value="쉴 때 더 아프다">
+                                <div class="pattern-card">
+                                    <span class="pattern-icon">😴</span>
+                                    <span class="pattern-text">쉴 때 더 아프다</span>
+                                </div>
+                            </label>
+                            <label class="pattern-option">
+                                <input type="checkbox" name="pain-pattern" value="활동할 때만 아프다">
+                                <div class="pattern-card">
+                                    <span class="pattern-icon">🏃</span>
+                                    <span class="pattern-text">활동할 때만 아프다</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">7</span>
+                        <h3>밤에 잠을 깨나요?</h3>
+                    </div>
+                    <div class="question-content">
+                        <div class="sleep-options">
+                            <label class="sleep-option">
+                                <input type="radio" name="night-wake" value="예">
+                                <div class="sleep-card">
+                                    <span class="sleep-icon">😴</span>
+                                    <span class="sleep-text">예, 자주 깹니다</span>
+                                </div>
+                            </label>
+                            <label class="sleep-option">
+                                <input type="radio" name="night-wake" value="아니오">
+                                <div class="sleep-card">
+                                    <span class="sleep-icon">😌</span>
+                                    <span class="sleep-text">아니오, 잘 자요</span>
+                                </div>
+                            </label>
+                            <label class="sleep-option">
+                                <input type="radio" name="night-wake" value="가끔">
+                                <div class="sleep-card">
+                                    <span class="sleep-icon">😐</span>
+                                    <span class="sleep-text">가끔 깨니다</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">8</span>
+                        <h3>더 아파지는 경우</h3>
+                    </div>
+                    <div class="question-content">
+                        <input type="text" id="worsen-factors" placeholder="예: 오래 앙아있을 때, 찬 곳에 있을 때, 스트레스 받을 때 등"
+                            class="text-input">
+                        <small class="input-hint">통증이 심해지는 상황이나 동작을 자세히 적어주세요</small>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">9</span>
+                        <h3>편해지는 경우</h3>
+                    </div>
+                    <div class="question-content">
+                        <input type="text" id="improve-factors" placeholder="예: 따듯한 천으로 찜을 때, 마사지할 때, 운동 후 등"
+                            class="text-input">
+                        <small class="input-hint">통증이 완화되는 방법이나 상황을 자세히 적어주세요</small>
+                    </div>
+                </div>
+
+                <div class="question-card emergency-section">
+                    <div class="question-header emergency">
+                        <span class="question-number emergency">⚠️</span>
+                        <h3>응급상황 체크</h3>
+                        <small class="emergency-note">다음 증상이 있다면 즉시 병원 방문이 필요합니다</small>
+                    </div>
+                    <div class="question-content">
+                        <div class="emergency-symptoms">
+                            <label class="emergency-option">
+                                <input type="checkbox" name="red-flag" value="fever">
+                                <div class="emergency-card">
+                                    <span class="emergency-icon">🌡️</span>
+                                    <span class="emergency-text">발열</span>
+                                    <small class="emergency-desc">38도 이상 고열</small>
+                                </div>
+                            </label>
+                            <label class="emergency-option">
+                                <input type="checkbox" name="red-flag" value="severe-numbness">
+                                <div class="emergency-card">
+                                    <span class="emergency-icon">🤚</span>
+                                    <span class="emergency-text">심한 저림/마비</span>
+                                    <small class="emergency-desc">팔다리 감각 없음</small>
+                                </div>
+                            </label>
+                            <label class="emergency-option">
+                                <input type="checkbox" name="red-flag" value="weakness">
+                                <div class="emergency-card">
+                                    <span class="emergency-icon">💪</span>
+                                    <span class="emergency-text">근력 약화</span>
+                                    <small class="emergency-desc">힘이 빠짐</small>
+                                </div>
+                            </label>
+                            <label class="emergency-option">
+                                <input type="checkbox" name="red-flag" value="bladder">
+                                <div class="emergency-card">
+                                    <span class="emergency-icon">🚽</span>
+                                    <span class="emergency-text">배뇨장애</span>
+                                    <small class="emergency-desc">소변 못봄</small>
+                                </div>
+                            </label>
+                            <label class="emergency-option">
+                                <input type="checkbox" name="red-flag" value="chest-pain">
+                                <div class="emergency-card">
+                                    <span class="emergency-icon">💔</span>
+                                    <span class="emergency-text">가슴 통증</span>
+                                    <small class="emergency-desc">심장 쪽 아픔</small>
+                                </div>
+                            </label>
+                            <label class="emergency-option">
+                                <input type="checkbox" name="red-flag" value="breathing">
+                                <div class="emergency-card">
+                                    <span class="emergency-icon">🫁</span>
+                                    <span class="emergency-text">호흡곤란</span>
+                                    <small class="emergency-desc">숨쉬기 어려움</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="next-to-step2" class="next-btn enhanced">
+                        <span class="btn-text">다음 단계: 통증 부위 선택</span>
+                        <span class="btn-icon">→</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- 2단계: 인체 그림 기반 부위 선택 -->
+        <section id="step2" class="step-section">
+            <h2>🎯 2단계: 정확한 통증 부위 표시</h2>
+            <p class="step-description">아픈 부위를 정확히 클릭해주세요. 여러 부위를 선택할 수 있습니다.</p>
+            <div class="body-map-guide">
+                <div class="guide-item">
+                    <span class="guide-icon">👆</span>
+                    <span class="guide-text">클릭하여 부위 선택</span>
+                </div>
+                <div class="guide-item">
+                    <span class="guide-icon">🔄</span>
+                    <span class="guide-text">앞면/뒷면 전환</span>
+                </div>
+                <div class="guide-item">
+                    <span class="guide-icon">❌</span>
+                    <span class="guide-text">선택 취소 가능</span>
+                </div>
+            </div>
+
+            <div class="body-map-container">
+                <div class="body-view-tabs">
+                    <button class="view-tab active" data-view="front">앞면</button>
+                    <button class="view-tab" data-view="back">뒷면</button>
+                </div>
+
+                <div class="body-map" id="body-map">
+                    <!-- SVG 인체 그림이 여기에 삽입됩니다 -->
+                    <svg id="body-svg" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 앞면 body outline -->
+                        <g id="front-view" class="body-view active">
+                            <!-- 머리 부위 -->
+                            <ellipse cx="200" cy="60" rx="40" ry="50" fill="none" stroke="#333" stroke-width="2" />
+                            <ellipse class="clickable-area" data-area="head-front" cx="200" cy="50" rx="35" ry="25"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="이마/앞머리" />
+                            <ellipse class="clickable-area" data-area="head-temple-left" cx="170" cy="55" rx="15"
+                                ry="20" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 관자놀이" />
+                            <ellipse class="clickable-area" data-area="head-temple-right" cx="230" cy="55" rx="15"
+                                ry="20" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 관자놀이" />
+                            <ellipse class="clickable-area" data-area="jaw-left" cx="180" cy="80" rx="12" ry="15"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 턱" />
+                            <ellipse class="clickable-area" data-area="jaw-right" cx="220" cy="80" rx="12" ry="15"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 턱" />
+
+                            <!-- 목 부위 -->
+                            <rect class="clickable-area" data-area="neck-front" x="185" y="100" width="30" height="25"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="목 앞쪽" />
+                            <rect class="clickable-area" data-area="neck-left" x="165" y="105" width="20" height="20"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="목 왼쪽" />
+                            <rect class="clickable-area" data-area="neck-right" x="215" y="105" width="20" height="20"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="목 오른쪽" />
+
+                            <!-- 어깨 부위 상세 -->
+                            <ellipse class="clickable-area" data-area="shoulder-left-front" cx="140" cy="135" rx="25"
+                                ry="18" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 어깨 앞" />
+                            <ellipse class="clickable-area" data-area="shoulder-right-front" cx="260" cy="135" rx="25"
+                                ry="18" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 어깨 앞" />
+                            <ellipse class="clickable-area" data-area="collar-left" cx="170" cy="125" rx="15" ry="10"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 쇄골" />
+                            <ellipse class="clickable-area" data-area="collar-right" cx="230" cy="125" rx="15" ry="10"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 쇄골" />
+
+                            <!-- 가슴 부위 상세 -->
+                            <rect class="clickable-area" data-area="chest-upper" x="170" y="130" width="60" height="40"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="가슴 윗부분" />
+                            <rect class="clickable-area" data-area="chest-left" x="160" y="150" width="35" height="50"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 가슴" />
+                            <rect class="clickable-area" data-area="chest-right" x="205" y="150" width="35" height="50"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 가슴" />
+                            <rect class="clickable-area" data-area="sternum" x="190" y="140" width="20" height="60"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="가슴뼈" />
+
+                            <!-- 복부 부위 상세 -->
+                            <rect class="clickable-area" data-area="upper-abdomen" x="170" y="200" width="60"
+                                height="30" fill="rgba(255,0,0,0.1)" stroke="#666" title="명치/상복부" />
+                            <rect class="clickable-area" data-area="abdomen-left" x="160" y="230" width="35" height="40"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 배" />
+                            <rect class="clickable-area" data-area="abdomen-right" x="205" y="230" width="35"
+                                height="40" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 배" />
+                            <rect class="clickable-area" data-area="navel" x="185" y="240" width="30" height="25"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="배꼽 주변" />
+                            <rect class="clickable-area" data-area="lower-abdomen" x="175" y="265" width="50"
+                                height="30" fill="rgba(255,0,0,0.1)" stroke="#666" title="아랫배" />
+
+                            <!-- 팔 부위 상세 -->
+                            <rect class="clickable-area" data-area="upper-arm-left" x="100" y="150" width="25"
+                                height="60" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 윗팔" />
+                            <rect class="clickable-area" data-area="upper-arm-right" x="275" y="150" width="25"
+                                height="60" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 윗팔" />
+                            <circle class="clickable-area" data-area="elbow-left" cx="112" cy="220" r="12"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 팔꿈치" />
+                            <circle class="clickable-area" data-area="elbow-right" cx="288" cy="220" r="12"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 팔꿈치" />
+                            <rect class="clickable-area" data-area="forearm-left" x="105" y="235" width="20" height="50"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 아래팔" />
+                            <rect class="clickable-area" data-area="forearm-right" x="280" y="235" width="20"
+                                height="50" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 아래팔" />
+                            <circle class="clickable-area" data-area="wrist-left" cx="115" cy="295" r="10"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 손목" />
+                            <circle class="clickable-area" data-area="wrist-right" cx="285" cy="295" r="10"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 손목" />
+                            <ellipse class="clickable-area" data-area="hand-left" cx="115" cy="315" rx="12" ry="20"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼손" />
+                            <ellipse class="clickable-area" data-area="hand-right" cx="285" cy="315" rx="12" ry="20"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른손" />
+
+                            <!-- 골반 부위 -->
+                            <rect class="clickable-area" data-area="pelvis-left" x="160" y="295" width="30" height="25"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 골반" />
+                            <rect class="clickable-area" data-area="pelvis-right" x="210" y="295" width="30" height="25"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 골반" />
+                            <rect class="clickable-area" data-area="groin-left" x="165" y="315" width="20" height="15"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 사타구니" />
+                            <rect class="clickable-area" data-area="groin-right" x="215" y="315" width="20" height="15"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 사타구니" />
+
+                            <!-- 허벅지 부위 상세 -->
+                            <rect class="clickable-area" data-area="thigh-front-left" x="160" y="330" width="25"
+                                height="50" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 허벅지 앞" />
+                            <rect class="clickable-area" data-area="thigh-front-right" x="210" y="330" width="25"
+                                height="50" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 허벅지 앞" />
+                            <rect class="clickable-area" data-area="thigh-inner-left" x="185" y="340" width="12"
+                                height="40" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 허벅지 안쪽" />
+                            <rect class="clickable-area" data-area="thigh-inner-right" x="203" y="340" width="12"
+                                height="40" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 허벅지 안쪽" />
+                            <rect class="clickable-area" data-area="thigh-outer-left" x="145" y="340" width="15"
+                                height="40" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 허벅지 바깥" />
+                            <rect class="clickable-area" data-area="thigh-outer-right" x="240" y="340" width="15"
+                                height="40" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 허벅지 바깥" />
+
+                            <!-- 무릎 부위 상세 -->
+                            <circle class="clickable-area" data-area="knee-front-left" cx="172" cy="400" r="15"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 무릎 앞" />
+                            <circle class="clickable-area" data-area="knee-front-right" cx="228" cy="400" r="15"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 무릎 앞" />
+
+                            <!-- 정강이/종아리 부위 상세 -->
+                            <rect class="clickable-area" data-area="shin-left" x="165" y="420" width="15" height="60"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 정강이" />
+                            <rect class="clickable-area" data-area="shin-right" x="220" y="420" width="15" height="60"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 정강이" />
+                            <rect class="clickable-area" data-area="calf-front-left" x="180" y="430" width="12"
+                                height="50" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 종아리 앞" />
+                            <rect class="clickable-area" data-area="calf-front-right" x="208" y="430" width="12"
+                                height="50" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 종아리 앞" />
+
+                            <!-- 발목/발 부위 -->
+                            <circle class="clickable-area" data-area="ankle-left" cx="175" cy="490" r="10"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 발목" />
+                            <circle class="clickable-area" data-area="ankle-right" cx="225" cy="490" r="10"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 발목" />
+                            <ellipse class="clickable-area" data-area="foot-top-left" cx="175" cy="520" rx="15" ry="25"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼발 등" />
+                            <ellipse class="clickable-area" data-area="foot-top-right" cx="225" cy="520" rx="15" ry="25"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른발 등" />
+                        </g>
+
+                        <!-- 뒷면 body outline -->
+                        <g id="back-view" class="body-view">
+                            <!-- 머리 뒷부분 -->
+                            <ellipse cx="200" cy="60" rx="40" ry="50" fill="none" stroke="#333" stroke-width="2" />
+                            <ellipse class="clickable-area" data-area="head-back" cx="200" cy="45" rx="35" ry="25"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="뒷머리" />
+                            <ellipse class="clickable-area" data-area="head-crown" cx="200" cy="35" rx="25" ry="15"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="정수리" />
+                            <ellipse class="clickable-area" data-area="occipital" cx="200" cy="70" rx="30" ry="20"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="후두부" />
+
+                            <!-- 목 뒷부분 상세 -->
+                            <rect class="clickable-area" data-area="neck-back-upper" x="185" y="95" width="30"
+                                height="15" fill="rgba(255,0,0,0.1)" stroke="#666" title="목 뒤 윗부분" />
+                            <rect class="clickable-area" data-area="neck-back-lower" x="185" y="110" width="30"
+                                height="20" fill="rgba(255,0,0,0.1)" stroke="#666" title="목 뒤 아래부분" />
+                            <rect class="clickable-area" data-area="neck-side-left-back" x="165" y="105" width="20"
+                                height="20" fill="rgba(255,0,0,0.1)" stroke="#666" title="목 뒤 왼쪽" />
+                            <rect class="clickable-area" data-area="neck-side-right-back" x="215" y="105" width="20"
+                                height="20" fill="rgba(255,0,0,0.1)" stroke="#666" title="목 뒤 오른쪽" />
+
+                            <!-- 어깨 뒷부분 상세 -->
+                            <ellipse class="clickable-area" data-area="shoulder-blade-left" cx="140" cy="150" rx="25"
+                                ry="35" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 어깨뼈" />
+                            <ellipse class="clickable-area" data-area="shoulder-blade-right" cx="260" cy="150" rx="25"
+                                ry="35" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 어깨뼈" />
+                            <ellipse class="clickable-area" data-area="shoulder-top-left" cx="130" cy="130" rx="20"
+                                ry="15" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 어깨 윗부분" />
+                            <ellipse class="clickable-area" data-area="shoulder-top-right" cx="270" cy="130" rx="20"
+                                ry="15" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 어깨 윗부분" />
+
+                            <!-- 등 상부 상세 -->
+                            <rect class="clickable-area" data-area="upper-back-center" x="175" y="130" width="50"
+                                height="40" fill="rgba(255,0,0,0.1)" stroke="#666" title="등 윗부분 중앙" />
+                            <rect class="clickable-area" data-area="upper-back-left" x="160" y="135" width="35"
+                                height="35" fill="rgba(255,0,0,0.1)" stroke="#666" title="등 윗부분 왼쪽" />
+                            <rect class="clickable-area" data-area="upper-back-right" x="205" y="135" width="35"
+                                height="35" fill="rgba(255,0,0,0.1)" stroke="#666" title="등 윗부분 오른쪽" />
+                            <rect class="clickable-area" data-area="mid-back-center" x="175" y="170" width="50"
+                                height="40" fill="rgba(255,0,0,0.1)" stroke="#666" title="등 중간 부분" />
+
+                            <!-- 허리 부위 상세 -->
+                            <rect class="clickable-area" data-area="lower-back-upper" x="170" y="210" width="60"
+                                height="30" fill="rgba(255,0,0,0.1)" stroke="#666" title="허리 윗부분" />
+                            <rect class="clickable-area" data-area="lower-back-left" x="160" y="220" width="35"
+                                height="40" fill="rgba(255,0,0,0.1)" stroke="#666" title="허리 왼쪽" />
+                            <rect class="clickable-area" data-area="lower-back-right" x="205" y="220" width="35"
+                                height="40" fill="rgba(255,0,0,0.1)" stroke="#666" title="허리 오른쪽" />
+                            <rect class="clickable-area" data-area="lower-back-center" x="180" y="240" width="40"
+                                height="30" fill="rgba(255,0,0,0.1)" stroke="#666" title="허리 중앙" />
+                            <rect class="clickable-area" data-area="sacral" x="185" y="270" width="30" height="25"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="천골 부위" />
+
+                            <!-- 엉덩이 부위 상세 -->
+                            <rect class="clickable-area" data-area="buttock-left-upper" x="160" y="295" width="35"
+                                height="25" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 엉덩이 위" />
+                            <rect class="clickable-area" data-area="buttock-right-upper" x="205" y="295" width="35"
+                                height="25" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 엉덩이 위" />
+                            <rect class="clickable-area" data-area="buttock-left-lower" x="160" y="320" width="35"
+                                height="25" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 엉덩이 아래" />
+                            <rect class="clickable-area" data-area="buttock-right-lower" x="205" y="320" width="35"
+                                height="25" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 엉덩이 아래" />
+                            <rect class="clickable-area" data-area="tailbone" x="190" y="340" width="20" height="15"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="꼬리뼈" />
+
+                            <!-- 팔 뒷부분 상세 -->
+                            <rect class="clickable-area" data-area="upper-arm-back-left" x="100" y="150" width="25"
+                                height="60" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 윗팔 뒤" />
+                            <rect class="clickable-area" data-area="upper-arm-back-right" x="275" y="150" width="25"
+                                height="60" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 윗팔 뒤" />
+                            <circle class="clickable-area" data-area="elbow-back-left" cx="112" cy="220" r="12"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 팔꿈치 뒤" />
+                            <circle class="clickable-area" data-area="elbow-back-right" cx="288" cy="220" r="12"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 팔꿈치 뒤" />
+                            <rect class="clickable-area" data-area="forearm-back-left" x="105" y="235" width="20"
+                                height="50" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 아래팔 뒤" />
+                            <rect class="clickable-area" data-area="forearm-back-right" x="280" y="235" width="20"
+                                height="50" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 아래팔 뒤" />
+
+                            <!-- 허벅지 뒷부분 상세 -->
+                            <rect class="clickable-area" data-area="thigh-back-left" x="160" y="355" width="25"
+                                height="50" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 허벅지 뒤" />
+                            <rect class="clickable-area" data-area="thigh-back-right" x="215" y="355" width="25"
+                                height="50" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 허벅지 뒤" />
+                            <rect class="clickable-area" data-area="hamstring-left" x="165" y="365" width="20"
+                                height="35" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 햄스트링" />
+                            <rect class="clickable-area" data-area="hamstring-right" x="215" y="365" width="20"
+                                height="35" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 햄스트링" />
+
+                            <!-- 무릎 뒷부분 -->
+                            <circle class="clickable-area" data-area="knee-back-left" cx="172" cy="410" r="15"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 무릎 뒤" />
+                            <circle class="clickable-area" data-area="knee-back-right" cx="228" cy="410" r="15"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 무릎 뒤" />
+
+                            <!-- 종아리 뒷부분 상세 -->
+                            <rect class="clickable-area" data-area="calf-back-left" x="165" y="430" width="20"
+                                height="50" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 종아리 뒤" />
+                            <rect class="clickable-area" data-area="calf-back-right" x="215" y="430" width="20"
+                                height="50" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 종아리 뒤" />
+                            <rect class="clickable-area" data-area="achilles-left" x="170" y="475" width="10"
+                                height="15" fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 아킬레스건" />
+                            <rect class="clickable-area" data-area="achilles-right" x="220" y="475" width="10"
+                                height="15" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 아킬레스건" />
+
+                            <!-- 발뒤꿈치/발바닥 -->
+                            <circle class="clickable-area" data-area="heel-left" cx="175" cy="495" r="12"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼쪽 발뒤꿈치" />
+                            <circle class="clickable-area" data-area="heel-right" cx="225" cy="495" r="12"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="오른쪽 발뒤꿈치" />
+                            <ellipse class="clickable-area" data-area="foot-sole-left" cx="175" cy="520" rx="15" ry="25"
+                                fill="rgba(255,0,0,0.1)" stroke="#666" title="왼발 바닥" />
+                            <ellipse class="clickable-area" data-area="foot-sole-right" cx="225" cy="520" rx="15"
+                                ry="25" fill="rgba(255,0,0,0.1)" stroke="#666" title="오른발 바닥" />
+                        </g>
+
+                        <!-- 선택된 영역 표시용 overlay -->
+                        <g id="selected-areas"></g>
+                    </svg>
+                </div>
+
+                <div class="selected-areas-panel">
+                    <div class="panel-header">
+                        <h4>🎯 선택된 통증 부위</h4>
+                        <span id="selection-count" class="selection-count">0개 선택됨</span>
+                    </div>
+                    <div class="selected-areas-content">
+                        <ul id="selected-list" class="selected-areas-list"></ul>
+                        <div class="panel-actions">
+                            <button type="button" id="clear-selection" class="clear-btn">
+                                <span class="btn-icon">🗑️</span>
+                                <span class="btn-text">전체 초기화</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-navigation">
+                <button type="button" id="back-to-step1" class="back-btn">← 이전</button>
+                <button type="button" id="analyze-pain" class="next-btn">분석하기 →</button>
+            </div>
+        </section>
+
+        <!-- 3단계: 결과 및 가이드 -->
+        <section id="step3" class="step-section">
+            <div id="red-flag-warning" class="warning-section hidden">
+                <h2>⚠️ 응급 상황 감지</h2>
+                <div class="emergency-notice">
+                    <p>입력하신 증상은 즉시 의료진의 진료가 필요할 수 있습니다.</p>
+                    <p><strong>지체 없이 병원을 방문하시기 바랍니다.</strong></p>
+                    <div class="emergency-contacts">
+                        <p>응급실: 119 | 의료상담: 1339</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="massage-guide" class="guide-section">
+                <h2>💡 AI 분석 결과</h2>
+
+                <div id="ai-analysis-result">
+                    <!-- AI 분석 결과가 여기에 표시됩니다 -->
+                </div>
+
+                <div class="safety-notice">
+                    <h3>⚠️ 중요 안내</h3>
+                    <ul>
+                        <li><strong>응급상황 시</strong> 즉시 병원 방문 (119)</li>
+                        <li><strong>3일 이상</strong> 통증 지속 시 의료진 상담</li>
+                        <li><strong>통증 악화 시</strong> 마사지 중단</li>
+                        <li><strong>과도한 압력</strong> 금지</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step-navigation">
+                <button type="button" id="start-over" class="back-btn">다시 분석하기</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="env-loader.js"></script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "pain-guide-helper",
+  "version": "1.0.0",
+  "description": "AI-powered pain analysis and self-massage guide",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "serve": "node server.js"
+  },
+  "keywords": [
+    "pain",
+    "massage",
+    "trigger-points",
+    "fascial-lines",
+    "ai",
+    "openai",
+    "healthcare"
+  ],
+  "dependencies": {
+    "express": "^4.18.0"
+  },
+  "author": "Pain Guide Team",
+  "license": "MIT"
+}
