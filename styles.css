@@ -2451,13 +2451,10 @@ input[type="range"]::-webkit-slider-thumb {
 /* Footer 스타일 */
 .footer-status {
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 15px 15px 0 0;
+    border-radius: 15px;
     margin-top: 40px;
     padding: 20px;
-    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    bottom: 0;
-    z-index: 90;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .footer-content {

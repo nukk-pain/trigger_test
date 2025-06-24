@@ -436,7 +436,7 @@ function setupBodyMapEvents() {
 function validateStep1() {
     // 1단계: 부위 선택 검증
     if (painData.selectedAreas.length === 0) {
-        alert('통증 부위를 하나 이상 선택해 주세요.');
+        alert('아픈 곳을 선택해 주세요.');
         return false;
     }
     return true;
@@ -446,25 +446,25 @@ function validateStep2() {
     // 2단계: 문진 검증
     const description = document.getElementById('pain-description').value.trim();
     if (description.length < 3) {
-        alert('가장 힘든 동작을 입력해 주세요.');
+        alert('아픈 동작을 써주세요.');
         return false;
     }
     
     const injuryHistory = document.querySelector('input[name="injury-history"]:checked');
     if (!injuryHistory) {
-        alert('다친 적이 있는지 선택해 주세요.');
+        alert('다친 적이 있는지 선택하세요.');
         return false;
     }
     
     const duration = document.querySelector('input[name="duration"]:checked');
     if (!duration) {
-        alert('통증 지속 기간을 선택해 주세요.');
+        alert('아픈 기간을 선택하세요.');
         return false;
     }
     
     const nrs = document.querySelector('input[name="nrs"]:checked');
     if (!nrs) {
-        alert('통증 강도를 선택해 주세요.');
+        alert('아픈 정도를 선택하세요.');
         return false;
     }
     
@@ -566,11 +566,11 @@ function updateLiveSelectionDisplay() {
     
     // 텍스트 업데이트
     if (painData.selectedAreas.length === 0) {
-        liveText.textContent = '통증 부위를 클릭해주세요';
+        liveText.textContent = '아픈 곳을 클릭하세요';
     } else if (painData.selectedAreas.length === 1) {
-        liveText.textContent = '1개 부위 선택됨';
+        liveText.textContent = '1개 선택';
     } else {
-        liveText.textContent = `${painData.selectedAreas.length}개 부위 선택됨`;
+        liveText.textContent = `${painData.selectedAreas.length}개 선택`;
     }
     
     // 배지 업데이트
@@ -1129,52 +1129,52 @@ function createTriggerPointElement(tp) {
     
     div.innerHTML = `
         <h4>🎯 ${tp.name}</h4>
-        <p><strong>실제 치료 위치:</strong> ${tp.anatomicalPosition}</p>
-        <p><strong>이 근육이 유발하는 통증:</strong> ${tp.referredPain.join(', ')}</p>
+        <p><strong>치료 위치:</strong> ${tp.anatomicalPosition}</p>
+        <p><strong>연관 통증:</strong> ${tp.referredPain.join(', ')}</p>
         
         <div class="trigger-explanation">
-            <p><strong>❓ 왜 이 부위를 치료하나요?</strong></p>
-            <p class="explanation-text">선택하신 통증 부위는 실제로는 <strong>${tp.anatomicalPosition}</strong>에 있는 트리거 포인트 때문일 가능성이 높습니다.</p>
+            <p><strong>❓ 왜 여기를 치료하나요?</strong></p>
+            <p class="explanation-text">아픈 곳의 원인이 <strong>${tp.anatomicalPosition}</strong>에 있을 수 있습니다.</p>
         </div>
 
         <!-- 트리거 포인트 찾기 가이드 -->
         <div class="find-trigger-guide">
-            <h5>🔍 트리거 포인트 찾는 방법</h5>
+            <h5>🔍 찾는 방법</h5>
             <div class="guide-steps">
                 <div class="guide-step">
                     <span class="step-number">1</span>
                     <div class="step-content">
-                        <strong>위치 확인:</strong> ${tp.anatomicalPosition}을 손으로 찾아보세요.
+                        <strong>위치:</strong> ${tp.anatomicalPosition}을 찾으세요
                     </div>
                 </div>
                 <div class="guide-step">
                     <span class="step-number">2</span>
                     <div class="step-content">
-                        <strong>압박 테스트:</strong> 손가락으로 해당 부위를 눌러보세요. 아픈 점이나 딱딱한 매듭 같은 것이 느껴집니다.
+                        <strong>누르기:</strong> 딱딱한 매듭을 찾으세요
                     </div>
                 </div>
                 <div class="guide-step">
                     <span class="step-number">3</span>
                     <div class="step-content">
-                        <strong>연관통 확인:</strong> 그 점을 누르면 선택하신 통증 부위(${tp.referredPain.join(', ')})에 통증이나 저림이 느껴지면 정확한 트리거 포인트입니다.
+                        <strong>확인:</strong> 누르면 ${tp.referredPain.join(', ')}에 통증이 느껴지나요?
                     </div>
                 </div>
             </div>
             <button class="interactive-guide-btn" onclick="startInteractiveGuide('${tp.name}', '${tp.location}')">
-                📱 단계별 찾기 가이드 시작
+                📱 상세 가이드
             </button>
         </div>
 
         <div class="massage-method">
-            <h5>🖐️ 마사지 방법</h5>
+            <h5>🖐️ 마사지</h5>
             <p><strong>방법:</strong> ${tp.massage.method}</p>
             <p><strong>빈도:</strong> ${tp.massage.frequency}</p>
-            <p><strong>지속시간:</strong> ${tp.massage.duration}</p>
-            <p class="precaution">⚠️ <strong>주의사항:</strong> ${tp.massage.precaution}</p>
+            <p><strong>시간:</strong> ${tp.massage.duration}</p>
+            <p class="precaution">⚠️ ${tp.massage.precaution}</p>
         </div>
         
         <div class="confidence-badge ${tp.confidence}">
-            ${confidenceText[tp.confidence]} (${matchReasonText[tp.matchReason] || '통증 패턴 분석'})
+            ${confidenceText[tp.confidence]}
         </div>
     `;
     
@@ -1556,56 +1556,56 @@ function getGuideSteps(triggerPointName, location) {
         'neck-shoulder-junction': {
             steps: [
                 {
-                    title: '어깨와 목 경계 찾기',
-                    content: '거울 앞에 서서 어깨 끝과 목이 만나는 지점을 찾아보세요. 어깨를 위아래로 움직여서 확인할 수 있습니다.',
+                    title: '위치 찾기',
+                    content: '어깨와 목이 만나는 지점을 찾으세요. 어깨를 위아래로 움직여 확인하세요.',
                     image: '🫱',
-                    tip: '어깨를 으쓱 올렸을 때 가장 높이 올라가는 부분입니다.'
+                    tip: '어깨를 으쓱할 때 가장 높은 부분입니다.'
                 },
                 {
-                    title: '손가락으로 탐색하기',
-                    content: '반대편 손의 2-3개 손가락을 사용해 해당 부위를 부드럽게 누르며 탐색해보세요.',
+                    title: '손가락으로 찾기',
+                    content: '반대편 손 2-3개 손가락으로 부드럽게 눌러보세요.',
                     image: '👆',
-                    tip: '너무 세게 누르지 마세요. 적당한 압력으로 시작하세요.'
+                    tip: '너무 세게 누르지 마세요.'
                 },
                 {
-                    title: '트리거 포인트 확인',
-                    content: '딱딱한 매듭이나 압통점을 찾았나요? 그 점을 누르면 목이나 머리 쪽으로 통증이 퍼지는지 확인해보세요.',
+                    title: '확인하기',
+                    content: '딱딱한 매듭을 찾았나요? 누르면 목이나 머리로 통증이 퍼지나요?',
                     image: '🎯',
-                    tip: '정확한 트리거 포인트를 누르면 익숙한 통증 패턴이 재현됩니다.'
+                    tip: '맞는 지점을 누르면 익숙한 통증이 느껴집니다.'
                 },
                 {
-                    title: '마사지 실행',
-                    content: '찾은 트리거 포인트를 5-10초간 일정한 압력으로 누른 후, 원을 그리며 부드럽게 마사지하세요.',
+                    title: '마사지하기',
+                    content: '5-10초간 누른 후, 원을 그리며 마사지하세요.',
                     image: '🖐️',
-                    tip: '호흡을 깊게 하면서 근육이 이완되는 것을 느껴보세요.'
+                    tip: '깊게 숨쉬며 근육이 풀리는 걸 느껴보세요.'
                 }
             ]
         },
         'skull-base': {
             steps: [
                 {
-                    title: '뒤통수 경계선 찾기',
-                    content: '머리 뒤쪽, 뒤통수뼈와 목이 만나는 경계선을 찾아보세요. 머리카락이 시작되는 부분 바로 아래입니다.',
+                    title: '뒤통수 찾기',
+                    content: '뒤통수와 목이 만나는 경계선을 찾으세요. 머리카락 바로 아래입니다.',
                     image: '🧠',
-                    tip: '고개를 앞뒤로 끄덕여보면 경계선을 더 쉽게 찾을 수 있습니다.'
+                    tip: '고개를 끄덕여보면 경계선을 쉽게 찾을 수 있어요.'
                 },
                 {
-                    title: '양쪽 탐색하기',
-                    content: '양손 엄지손가락을 사용해 뒤통수 양쪽을 동시에 탐색해보세요.',
+                    title: '양쪽 누르기',
+                    content: '양손 엄지로 뒤통수 양쪽을 동시에 눌러보세요.',
                     image: '👍',
-                    tip: '목 중앙의 척추 부분은 피하고, 양쪽 근육 부분만 눌러주세요.'
+                    tip: '척추는 피하고 양쪽 근육만 누르세요.'
                 },
                 {
-                    title: '압통점 확인',
-                    content: '특히 아픈 부분이나 딱딱한 부분을 찾았나요? 그 점을 누르면 머리 앞쪽이나 눈 주변으로 통증이 퍼지나요?',
+                    title: '아픈 점 확인',
+                    content: '아픈 부분을 찾았나요? 누르면 머리 앞쪽으로 통증이 퍼지나요?',
                     image: '🎯',
-                    tip: '후두하근의 트리거 포인트는 종종 두통을 유발합니다.'
+                    tip: '이 부분은 두통을 자주 일으킵니다.'
                 },
                 {
-                    title: '부드러운 마사지',
-                    content: '찾은 부위를 엄지손가락으로 작은 원을 그리며 부드럽게 마사지하세요. 5-10분간 지속하세요.',
+                    title: '마사지하기',
+                    content: '엄지로 작은 원을 그리며 5-10분간 마사지하세요.',
                     image: '🔄',
-                    tip: '목 부위이므로 특히 부드럽게, 절대 강하게 누르지 마세요.'
+                    tip: '목 부위라 부드럽게, 절대 세게 누르지 마세요.'
                 }
             ]
         }
@@ -1614,22 +1614,22 @@ function getGuideSteps(triggerPointName, location) {
     return commonSteps[location] || {
         steps: [
             {
-                title: '부위 확인',
-                content: `${triggerPointName} 부위를 손으로 찾아보세요.`,
+                title: '부위 찾기',
+                content: `${triggerPointName} 부위를 찾으세요.`,
                 image: '📍',
-                tip: '해부학적 위치를 참고하여 정확한 부위를 찾아보세요.'
+                tip: '정확한 위치를 찾아보세요.'
             },
             {
-                title: '탐색하기',
-                content: '손가락으로 해당 부위를 부드럽게 눌러가며 탐색해보세요.',
+                title: '누르기',
+                content: '손가락으로 부드럽게 눌러보세요.',
                 image: '🔍',
-                tip: '딱딱한 매듭이나 특히 아픈 점을 찾아보세요.'
+                tip: '딱딱한 매듭이나 아픈 점을 찾으세요.'
             },
             {
-                title: '마사지하기',
-                content: '찾은 트리거 포인트를 적절한 압력으로 마사지하세요.',
+                title: '마사지',
+                content: '적절한 압력으로 마사지하세요.',
                 image: '🖐️',
-                tip: '통증이 심하면 압력을 줄이고, 편안하면 조금 더 눌러보세요.'
+                tip: '아프면 약하게, 괜찮으면 조금 더 세게 누르세요.'
             }
         ]
     };
@@ -1694,7 +1694,7 @@ function setupGuideNavigation() {
     
     document.getElementById('finish-guide').addEventListener('click', () => {
         closeInteractiveGuide();
-        showSuccessMessage(`${window.currentGuide.triggerPointName} 가이드를 완료했습니다! 꾸준히 마사지하시면 통증이 완화될 것입니다.`);
+        showSuccessMessage(`${window.currentGuide.triggerPointName} 가이드 완료! 꾸준히 하시면 좋아질 거예요.`);
     });
 }
 

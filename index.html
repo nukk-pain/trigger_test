@@ -12,38 +12,38 @@
 <body>
     <div class="container">
         <header>
-            <h1>🩺 통증 가이드 도우미</h1>
-            <p>셀프 마사지 안내</p>
+            <h1>🎯 통증 치료</h1>
+            <p>스스로 해결하기</p>
         </header>
 
         <!-- 1단계: 인체 그림 기반 부위 선택 -->
         <section id="step1" class="step-section active">
-            <h2>🎯 1단계: 정확한 통증 부위 표시</h2>
-            <p class="step-description">아픈 부위를 정확히 클릭해주세요. 여러 부위를 선택할 수 있습니다.</p>
+            <h2>1단계: 아픈 곳 선택</h2>
+            <p class="step-description">아픈 부위를 클릭하세요</p>
             <!-- 실시간 선택 표시 상단 고정 -->
             <div class="selection-status-bar">
                 <div class="status-content">
                     <span class="status-icon">🎯</span>
-                    <span id="live-selection-text">통증 부위를 클릭해주세요</span>
+                    <span id="live-selection-text">아픈 곳을 클릭하세요</span>
                     <div id="live-selection-badges" class="selection-badges"></div>
                 </div>
                 <button type="button" id="quick-clear" class="quick-clear-btn" style="display: none;">
-                    <span>전체 지우기</span>
+                    <span>지우기</span>
                 </button>
             </div>
 
             <div class="body-map-guide">
                 <div class="guide-item">
                     <span class="guide-icon">👆</span>
-                    <span class="guide-text">클릭하여 부위 선택</span>
+                    <span class="guide-text">클릭 선택</span>
                 </div>
                 <div class="guide-item">
                     <span class="guide-icon">🔄</span>
-                    <span class="guide-text">앞면/뒷면 전환</span>
+                    <span class="guide-text">앞면/뒷면</span>
                 </div>
                 <div class="guide-item">
                     <span class="guide-icon">✨</span>
-                    <span class="guide-text">클릭하면 즉시 표시</span>
+                    <span class="guide-text">즉시 표시</span>
                 </div>
             </div>
 
@@ -332,18 +332,18 @@
 
         <!-- 2단계: 통증 상세 정보 입력 -->
         <section id="step2" class="step-section">
-            <h2>📝 2단계: 상세 정보 입력</h2>
-            <p class="step-description">통증에 대한 자세한 정보를 입력해주세요. 정확한 분석을 위해 필요합니다.</p>
+            <h2>2단계: 통증 정보</h2>
+            <p class="step-description">간단한 질문에 답해주세요</p>
             <form id="pain-questionnaire" class="questionnaire-form">
                 <div class="question-card">
                     <div class="question-header">
                         <span class="question-number">1</span>
-                        <h3>가장 힘든 동작은 무엇인가요?</h3>
+                        <h3>가장 아픈 동작은?</h3>
                     </div>
                     <div class="question-content">
-                        <input type="text" id="pain-description" placeholder="예: 목 돌리기, 팔 들어올리기, 허리 숙이기 등"
+                        <input type="text" id="pain-description" placeholder="예: 목 돌리기, 팔 들기"
                             class="text-input">
-                        <small class="input-hint">일상생활에서 가장 불편함을 느끼는 동작을 적어주세요</small>
+                        <small class="input-hint">가장 아픈 동작을 써주세요</small>
                     </div>
                 </div>
 
@@ -357,12 +357,12 @@
                             <label class="radio-option">
                                 <input type="radio" name="injury-history" value="네">
                                 <span class="radio-button"></span>
-                                <span class="option-text">네, 다친 적이 있어요</span>
+                                <span class="option-text">네</span>
                             </label>
                             <label class="radio-option">
                                 <input type="radio" name="injury-history" value="아니오">
                                 <span class="radio-button"></span>
-                                <span class="option-text">아니오, 다친 적이 없어요</span>
+                                <span class="option-text">아니오</span>
                             </label>
                         </div>
                     </div>
