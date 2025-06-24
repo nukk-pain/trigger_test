@@ -758,11 +758,15 @@ function clearSelection() {
         if (element) {
             element.classList.remove('selected');
             element.style.fill = 'rgba(255, 0, 0, 0.1)';
+            element.style.fillOpacity = '1';
+            // Force style recalculation
+            element.offsetHeight;
         }
     });
     
     painData.selectedAreas = [];
     updateSelectedAreasList();
+    updateLiveSelectionDisplay();
 }
 
 function switchBodyView(view) {
@@ -861,8 +865,31 @@ async function performAIAnalysis() {
         aiEnhanced: true
     };
     
-    // 결과 표시
-    displayAnalysisResults();
+    // GPT 결과만 표시 (내부 트리거 포인트 분석 제거)
+    displayGPTResults(aiAnalysis);
+}
+
+function displayGPTResults(aiAnalysis) {
+    const massageGuide = document.getElementById('massage-guide');
+    const container = document.getElementById('massage-steps');
+    
+    // 컨테이너 초기화
+    container.innerHTML = '';
+    
+    // GPT 결과를 HTML로 변환하여 표시
+    const formattedResult = formatTextToHTML(aiAnalysis.analysis || aiAnalysis.text || aiAnalysis);
+    
+    container.innerHTML = `
+        <div class="ai-analysis-result">
+            <h3>🤖 AI 전문가 분석</h3>
+            <div class="analysis-content">
+                ${formattedResult}
+            </div>
+        </div>
+    `;
+    
+    // 마사지 가이드 표시
+    massageGuide.style.display = 'block';
 }
 
 async function checkRedFlagsWithAI() {

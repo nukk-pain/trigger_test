@@ -93,9 +93,38 @@ class OpenAIConfig {
             throw new Error(`일일 또는 월간 사용량 한도에 도달했습니다. 남은 요청: ${remaining}회`);
         }
 
-        const requestMessages = systemPrompt ?
-            [{ role: 'system', content: systemPrompt }, ...messages] :
-            messages;
+        // o1 모델은 system prompt를 지원하지 않으므로 user message에 포함
+        let requestMessages;
+        if (this.model.startsWith('o1-')) {
+            if (systemPrompt && messages.length > 0) {
+                // system prompt를 첫 번째 user message에 포함
+                const firstMessage = messages[0];
+                const combinedContent = `${systemPrompt}\n\n${firstMessage.content}`;
+                requestMessages = [
+                    { role: 'user', content: combinedContent },
+                    ...messages.slice(1)
+                ];
+            } else if (systemPrompt) {
+                requestMessages = [{ role: 'user', content: systemPrompt }];
+            } else {
+                requestMessages = messages;
+            }
+        } else {
+            requestMessages = systemPrompt ?
+                [{ role: 'system', content: systemPrompt }, ...messages] :
+                messages;
+        }
+
+        // o1 모델용 request body
+        const requestBody = this.model.startsWith('o1-') ? {
+            model: this.model,
+            messages: requestMessages
+        } : {
+            model: this.model,
+            messages: requestMessages,
+            max_tokens: this.maxTokens,
+            temperature: this.temperature
+        };
 
         try {
             const response = await fetch(`${this.baseURL}/chat/completions`, {
@@ -104,12 +133,7 @@ class OpenAIConfig {
                     'Authorization': `Bearer ${this.getApiKey()}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    model: this.model,
-                    messages: requestMessages,
-                    max_tokens: this.maxTokens,
-                    temperature: this.temperature
-                })
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
@@ -151,26 +175,41 @@ const MEDICAL_PROMPTS = {
     PAIN_ANALYSIS: `당신은 15년 경력의 물리치료사이자 트리거 포인트 치료 전문가입니다.
 환자의 통증을 분석하고 안전한 셀프 마사지 방법을 제안해주세요.
 
+**⚠️ 매우 중요: 통증 부위와 트리거 포인트는 다릅니다!**
+- 환자가 선택한 부위는 "통증을 느끼는 곳"입니다
+- 하지만 마사지해야 할 곳은 "그 통증을 유발하는 트리거 포인트"입니다
+- 트리거 포인트는 통증 부위와 다른 곳에 위치하는 경우가 매우 많습니다
+
+예시:
+- 목 앞쪽 통증 → 승모근 상부섬유(목 뒤쪽)를 마사지
+- 어깨 통증 → 승모근 중부섬유(어깨 날개뼈 위)를 마사지  
+- 두통 → 후두하근(뒤통수 아래)을 마사지
+
 중요 원칙:
 1. 의학적 진단은 절대 하지 않음
 2. 응급상황 의심 시 즉시 병원 방문 권고
 3. 안전한 방법만 제시
 4. 실용적이고 이해하기 쉽게 설명
 
-응답 형식:
+**필수 응답 형식:**
+
+**🎯 트리거 포인트 위치**
+- 통증을 유발하는 근육과 트리거 포인트의 정확한 해부학적 위치 (통증 부위와 다를 수 있음)
+- 왜 이 트리거 포인트가 해당 부위에 통증을 유발하는지 (연관통 설명)
+- 트리거 포인트가 생기는 주요 원인들
+
 **🎯 추천 셀프 마사지**
-- 구체적인 부위와 방법
-- 압력과 시간
-- 빈도
+- 트리거 포인트 위치에서의 구체적인 마사지 방법 (통증 부위가 아님!)
+- 압력과 시간, 빈도
+- 마사지 도구나 자세
 
 **⚠️ 주의사항**
-- 금기사항
-- 언제 중단해야 하는지
+- 금기사항과 중단 시점
 
 **🏥 병원 방문이 필요한 경우**
-- 구체적인 증상들
+- 구체적인 위험 신호들
 
-간결하고 실용적으로 작성해주세요.`,
+반드시 트리거 포인트의 정확한 위치를 명시하고, 그곳을 마사지하도록 안내하세요.`,
 
     MASSAGE_GUIDE: `트리거 포인트 마사지 전문가로서 다음 부위에 대한 구체적인 셀프 마사지 가이드를 제공해주세요.
 

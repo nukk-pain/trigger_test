@@ -5,6 +5,13 @@ class EnvLoader {
         this.loaded = false;
     }
 
+    isTestEnvironment() {
+        return window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname.includes('localhost') ||
+            window.location.search.includes('debug=true');
+    }
+
     async loadEnv() {
         try {
             // Vercel API 엔드포인트에서 환경변수 로드 시도
@@ -14,13 +21,15 @@ class EnvLoader {
                 if (result.success) {
                     this.config = { ...this.config, ...result.data };
                     this.loaded = true;
-                    console.log('✅ Vercel에서 환경변수를 성공적으로 로드했습니다.');
-                    console.log('📊 로드된 설정:', {
-                        OPENAI_API_KEY: result.data.OPENAI_API_KEY ? `${result.data.OPENAI_API_KEY.substring(0, 10)}...` : '없음',
-                        DAILY_LIMIT: result.data.DAILY_LIMIT,
-                        MONTHLY_LIMIT: result.data.MONTHLY_LIMIT,
-                        OPENAI_MODEL: result.data.OPENAI_MODEL
-                    });
+                    if (this.isTestEnvironment()) {
+                        console.log('✅ Vercel에서 환경변수를 성공적으로 로드했습니다.');
+                        console.log('📊 로드된 설정:', {
+                            OPENAI_API_KEY: result.data.OPENAI_API_KEY ? `${result.data.OPENAI_API_KEY.substring(0, 10)}...` : '없음',
+                            DAILY_LIMIT: result.data.DAILY_LIMIT,
+                            MONTHLY_LIMIT: result.data.MONTHLY_LIMIT,
+                            OPENAI_MODEL: result.data.OPENAI_MODEL
+                        });
+                    }
                     return this.loaded || this.hasApiKey();
                 }
             }
@@ -35,13 +44,15 @@ class EnvLoader {
                 const serverConfig = await response.json();
                 this.config = { ...this.config, ...serverConfig };
                 this.loaded = true;
-                console.log('✅ 로컬 서버에서 환경변수를 성공적으로 로드했습니다.');
-                console.log('📊 로드된 설정:', {
-                    OPENAI_API_KEY: serverConfig.OPENAI_API_KEY ? `${serverConfig.OPENAI_API_KEY.substring(0, 10)}...` : '없음',
-                    DAILY_REQUEST_LIMIT: serverConfig.DAILY_REQUEST_LIMIT,
-                    MONTHLY_REQUEST_LIMIT: serverConfig.MONTHLY_REQUEST_LIMIT,
-                    OPENAI_MODEL: serverConfig.OPENAI_MODEL
-                });
+                if (this.isTestEnvironment()) {
+                    console.log('✅ 로컬 서버에서 환경변수를 성공적으로 로드했습니다.');
+                    console.log('📊 로드된 설정:', {
+                        OPENAI_API_KEY: serverConfig.OPENAI_API_KEY ? `${serverConfig.OPENAI_API_KEY.substring(0, 10)}...` : '없음',
+                        DAILY_REQUEST_LIMIT: serverConfig.DAILY_REQUEST_LIMIT,
+                        MONTHLY_REQUEST_LIMIT: serverConfig.MONTHLY_REQUEST_LIMIT,
+                        OPENAI_MODEL: serverConfig.OPENAI_MODEL
+                    });
+                }
             } else {
                 console.warn('⚠️ 서버 환경변수를 로드할 수 없습니다. 로컬 설정을 사용합니다.');
             }
@@ -52,7 +63,7 @@ class EnvLoader {
 
         // localStorage에서 설정 로드 (서버 설정보다 우선순위 낮음)
         this.loadFromLocalStorage();
-        
+
         return this.loaded || this.hasApiKey();
     }
 
@@ -89,7 +100,7 @@ class EnvLoader {
         // API 키는 절대 저장하지 않음
         const safeConfig = { ...this.config };
         delete safeConfig.OPENAI_API_KEY;
-        
+
         localStorage.setItem('pain_guide_config', JSON.stringify(safeConfig));
     }
 
@@ -128,7 +139,7 @@ class EnvLoader {
 
     // AI 모델 설정
     getModel() {
-        return this.get('OPENAI_MODEL', 'gpt-4o-mini');
+        return this.get('OPENAI_MODEL', 'gpt-o4-mini');
     }
 
     getMaxTokens() {
@@ -195,7 +206,7 @@ class UsageTracker {
     canMakeRequest(envLoader) {
         const dailyUsage = this.getDailyUsage();
         const monthlyUsage = this.getMonthlyUsage();
-        
+
         const dailyLimit = envLoader.getDailyLimit();
         const monthlyLimit = envLoader.getMonthlyLimit();
 
@@ -222,7 +233,7 @@ class UsageTracker {
         this.usage.total++;
 
         this.saveUsage();
-        
+
         // 오래된 데이터 정리 (30일 이전 일일 데이터)
         this.cleanupOldData();
     }
@@ -258,7 +269,7 @@ class UsageTracker {
     getRemainingRequests(envLoader) {
         const dailyRemaining = Math.max(0, envLoader.getDailyLimit() - this.getDailyUsage());
         const monthlyRemaining = Math.max(0, envLoader.getMonthlyLimit() - this.getMonthlyUsage());
-        
+
         return Math.min(dailyRemaining, monthlyRemaining);
     }
 }

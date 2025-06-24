@@ -27,14 +27,16 @@ function loadEnvFile() {
             });
             
             console.log('✅ .env.local 파일을 성공적으로 로드했습니다.');
-            console.log('📊 설정된 환경변수:');
-            Object.keys(envConfig).forEach(key => {
-                if (key === 'OPENAI_API_KEY') {
-                    console.log(`   ${key}: ${envConfig[key].substring(0, 10)}...`);
-                } else {
-                    console.log(`   ${key}: ${envConfig[key]}`);
-                }
-            });
+            if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+                console.log('📊 설정된 환경변수:');
+                Object.keys(envConfig).forEach(key => {
+                    if (key === 'OPENAI_API_KEY') {
+                        console.log(`   ${key}: ${envConfig[key].substring(0, 10)}...`);
+                    } else {
+                        console.log(`   ${key}: ${envConfig[key]}`);
+                    }
+                });
+            }
         } else {
             console.log('⚠️ .env.local 파일이 없습니다.');
         }
