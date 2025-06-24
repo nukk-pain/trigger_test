@@ -22,8 +22,8 @@ export default function handler(req, res) {
             OPENAI_MODEL: process.env.OPENAI_MODEL || 'gpt-4o-mini',
             MAX_TOKENS: parseInt(process.env.MAX_TOKENS || '2000'),
             TEMPERATURE: parseFloat(process.env.TEMPERATURE || '0.7'),
-            DAILY_LIMIT: parseInt(process.env.DAILY_LIMIT || '20'),
-            MONTHLY_LIMIT: parseInt(process.env.MONTHLY_LIMIT || '200')
+            DAILY_LIMIT: parseInt(process.env.DAILY_REQUEST_LIMIT || '20'),
+            MONTHLY_LIMIT: parseInt(process.env.MONTHLY_REQUEST_LIMIT || '200')
         };
 
         console.log('✅ Vercel에서 환경변수를 성공적으로 로드했습니다.');
