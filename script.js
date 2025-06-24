@@ -1,85 +1,133 @@
 // 통증 가이드 도우미 - 메인 JavaScript (OpenAI API 통합)
 
-// 트리거 포인트 데이터베이스 (공개 데이터 기반)
-const triggerPointsDB = {
-    // 목/어깨 관련
-    'neck': {
-        triggerPoints: [
-            {
-                name: '승모근 상부섬유',
-                location: 'neck-shoulder-junction',
-                referredPain: ['목', '어깨', '측두부'],
-                triggers: ['sitting', 'stress', 'poor-posture'],
-                massage: {
-                    method: '엄지손가락으로 5-10초간 지압',
-                    frequency: '하루 3-5회',
-                    duration: '각 5-10초',
-                    precaution: '너무 강하게 누르지 말 것'
-                }
-            },
-            {
-                name: '후두하근',
-                location: 'skull-base',
-                referredPain: ['뒤통수', '목'],
-                triggers: ['computer-work', 'reading'],
-                massage: {
-                    method: '목 뒤 머리카락 경계선 부드럽게 마사지',
-                    frequency: '하루 2-3회',
-                    duration: '5분',
-                    precaution: '경추 신경 주의'
-                }
-            }
-        ]
+// 트리거 포인트 데이터베이스 - 통증 부위별 실제 치료 포인트 매핑
+const triggerPointsDB = [
+    // 승모근 상부섬유 - 목, 어깨, 두통의 주요 원인
+    {
+        name: '승모근 상부섬유',
+        location: 'neck-shoulder-junction',
+        anatomicalPosition: '목과 어깨 경계 부분',
+        referredPain: ['목', '어깨', '머리', '관자놀이', '뒤통수'],
+        painAreas: ['neck-front', 'neck-left', 'neck-right', 'neck-back-upper', 'neck-back-lower', 
+                   'shoulder-left-front', 'shoulder-right-front', 'shoulder-top-left', 'shoulder-top-right',
+                   'head-temple-left', 'head-temple-right', 'head-back', 'occipital'],
+        triggers: ['sitting', 'stress', 'poor-posture', 'computer-work'],
+        massage: {
+            method: '목과 어깨 경계 부분을 엄지손가락으로 5-10초간 지압',
+            frequency: '하루 3-5회',
+            duration: '각 부위 5-10초',
+            precaution: '너무 강하게 누르지 말고, 혈관이나 신경 피하기'
+        }
     },
-    'shoulder': {
-        triggerPoints: [
-            {
-                name: '승모근 중부섬유',
-                location: 'shoulder-blade-top',
-                referredPain: ['어깨', '목', '팔'],
-                triggers: ['heavy-lifting', 'sleeping-position'],
-                massage: {
-                    method: '반대손으로 어깨 마사지',
-                    frequency: '하루 3회',
-                    duration: '5-10분',
-                    precaution: '관절 직접 압박 금지'
-                }
-            }
-        ]
+    // 후두하근 - 두통과 목 통증의 주요 원인
+    {
+        name: '후두하근',
+        location: 'skull-base',
+        anatomicalPosition: '뒤통수와 목 경계선',
+        referredPain: ['뒤통수', '목', '눈 주변', '이마'],
+        painAreas: ['head-back', 'occipital', 'head-front', 'neck-back-upper', 'neck-back-lower'],
+        triggers: ['computer-work', 'reading', 'forward-head-posture'],
+        massage: {
+            method: '뒤통수 아래 목 경계선을 부드럽게 원을 그리며 마사지',
+            frequency: '하루 2-3회',
+            duration: '5분',
+            precaution: '경추 신경 주의, 부드럽게 마사지'
+        }
     },
-    'back': {
-        triggerPoints: [
-            {
-                name: '능형근',
-                location: 'between-shoulder-blades',
-                referredPain: ['등', '어깨 날개뼈'],
-                triggers: ['slouching', 'carrying-bags'],
-                massage: {
-                    method: '테니스공 이용한 벽 마사지',
-                    frequency: '하루 2회',
-                    duration: '10분',
-                    precaution: '척추 직접 압박 금지'
-                }
-            }
-        ]
+    // 흉쇄유돌근 - 목과 두통의 숨은 원인
+    {
+        name: '흉쇄유돌근',
+        location: 'neck-side',
+        anatomicalPosition: '목 옆쪽, 귀 아래에서 쇄골까지',
+        referredPain: ['목 옆쪽', '귀', '관자놀이', '이마', '어깨'],
+        painAreas: ['neck-left', 'neck-right', 'head-temple-left', 'head-temple-right', 'head-front'],
+        triggers: ['neck-turning', 'stress', 'sleeping-position'],
+        massage: {
+            method: '목 옆쪽을 위에서 아래로 부드럽게 쓸어내리기',
+            frequency: '하루 2-3회',
+            duration: '3-5분',
+            precaution: '경동맥 부위 피하고 부드럽게'
+        }
     },
-    'lower-back': {
-        triggerPoints: [
-            {
-                name: '요방형근',
-                location: 'lower-back-sides',
-                referredPain: ['허리', '엉덩이'],
-                triggers: ['prolonged-sitting', 'lifting'],
-                massage: {
-                    method: '누워서 테니스공 굴리기',
-                    frequency: '하루 2-3회',
-                    duration: '10-15분',
-                    precaution: '디스크 의심시 중단'
-                }
-            }
-        ]
+    // 승모근 중부섬유 - 어깨와 등 통증
+    {
+        name: '승모근 중부섬유',
+        location: 'shoulder-blade-top',
+        anatomicalPosition: '어깨 날개뼈 위쪽 가장자리',
+        referredPain: ['어깨', '목', '팔', '등 위쪽'],
+        painAreas: ['shoulder-blade-left', 'shoulder-blade-right', 'shoulder-top-left', 'shoulder-top-right',
+                   'upper-back-left', 'upper-back-right', 'upper-arm-left', 'upper-arm-right'],
+        triggers: ['heavy-lifting', 'sleeping-position', 'stress'],
+        massage: {
+            method: '어깨 날개뼈 위쪽을 반대손으로 누르며 마사지',
+            frequency: '하루 3회',
+            duration: '5-10분',
+            precaution: '관절 직접 압박 금지, 근육 부분만'
+        }
+    },
+    // 능형근 - 어깨 날개뼈 사이 통증
+    {
+        name: '능형근',
+        location: 'between-shoulder-blades',
+        anatomicalPosition: '양쪽 어깨 날개뼈 사이',
+        referredPain: ['등', '어깨 날개뼈', '어깨'],
+        painAreas: ['upper-back-center', 'shoulder-blade-left', 'shoulder-blade-right', 'mid-back-center'],
+        triggers: ['slouching', 'carrying-bags', 'computer-work'],
+        massage: {
+            method: '테니스공을 벽에 대고 어깨 날개뼈 사이 굴리기',
+            frequency: '하루 2회',
+            duration: '10분',
+            precaution: '척추 직접 압박 금지, 근육 부분만'
+        }
+    },
+    // 요방형근 - 허리 통증의 주요 원인
+    {
+        name: '요방형근',
+        location: 'lower-back-sides',
+        anatomicalPosition: '허리 양쪽 옆구리',
+        referredPain: ['허리', '엉덩이', '사타구니'],
+        painAreas: ['lower-back-left', 'lower-back-right', 'lower-back-center', 
+                   'buttock-left-upper', 'buttock-right-upper', 'groin-left', 'groin-right'],
+        triggers: ['prolonged-sitting', 'lifting', 'uneven-posture'],
+        massage: {
+            method: '옆으로 누워서 테니스공을 허리 옆구리에 대고 굴리기',
+            frequency: '하루 2-3회',
+            duration: '10-15분',
+            precaution: '디스크 의심시 중단, 신장 부위 피하기'
+        }
+    },
+    // 전거근 - 갈비뼈와 어깨 통증
+    {
+        name: '전거근',
+        location: 'side-ribs',
+        anatomicalPosition: '겨드랑이 아래 갈비뼈 옆면',
+        referredPain: ['갈비뼈', '어깨', '팔', '등'],
+        painAreas: ['chest-left', 'chest-right', 'upper-arm-left', 'upper-arm-right', 'upper-back-left', 'upper-back-right'],
+        triggers: ['reaching-overhead', 'carrying-heavy', 'breathing-issues'],
+        massage: {
+            method: '겨드랑이 아래 갈비뼈를 손가락으로 부드럽게 마사지',
+            frequency: '하루 2회',
+            duration: '5분',
+            precaution: '갈비뼈 골절 주의, 부드럽게'
+        }
+    },
+    // 이상근 - 엉덩이와 다리 통증
+    {
+        name: '이상근',
+        location: 'deep-buttock',
+        anatomicalPosition: '엉덩이 깊숙한 부분',
+        referredPain: ['엉덩이', '허벅지 뒤', '종아리'],
+        painAreas: ['buttock-left-upper', 'buttock-right-upper', 'buttock-left-lower', 'buttock-right-lower',
+                   'thigh-back-left', 'thigh-back-right', 'hamstring-left', 'hamstring-right'],
+        triggers: ['prolonged-sitting', 'running', 'hip-tightness'],
+        massage: {
+            method: '테니스공에 앉아서 엉덩이 압박, 다리 움직이기',
+            frequency: '하루 2회',
+            duration: '10분',
+            precaution: '좌골신경 압박 주의'
+        }
     }
-};
+];
 
 // 근막 경선 데이터 (Thomas Myers Anatomy Trains 기반)
 const fascialLinesDB = {
@@ -882,28 +930,59 @@ function showRedFlagWarning(aiReason = null) {
 
 function analyzeTriggerPoints() {
     const recommendations = [];
+    const foundTriggerPoints = new Set(); // 중복 방지
     
-    painData.selectedAreas.forEach(area => {
-        const areaGroup = mapAreaToGroup(area);
-        if (triggerPointsDB[areaGroup]) {
-            const triggerPoints = triggerPointsDB[areaGroup].triggerPoints;
+    // 선택된 통증 부위에 대해 해당 부위에 통증을 유발하는 트리거 포인트들을 찾기
+    painData.selectedAreas.forEach(selectedArea => {
+        triggerPointsDB.forEach(triggerPoint => {
+            // 이 트리거 포인트가 선택된 부위에 통증을 유발하는지 확인
+            const causesSelectedPain = triggerPoint.painAreas.includes(selectedArea);
             
-            triggerPoints.forEach(tp => {
-                // 트리거 액션과 매칭
-                const actionMatch = tp.triggers.some(trigger => 
-                    painData.questionnaire.triggerActions.includes(trigger)
-                );
+            if (causesSelectedPain && !foundTriggerPoints.has(triggerPoint.name)) {
+                foundTriggerPoints.add(triggerPoint.name);
                 
-                if (actionMatch || painData.questionnaire.intensity >= 6) {
-                    recommendations.push({
-                        ...tp,
-                        area: areaGroup,
-                        confidence: actionMatch ? 'high' : 'medium'
-                    });
+                // 트리거 액션과 매칭하여 신뢰도 결정
+                const triggers = painData.questionnaire.worsenFactors ? 
+                    painData.questionnaire.worsenFactors.toLowerCase() : '';
+                
+                const actionMatch = triggerPoint.triggers.some(trigger => {
+                    const triggerKeywords = {
+                        'sitting': ['앉', '의자', '컴퓨터'],
+                        'stress': ['스트레스', '긴장', '피로'],
+                        'poor-posture': ['자세', '구부정', '앞으로'],
+                        'computer-work': ['컴퓨터', '업무', '모니터', '키보드'],
+                        'heavy-lifting': ['들기', '무거운', '짐'],
+                        'sleeping-position': ['잠', '베개', '누워서'],
+                        'prolonged-sitting': ['오래 앉', '장시간'],
+                        'forward-head-posture': ['목 앞으로', '거북목']
+                    };
+                    
+                    const keywords = triggerKeywords[trigger] || [trigger];
+                    return keywords.some(keyword => triggers.includes(keyword));
+                });
+                
+                // 통증 강도 고려
+                const intensityMatch = painData.questionnaire.nrs >= 6;
+                
+                let confidence = 'low';
+                if (actionMatch && intensityMatch) {
+                    confidence = 'high';
+                } else if (actionMatch || intensityMatch) {
+                    confidence = 'medium';
                 }
-            });
-        }
+                
+                recommendations.push({
+                    ...triggerPoint,
+                    confidence: confidence,
+                    matchReason: actionMatch ? 'trigger-action-match' : 'pain-area-match'
+                });
+            }
+        });
     });
+    
+    // 신뢰도순으로 정렬 (high > medium > low)
+    const confidenceOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+    recommendations.sort((a, b) => confidenceOrder[b.confidence] - confidenceOrder[a.confidence]);
     
     return recommendations;
 }
@@ -931,16 +1010,7 @@ function analyzeFascialLines() {
     return recommendations;
 }
 
-function mapAreaToGroup(area) {
-    if (area.includes('neck')) return 'neck';
-    if (area.includes('shoulder')) return 'shoulder';
-    if (area.includes('back') && !area.includes('lower')) return 'back';
-    if (area.includes('lower-back') || area === 'buttocks') return 'lower-back';
-    if (area.includes('thigh')) return 'thigh';
-    if (area.includes('knee')) return 'knee';
-    if (area === 'chest' || area === 'abdomen') return 'chest';
-    return 'other';
-}
+// mapAreaToGroup 함수 제거 - 이제 직접 painAreas 배열로 매칭
 
 function displayAnalysisResults() {
     if (painData.analysis.hasRedFlags) return;
@@ -988,18 +1058,34 @@ function createTriggerPointElement(tp) {
     const div = document.createElement('div');
     div.className = 'trigger-point-card';
     
+    const confidenceText = {
+        'high': '높은 일치도',
+        'medium': '중간 일치도', 
+        'low': '낮은 일치도'
+    };
+    
+    const matchReasonText = {
+        'trigger-action-match': '행동 패턴 일치',
+        'pain-area-match': '통증 부위 일치'
+    };
+    
     div.innerHTML = `
         <h4>🎯 ${tp.name}</h4>
-        <p><strong>위치:</strong> ${getLocationDescription(tp.location)}</p>
-        <p><strong>연관통:</strong> ${tp.referredPain.join(', ')}</p>
+        <p><strong>실제 치료 위치:</strong> ${tp.anatomicalPosition}</p>
+        <p><strong>이 근육이 유발하는 통증:</strong> ${tp.referredPain.join(', ')}</p>
+        <div class="trigger-explanation">
+            <p><strong>❓ 왜 이 부위를 치료하나요?</strong></p>
+            <p class="explanation-text">선택하신 통증 부위는 실제로는 <strong>${tp.anatomicalPosition}</strong>에 있는 트리거 포인트 때문일 가능성이 높습니다.</p>
+        </div>
         <div class="massage-method">
-            <p><strong>마사지 방법:</strong> ${tp.massage.method}</p>
+            <h5>🖐️ 마사지 방법</h5>
+            <p><strong>방법:</strong> ${tp.massage.method}</p>
             <p><strong>빈도:</strong> ${tp.massage.frequency}</p>
             <p><strong>지속시간:</strong> ${tp.massage.duration}</p>
-            <p class="precaution">⚠️ ${tp.massage.precaution}</p>
+            <p class="precaution">⚠️ <strong>주의사항:</strong> ${tp.massage.precaution}</p>
         </div>
         <div class="confidence-badge ${tp.confidence}">
-            ${tp.confidence === 'high' ? '높은 일치도' : '중간 일치도'}
+            ${confidenceText[tp.confidence]} (${matchReasonText[tp.matchReason] || '통증 패턴 분석'})
         </div>
     `;
     
