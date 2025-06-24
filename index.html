@@ -14,17 +14,6 @@
         <header>
             <h1>🩺 통증 가이드 도우미</h1>
             <p>셀프 마사지 안내</p>
-            <div class="ai-status-bar">
-                <div id="ai-status" class="ai-status">
-                    <span id="ai-indicator">🤖</span>
-                    <span id="ai-text">AI 분석 시스템 로딩중...</span>
-                </div>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-step active" data-step="1">1단계</div>
-                <div class="progress-step" data-step="2">2단계</div>
-                <div class="progress-step" data-step="3">결과</div>
-            </div>
         </header>
 
         <!-- 1단계: 인체 그림 기반 부위 선택 -->
@@ -809,6 +798,23 @@
             </div>
         </section>
     </div>
+
+    <!-- 하단 상태 정보 -->
+    <footer class="footer-status">
+        <div class="footer-content">
+            <div class="progress-bar">
+                <div class="progress-step active" data-step="1">1단계</div>
+                <div class="progress-step" data-step="2">2단계</div>
+                <div class="progress-step" data-step="3">결과</div>
+            </div>
+            <div class="ai-status-bar">
+                <div id="ai-status" class="ai-status">
+                    <span id="ai-indicator">🤖</span>
+                    <span id="ai-text">AI 분석 시스템 로딩중...</span>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="env-loader.js"></script>
     <script src="config.js"></script>

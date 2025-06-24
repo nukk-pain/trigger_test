@@ -2204,32 +2204,589 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* 모바일 최적화 */
 @media (max-width: 768px) {
+    .container {
+        padding: 10px;
+        max-width: 100%;
+    }
+    
+    header {
+        padding: 20px 15px;
+        margin-bottom: 15px;
+        border-radius: 15px;
+    }
+    
+    header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+    }
+    
+    header p {
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+    
+    .step-section {
+        padding: 20px 15px;
+        margin-bottom: 15px;
+    }
+    
+    .step-section h2 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .step-description {
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+    }
+    
     .selection-status-bar {
         padding: 12px 15px;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
         align-items: stretch;
+        margin-bottom: 15px;
+        position: relative;
+        top: 0;
     }
     
     .status-content {
         justify-content: center;
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    #live-selection-text {
+        font-size: 0.95rem;
     }
     
     .selection-badges {
         justify-content: center;
         margin-left: 0;
+        gap: 6px;
     }
     
     .selection-badge {
         font-size: 0.8rem;
-        padding: 4px 10px;
+        padding: 6px 10px;
+        border-radius: 15px;
     }
     
-    .clickable-area:hover {
-        transform: scale(1.15);
+    .quick-clear-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        border-radius: 20px;
+        width: 100%;
+        margin-top: 5px;
+    }
+    
+    .body-map-guide {
+        display: none; /* 모바일에서는 가이드 숨김 */
+    }
+    
+    .body-map-container {
+        gap: 15px;
+    }
+    
+    .body-view-tabs {
+        gap: 8px;
+        width: 100%;
+    }
+    
+    .view-tab {
+        flex: 1;
+        padding: 12px 15px;
+        font-size: 0.9rem;
+        border-radius: 20px;
     }
     
     .body-map {
-        padding: 20px;
+        padding: 15px;
+        border-radius: 12px;
+        max-width: 100%;
+        width: 100%;
+    }
+    
+    #body-svg {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .clickable-area {
+        stroke-width: 2.5;
+    }
+    
+    .clickable-area:hover,
+    .clickable-area:active {
+        transform: scale(1.2);
+        stroke-width: 4;
+    }
+    
+    .clickable-area.selected {
+        stroke-width: 4;
+        transform: scale(1.15);
+    }
+    
+    .selected-areas-panel {
+        padding: 15px;
+        margin-top: 15px;
+    }
+    
+    .question-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .question-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .text-input {
+        font-size: 16px; /* 모바일 줌 방지 */
+        padding: 12px 15px;
+    }
+    
+    .radio-group-enhanced,
+    .nrs-scale {
+        gap: 8px;
+    }
+    
+    .radio-option {
+        padding: 10px 12px;
+    }
+    
+    .nrs-option {
+        min-width: 35px;
+        min-height: 35px;
+    }
+    
+    .next-btn,
+    .analyze-btn,
+    .back-btn {
+        padding: 15px 25px;
+        font-size: 1rem;
+        margin: 15px 0;
+        width: 100%;
+        border-radius: 12px;
+    }
+    
+    .navigation-buttons {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+    }
+    
+    header {
+        padding: 15px 12px;
+        margin-bottom: 12px;
+    }
+    
+    header h1 {
+        font-size: 1.6rem;
+    }
+    
+    .step-section {
+        padding: 15px 12px;
+    }
+    
+    .selection-status-bar {
+        padding: 10px 12px;
+        border-radius: 10px;
+    }
+    
+    .body-map {
+        padding: 12px;
+    }
+    
+    .selection-badge {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+    
+    .clickable-area:hover,
+    .clickable-area:active {
+        transform: scale(1.25);
+    }
+    
+    #body-svg {
+        max-width: 320px;
+    }
+    
+    .footer-status {
+        margin-top: 30px;
+        padding: 10px;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .progress-bar {
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .progress-step {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+    
+    .ai-status-bar {
+        padding: 8px 12px;
+    }
+    
+    .ai-status {
+        font-size: 0.8rem;
+    }
+}
+
+/* Footer 스타일 */
+.footer-status {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px 15px 0 0;
+    margin-top: 40px;
+    padding: 20px;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    bottom: 0;
+    z-index: 90;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.footer-status .progress-bar {
+    margin: 0;
+}
+
+.footer-status .ai-status-bar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+/* 트리거 포인트 찾기 가이드 스타일 */
+.find-trigger-guide {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f1f8e9 100%);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 15px 0;
+    border-left: 4px solid #4CAF50;
+}
+
+.find-trigger-guide h5 {
+    color: #2e7d32;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.guide-steps {
+    margin-bottom: 20px;
+}
+
+.guide-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+}
+
+.step-number {
+    background: #4CAF50;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.interactive-guide-btn {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.interactive-guide-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+/* 인터랙티브 가이드 모달 */
+.interactive-guide-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.guide-modal-content {
+    background: white;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    animation: modalAppear 0.3s ease;
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.guide-header {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    padding: 20px;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.guide-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.close-guide {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.close-guide:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.guide-progress {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.progress-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ddd;
+    transition: all 0.3s ease;
+}
+
+.progress-dot.active {
+    background: #4CAF50;
+    transform: scale(1.3);
+}
+
+.progress-dot.completed {
+    background: #81C784;
+}
+
+.guide-content {
+    padding: 20px;
+    min-height: 200px;
+}
+
+.guide-step-content {
+    text-align: center;
+}
+
+.step-header {
+    margin-bottom: 20px;
+}
+
+.step-emoji {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.step-header h4 {
+    color: #2e7d32;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.step-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.step-tip {
+    background: #fff3e0;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #ff9800;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.tip-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.tip-text {
+    font-size: 0.9rem;
+    color: #e65100;
+    line-height: 1.4;
+}
+
+.guide-navigation {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.guide-nav-btn,
+.guide-finish-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.guide-nav-btn {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.guide-nav-btn:not(:disabled):hover {
+    background: #e0e0e0;
+    transform: translateY(-1px);
+}
+
+.guide-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.guide-finish-btn {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.guide-finish-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+/* 모바일 가이드 최적화 */
+@media (max-width: 768px) {
+    .interactive-guide-modal {
+        padding: 10px;
+    }
+    
+    .guide-modal-content {
+        max-height: 95vh;
+        border-radius: 15px;
+    }
+    
+    .guide-header {
+        padding: 15px;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .guide-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .step-emoji {
+        font-size: 2.5rem;
+    }
+    
+    .guide-navigation {
+        flex-direction: column;
+    }
+    
+    .guide-nav-btn,
+    .guide-finish-btn {
+        width: 100%;
+    }
+    
+    .find-trigger-guide {
+        padding: 15px;
+    }
+    
+    .guide-step {
+        padding: 8px;
+    }
+    
+    .interactive-guide-btn {
+        padding: 10px 16px;
+        font-size: 0.85rem;
     }
 }

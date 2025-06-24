@@ -1131,10 +1131,40 @@ function createTriggerPointElement(tp) {
         <h4>🎯 ${tp.name}</h4>
         <p><strong>실제 치료 위치:</strong> ${tp.anatomicalPosition}</p>
         <p><strong>이 근육이 유발하는 통증:</strong> ${tp.referredPain.join(', ')}</p>
+        
         <div class="trigger-explanation">
             <p><strong>❓ 왜 이 부위를 치료하나요?</strong></p>
             <p class="explanation-text">선택하신 통증 부위는 실제로는 <strong>${tp.anatomicalPosition}</strong>에 있는 트리거 포인트 때문일 가능성이 높습니다.</p>
         </div>
+
+        <!-- 트리거 포인트 찾기 가이드 -->
+        <div class="find-trigger-guide">
+            <h5>🔍 트리거 포인트 찾는 방법</h5>
+            <div class="guide-steps">
+                <div class="guide-step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <strong>위치 확인:</strong> ${tp.anatomicalPosition}을 손으로 찾아보세요.
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <strong>압박 테스트:</strong> 손가락으로 해당 부위를 눌러보세요. 아픈 점이나 딱딱한 매듭 같은 것이 느껴집니다.
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <strong>연관통 확인:</strong> 그 점을 누르면 선택하신 통증 부위(${tp.referredPain.join(', ')})에 통증이나 저림이 느껴지면 정확한 트리거 포인트입니다.
+                    </div>
+                </div>
+            </div>
+            <button class="interactive-guide-btn" onclick="startInteractiveGuide('${tp.name}', '${tp.location}')">
+                📱 단계별 찾기 가이드 시작
+            </button>
+        </div>
+
         <div class="massage-method">
             <h5>🖐️ 마사지 방법</h5>
             <p><strong>방법:</strong> ${tp.massage.method}</p>
@@ -1142,6 +1172,7 @@ function createTriggerPointElement(tp) {
             <p><strong>지속시간:</strong> ${tp.massage.duration}</p>
             <p class="precaution">⚠️ <strong>주의사항:</strong> ${tp.massage.precaution}</p>
         </div>
+        
         <div class="confidence-badge ${tp.confidence}">
             ${confidenceText[tp.confidence]} (${matchReasonText[tp.matchReason] || '통증 패턴 분석'})
         </div>
@@ -1474,4 +1505,203 @@ async function askAIQuestion(question) {
         console.error('AI 질문 처리 실패:', error);
         throw error;
     }
+}
+
+// 인터랙티브 트리거 포인트 찾기 가이드
+function startInteractiveGuide(triggerPointName, location) {
+    const guideData = getGuideSteps(triggerPointName, location);
+    
+    const modal = document.createElement('div');
+    modal.className = 'interactive-guide-modal';
+    modal.innerHTML = `
+        <div class="guide-modal-content">
+            <div class="guide-header">
+                <h3>🔍 ${triggerPointName} 찾기 가이드</h3>
+                <button class="close-guide" onclick="closeInteractiveGuide()">✕</button>
+            </div>
+            <div class="guide-progress">
+                <div class="progress-dots">
+                    ${guideData.steps.map((_, index) => 
+                        `<div class="progress-dot ${index === 0 ? 'active' : ''}" data-step="${index}"></div>`
+                    ).join('')}
+                </div>
+            </div>
+            <div class="guide-content" id="guide-content">
+                <!-- 동적으로 단계별 내용 표시 -->
+            </div>
+            <div class="guide-navigation">
+                <button id="prev-step" class="guide-nav-btn" disabled>이전</button>
+                <button id="next-step" class="guide-nav-btn">다음</button>
+                <button id="finish-guide" class="guide-finish-btn" style="display: none;">완료</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // 가이드 상태 초기화
+    window.currentGuide = {
+        currentStep: 0,
+        totalSteps: guideData.steps.length,
+        steps: guideData.steps,
+        triggerPointName: triggerPointName
+    };
+    
+    updateGuideStep();
+    setupGuideNavigation();
+}
+
+function getGuideSteps(triggerPointName, location) {
+    const commonSteps = {
+        'neck-shoulder-junction': {
+            steps: [
+                {
+                    title: '어깨와 목 경계 찾기',
+                    content: '거울 앞에 서서 어깨 끝과 목이 만나는 지점을 찾아보세요. 어깨를 위아래로 움직여서 확인할 수 있습니다.',
+                    image: '🫱',
+                    tip: '어깨를 으쓱 올렸을 때 가장 높이 올라가는 부분입니다.'
+                },
+                {
+                    title: '손가락으로 탐색하기',
+                    content: '반대편 손의 2-3개 손가락을 사용해 해당 부위를 부드럽게 누르며 탐색해보세요.',
+                    image: '👆',
+                    tip: '너무 세게 누르지 마세요. 적당한 압력으로 시작하세요.'
+                },
+                {
+                    title: '트리거 포인트 확인',
+                    content: '딱딱한 매듭이나 압통점을 찾았나요? 그 점을 누르면 목이나 머리 쪽으로 통증이 퍼지는지 확인해보세요.',
+                    image: '🎯',
+                    tip: '정확한 트리거 포인트를 누르면 익숙한 통증 패턴이 재현됩니다.'
+                },
+                {
+                    title: '마사지 실행',
+                    content: '찾은 트리거 포인트를 5-10초간 일정한 압력으로 누른 후, 원을 그리며 부드럽게 마사지하세요.',
+                    image: '🖐️',
+                    tip: '호흡을 깊게 하면서 근육이 이완되는 것을 느껴보세요.'
+                }
+            ]
+        },
+        'skull-base': {
+            steps: [
+                {
+                    title: '뒤통수 경계선 찾기',
+                    content: '머리 뒤쪽, 뒤통수뼈와 목이 만나는 경계선을 찾아보세요. 머리카락이 시작되는 부분 바로 아래입니다.',
+                    image: '🧠',
+                    tip: '고개를 앞뒤로 끄덕여보면 경계선을 더 쉽게 찾을 수 있습니다.'
+                },
+                {
+                    title: '양쪽 탐색하기',
+                    content: '양손 엄지손가락을 사용해 뒤통수 양쪽을 동시에 탐색해보세요.',
+                    image: '👍',
+                    tip: '목 중앙의 척추 부분은 피하고, 양쪽 근육 부분만 눌러주세요.'
+                },
+                {
+                    title: '압통점 확인',
+                    content: '특히 아픈 부분이나 딱딱한 부분을 찾았나요? 그 점을 누르면 머리 앞쪽이나 눈 주변으로 통증이 퍼지나요?',
+                    image: '🎯',
+                    tip: '후두하근의 트리거 포인트는 종종 두통을 유발합니다.'
+                },
+                {
+                    title: '부드러운 마사지',
+                    content: '찾은 부위를 엄지손가락으로 작은 원을 그리며 부드럽게 마사지하세요. 5-10분간 지속하세요.',
+                    image: '🔄',
+                    tip: '목 부위이므로 특히 부드럽게, 절대 강하게 누르지 마세요.'
+                }
+            ]
+        }
+    };
+    
+    return commonSteps[location] || {
+        steps: [
+            {
+                title: '부위 확인',
+                content: `${triggerPointName} 부위를 손으로 찾아보세요.`,
+                image: '📍',
+                tip: '해부학적 위치를 참고하여 정확한 부위를 찾아보세요.'
+            },
+            {
+                title: '탐색하기',
+                content: '손가락으로 해당 부위를 부드럽게 눌러가며 탐색해보세요.',
+                image: '🔍',
+                tip: '딱딱한 매듭이나 특히 아픈 점을 찾아보세요.'
+            },
+            {
+                title: '마사지하기',
+                content: '찾은 트리거 포인트를 적절한 압력으로 마사지하세요.',
+                image: '🖐️',
+                tip: '통증이 심하면 압력을 줄이고, 편안하면 조금 더 눌러보세요.'
+            }
+        ]
+    };
+}
+
+function updateGuideStep() {
+    const guide = window.currentGuide;
+    const content = document.getElementById('guide-content');
+    const step = guide.steps[guide.currentStep];
+    
+    content.innerHTML = `
+        <div class="guide-step-content">
+            <div class="step-header">
+                <div class="step-emoji">${step.image}</div>
+                <h4>단계 ${guide.currentStep + 1}: ${step.title}</h4>
+            </div>
+            <div class="step-body">
+                <p class="step-description">${step.content}</p>
+                <div class="step-tip">
+                    <span class="tip-icon">💡</span>
+                    <span class="tip-text">${step.tip}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 진행률 점 업데이트
+    document.querySelectorAll('.progress-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === guide.currentStep);
+        dot.classList.toggle('completed', index < guide.currentStep);
+    });
+    
+    // 네비게이션 버튼 상태 업데이트
+    document.getElementById('prev-step').disabled = guide.currentStep === 0;
+    
+    const nextBtn = document.getElementById('next-step');
+    const finishBtn = document.getElementById('finish-guide');
+    
+    if (guide.currentStep === guide.totalSteps - 1) {
+        nextBtn.style.display = 'none';
+        finishBtn.style.display = 'block';
+    } else {
+        nextBtn.style.display = 'block';
+        finishBtn.style.display = 'none';
+    }
+}
+
+function setupGuideNavigation() {
+    document.getElementById('prev-step').addEventListener('click', () => {
+        if (window.currentGuide.currentStep > 0) {
+            window.currentGuide.currentStep--;
+            updateGuideStep();
+        }
+    });
+    
+    document.getElementById('next-step').addEventListener('click', () => {
+        if (window.currentGuide.currentStep < window.currentGuide.totalSteps - 1) {
+            window.currentGuide.currentStep++;
+            updateGuideStep();
+        }
+    });
+    
+    document.getElementById('finish-guide').addEventListener('click', () => {
+        closeInteractiveGuide();
+        showSuccessMessage(`${window.currentGuide.triggerPointName} 가이드를 완료했습니다! 꾸준히 마사지하시면 통증이 완화될 것입니다.`);
+    });
+}
+
+function closeInteractiveGuide() {
+    const modal = document.querySelector('.interactive-guide-modal');
+    if (modal) {
+        modal.remove();
+    }
+    window.currentGuide = null;
 }
