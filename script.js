@@ -747,15 +747,17 @@ function performBasicAnalysis() {
 }
 
 async function performAIAnalysis() {
-    // 레드 플래그 AI 체크
-    const redFlagAnalysis = await checkRedFlagsWithAI();
+    // 기본 레드 플래그 체크만 수행 (API 호출 없이)
+    const hasRedFlags = painData.questionnaire.redFlags.some(flag => 
+        redFlagConditions.includes(flag)
+    );
     
-    if (redFlagAnalysis.isEmergency) {
-        showRedFlagWarning(redFlagAnalysis.reason);
+    if (hasRedFlags) {
+        showRedFlagWarning();
         return;
     }
     
-    // AI 기반 통증 분석
+    // AI 기반 통증 분석 (한 번의 API 호출로 레드 플래그와 분석 모두 수행)
     const aiAnalysis = await analyzeWithAI();
     
     // 결과 저장
