@@ -1,19 +1,14 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/env.js",
-      "use": "@vercel/node"
+  "functions": {
+    "api/env.js": {
+      "runtime": "@vercel/node@20.x"
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/api/env",
-      "dest": "/api/env.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "source": "/api/env",
+      "destination": "/api/env.js"
     }
   ]
 }
