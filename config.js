@@ -18,6 +18,12 @@ class OpenAIConfig {
         this.model = window.envLoader.getModel();
         this.maxTokens = window.envLoader.getMaxTokens();
         this.temperature = window.envLoader.getTemperature();
+        
+        // o4 모델의 경우 추론 토큰을 고려하여 더 많은 토큰 할당
+        if (this.model.startsWith('o4-')) {
+            this.maxTokens = Math.max(this.maxTokens, 4000);
+            console.log('🧠 o4 모델 감지: 최대 토큰을', this.maxTokens, '로 증가');
+        }
 
         return this.hasApiKey();
     }
@@ -93,9 +99,15 @@ class OpenAIConfig {
             throw new Error(`일일 또는 월간 사용량 한도에 도달했습니다. 남은 요청: ${remaining}회`);
         }
 
+        console.log('📤 API 요청 준비:', {
+            model: this.model,
+            systemPrompt: systemPrompt ? systemPrompt.substring(0, 100) + '...' : 'None',
+            messages: messages
+        });
+
         // o1 모델은 system prompt를 지원하지 않으므로 user message에 포함
         let requestMessages;
-        if (this.model.startsWith('o1-')) {
+        if (this.model.startsWith('o1-') || this.model.startsWith('o4-')) {
             if (systemPrompt && messages.length > 0) {
                 // system prompt를 첫 번째 user message에 포함
                 const firstMessage = messages[0];
@@ -115,16 +127,29 @@ class OpenAIConfig {
                 messages;
         }
 
-        // o1 모델용 request body
-        const requestBody = this.model.startsWith('o1-') ? {
-            model: this.model,
-            messages: requestMessages
-        } : {
+        console.log('📨 최종 요청 메시지:', requestMessages);
+
+        // 모델별 request body 구성
+        const modelSupportsTemperature = !this.model.startsWith('o1-') && !this.model.startsWith('o3-') && !this.model.startsWith('o4-');
+        
+        // 일부 모델은 temperature=1만 지원하므로 안전하게 설정
+        const safeTemperature = modelSupportsTemperature ? 1 : undefined;
+        
+        const requestBody = {
             model: this.model,
             messages: requestMessages,
-            max_tokens: this.maxTokens,
-            temperature: this.temperature
+            max_completion_tokens: this.maxTokens,
+            // 토큰 절약을 위한 설정
+            stream: false,
+            logprobs: false
         };
+        
+        // temperature를 지원하는 모델에만 추가
+        if (safeTemperature !== undefined) {
+            requestBody.temperature = safeTemperature;
+        }
+
+        console.log('🔧 요청 본문:', requestBody);
 
         try {
             const response = await fetch(`${this.baseURL}/chat/completions`, {
@@ -136,17 +161,36 @@ class OpenAIConfig {
                 body: JSON.stringify(requestBody)
             });
 
+            console.log('📡 API 응답 상태:', response.status);
+
             if (!response.ok) {
                 const errorData = await response.json();
+                console.error('❌ API 오류 응답:', errorData);
                 throw new Error(errorData.error?.message || `HTTP ${response.status}`);
             }
 
             const data = await response.json();
+            console.log('📥 API 응답 데이터:', data);
+            console.log('🔍 choices 배열:', data.choices);
+            console.log('🔍 첫 번째 choice:', data.choices[0]);
+            console.log('🔍 메시지 객체:', data.choices[0]?.message);
+            console.log('🔍 메시지 내용:', data.choices[0]?.message?.content);
 
             // 성공적인 요청 기록
             window.usageTracker.recordRequest();
 
-            return data.choices[0]?.message?.content || '';
+            const result = data.choices[0]?.message?.content || '';
+            const finishReason = data.choices[0]?.finish_reason;
+            
+            console.log('✅ 최종 결과:', result);
+            console.log('📏 결과 길이:', result.length);
+            console.log('🏁 완료 이유:', finishReason);
+            
+            if (finishReason === 'length' && result.length === 0) {
+                throw new Error('토큰 제한으로 인해 응답이 생성되지 않았습니다. 더 간단한 질문을 해주세요.');
+            }
+            
+            return result;
         } catch (error) {
             console.error('OpenAI API 요청 실패:', error);
             throw error;
@@ -172,44 +216,23 @@ class OpenAIConfig {
 
 // 의료 전문 프롬프트 템플릿
 const MEDICAL_PROMPTS = {
-    PAIN_ANALYSIS: `당신은 15년 경력의 물리치료사이자 트리거 포인트 치료 전문가입니다.
-환자의 통증을 분석하고 안전한 셀프 마사지 방법을 제안해주세요.
+    PAIN_ANALYSIS: `근골격계 전문가로서 통증 부위와 악화 상황을 분석해 트리거 포인트 마사지를 안내하세요.
 
-**⚠️ 매우 중요: 통증 부위와 트리거 포인트는 다릅니다!**
-- 환자가 선택한 부위는 "통증을 느끼는 곳"입니다
-- 하지만 마사지해야 할 곳은 "그 통증을 유발하는 트리거 포인트"입니다
-- 트리거 포인트는 통증 부위와 다른 곳에 위치하는 경우가 매우 많습니다
+출력 형식:
+## 요약
+> 증상·원인·목표 (3줄 이하)
 
-예시:
-- 목 앞쪽 통증 → 승모근 상부섬유(목 뒤쪽)를 마사지
-- 어깨 통증 → 승모근 중부섬유(어깨 날개뼈 위)를 마사지  
-- 두통 → 후두하근(뒤통수 아래)을 마사지
+## 마사지 방법
+| 단계 | 방법 | 시간 | 주의점 |
+최대 4단계, 안전 체크 포함
 
-중요 원칙:
-1. 의학적 진단은 절대 하지 않음
-2. 응급상황 의심 시 즉시 병원 방문 권고
-3. 안전한 방법만 제시
-4. 실용적이고 이해하기 쉽게 설명
+## 주의사항
+⚠️ 중단 기준 및 전문 진료 권유
 
-**필수 응답 형식:**
+## 면책
+셀프케어 안내이며 진단이 아닙니다. 심한 경우 전문 진료 받으세요.
 
-**🎯 트리거 포인트 위치**
-- 통증을 유발하는 근육과 트리거 포인트의 정확한 해부학적 위치 (통증 부위와 다를 수 있음)
-- 왜 이 트리거 포인트가 해당 부위에 통증을 유발하는지 (연관통 설명)
-- 트리거 포인트가 생기는 주요 원인들
-
-**🎯 추천 셀프 마사지**
-- 트리거 포인트 위치에서의 구체적인 마사지 방법 (통증 부위가 아님!)
-- 압력과 시간, 빈도
-- 마사지 도구나 자세
-
-**⚠️ 주의사항**
-- 금기사항과 중단 시점
-
-**🏥 병원 방문이 필요한 경우**
-- 구체적인 위험 신호들
-
-반드시 트리거 포인트의 정확한 위치를 명시하고, 그곳을 마사지하도록 안내하세요.`,
+존댓말 사용, 간결하게 작성하세요.`,
 
     MASSAGE_GUIDE: `트리거 포인트 마사지 전문가로서 다음 부위에 대한 구체적인 셀프 마사지 가이드를 제공해주세요.
 

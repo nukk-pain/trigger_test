@@ -239,24 +239,17 @@ function showStartupError(message) {
 }
 
 function setupEventListeners() {
-    // 1단계 (부위 선택) -> 2단계 (문진)
-    document.getElementById('next-to-step2').addEventListener('click', function() {
-        if (validateStep1()) {
-            goToStep(2);
-        }
-    });
-    
-    // 2단계 (문진) -> 1단계 (부위 선택)
-    document.getElementById('back-to-step1').addEventListener('click', function() {
-        goToStep(1);
-    });
-    
-    // 2단계 (문진) -> 3단계 (분석)
+    // 1단계 (부위 선택 + 동작 선택) -> 3단계 (분석)
     document.getElementById('analyze-pain').addEventListener('click', function() {
-        if (validateStep2()) {
-            collectStep2Data();
+        console.log('🔘 분석하기 버튼 클릭됨');
+        if (validateStep1()) {
+            console.log('✅ 1단계 검증 통과');
+            collectActionData();
+            console.log('📝 데이터 수집 완료:', painData.questionnaire);
             analyzePain();
-            goToStep(3);
+            goToStep(2);
+        } else {
+            console.log('❌ 1단계 검증 실패');
         }
     });
     
@@ -317,9 +310,12 @@ function updateAIStatus() {
     const indicator = document.getElementById('ai-indicator');
     const text = document.getElementById('ai-text');
     
+    // Only update if elements exist (footer present)
+    if (!indicator || !text) return;
+    
     if (window.openaiConfig && window.openaiConfig.hasApiKey()) {
         indicator.textContent = '🤖✅';
-        text.textContent = 'AI 분석 활성화 (.env.local 설정됨)';
+        text.textContent = 'AI 분석 활성화';
     } else {
         indicator.textContent = '🤖❌';
         text.textContent = '.env.local 파일에 API 키 설정 필요';
@@ -327,42 +323,26 @@ function updateAIStatus() {
 }
 
 function setupDynamicFormEvents() {
-    // 다친 적이 있는지에 따른 상세 질문 표시/숨김
-    document.querySelectorAll('input[name="injury-history"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const injuryDetails = document.getElementById('injury-details');
-            if (this.value === '네') {
-                injuryDetails.style.display = 'block';
-            } else {
-                injuryDetails.style.display = 'none';
-            }
-        });
-    });
+    // 텍스트 입력 글자 수 카운터
+    const painDescriptionTextarea = document.getElementById('pain-description');
+    const charCountElement = document.getElementById('char-count');
     
-    // 외상 종류에서 '기타' 선택 시 텍스트 입력 표시
-    document.querySelectorAll('input[name="injury-type"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const otherInput = document.getElementById('injury-other');
-            if (this.value === '기타') {
-                otherInput.style.display = 'block';
+    if (painDescriptionTextarea && charCountElement) {
+        painDescriptionTextarea.addEventListener('input', function() {
+            const currentLength = this.value.length;
+            const maxLength = this.getAttribute('maxlength') || 500;
+            
+            charCountElement.textContent = currentLength;
+            
+            // 글자 수에 따른 스타일 변경
+            const counter = charCountElement.parentElement;
+            if (currentLength > maxLength * 0.8) {
+                counter.classList.add('warning');
             } else {
-                otherInput.style.display = 'none';
+                counter.classList.remove('warning');
             }
         });
-    });
-    
-    // 통증 성격에서 '기타' 선택 시 텍스트 입력 표시
-    document.querySelectorAll('input[name="pain-quality"]').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const otherInput = document.getElementById('pain-quality-other');
-            const isOtherChecked = document.querySelector('input[name="pain-quality"][value="기타"]:checked');
-            if (isOtherChecked) {
-                otherInput.style.display = 'block';
-            } else {
-                otherInput.style.display = 'none';
-            }
-        });
-    });
+    }
 }
 
 async function handleAIQuestion() {
@@ -426,52 +406,33 @@ function setupBodyMapEvents() {
 }
 
 function validateStep1() {
-    // 1단계: 부위 선택 검증
+    // 1단계: 부위 선택 + 통증 설명 검증
     if (painData.selectedAreas.length === 0) {
         alert('아픈 곳을 선택해 주세요.');
         return false;
     }
-    return true;
-}
-
-function validateStep2() {
-    // 2단계: 문진 검증
-    const injuryHistory = document.querySelector('input[name="injury-history"]:checked');
-    if (!injuryHistory) {
-        alert('다친 적이 있는지 선택하세요.');
+    
+    // 통증 설명 검증
+    const painDescription = document.getElementById('pain-description').value.trim();
+    if (painDescription.length === 0) {
+        alert('통증이 심해지는 상황을 설명해 주세요.');
         return false;
     }
     
-    const duration = document.querySelector('input[name="duration"]:checked');
-    if (!duration) {
-        alert('아픈 기간을 선택하세요.');
-        return false;
-    }
-    
-    const nrs = document.querySelector('input[name="nrs"]:checked');
-    if (!nrs) {
-        alert('아픈 정도를 선택하세요.');
+    if (painDescription.length < 10) {
+        alert('조금 더 자세히 설명해 주세요. (최소 10자)');
         return false;
     }
     
     return true;
 }
 
-function collectStep2Data() {
+
+function collectActionData() {
+    const painDescription = document.getElementById('pain-description').value.trim();
     painData.questionnaire = {
-        mostDifficultMovement: document.getElementById('pain-description').value,
-        injuryHistory: document.querySelector('input[name="injury-history"]:checked')?.value || '',
-        injuryType: document.querySelector('input[name="injury-type"]:checked')?.value || '',
-        injuryOther: document.getElementById('injury-other').value || '',
-        duration: document.querySelector('input[name="duration"]:checked')?.value || '',
-        nrs: document.querySelector('input[name="nrs"]:checked')?.value || '',
-        painQuality: Array.from(document.querySelectorAll('input[name="pain-quality"]:checked')).map(cb => cb.value),
-        painQualityOther: document.getElementById('pain-quality-other').value || '',
-        painPattern: Array.from(document.querySelectorAll('input[name="pain-pattern"]:checked')).map(cb => cb.value),
-        nightWake: document.querySelector('input[name="night-wake"]:checked')?.value || '',
-        worsenFactors: document.getElementById('worsen-factors').value || '',
-        improveFactors: document.getElementById('improve-factors').value || '',
-        redFlags: Array.from(document.querySelectorAll('input[name="red-flag"]:checked')).map(cb => cb.value)
+        painDescription: painDescription,
+        aggravatingActions: [] // 기존 체크박스 방식 제거
     };
 }
 
@@ -483,7 +444,11 @@ function toggleAreaSelection(area) {
         // 선택 해제
         painData.selectedAreas.splice(index, 1);
         element.classList.remove('selected');
-        element.style.fill = 'rgba(255, 0, 0, 0.1)';
+        // 인라인 스타일 완전히 제거하여 원래 상태로 복원
+        element.style.fill = '';
+        element.style.stroke = '';
+        element.style.strokeWidth = '';
+        element.style.opacity = '';
     } else {
         // 선택 추가
         painData.selectedAreas.push(area);
@@ -596,6 +561,11 @@ function removeSelectedArea(areaToRemove) {
     const areaElement = document.querySelector(`[data-area="${areaToRemove}"]`);
     if (areaElement) {
         areaElement.classList.remove('selected');
+        // 인라인 스타일도 제거하여 완전히 원래 상태로 복원
+        areaElement.style.fill = '';
+        areaElement.style.stroke = '';
+        areaElement.style.strokeWidth = '';
+        areaElement.style.opacity = '';
     }
     
     updateSelectedAreasList();
@@ -757,8 +727,12 @@ function clearSelection() {
         const element = document.querySelector(`[data-area="${area}"]`);
         if (element) {
             element.classList.remove('selected');
-            element.style.fill = 'rgba(255, 0, 0, 0.1)';
-            element.style.fillOpacity = '1';
+            // 인라인 스타일 완전히 제거하여 원래 상태로 복원
+            element.style.fill = '';
+            element.style.stroke = '';
+            element.style.strokeWidth = '';
+            element.style.opacity = '';
+            element.style.fillOpacity = '';
             // Force style recalculation
             element.offsetHeight;
         }
@@ -782,6 +756,8 @@ function switchBodyView(view) {
 }
 
 async function analyzePain() {
+    console.log('🚀 analyzePain 함수 시작');
+    
     // 사용량 확인
     if (!window.openaiConfig.getRemainingRequests()) {
         const stats = window.openaiConfig.getUsageStats();
@@ -793,6 +769,7 @@ async function analyzePain() {
     showLoadingIndicator();
     
     try {
+        console.log('🤖 AI 분석 시작');
         // API 키가 필수이므로 항상 AI 분석 사용
         await performAIAnalysis();
         
@@ -817,9 +794,10 @@ async function analyzePain() {
 
 function performBasicAnalysis() {
     // 레드 플래그 체크
-    const hasRedFlags = painData.questionnaire.redFlags.some(flag => 
-        redFlagConditions.includes(flag)
-    );
+    const hasRedFlags = painData.questionnaire.medicalConditions && 
+        painData.questionnaire.medicalConditions.some(condition => 
+            ['chest-pain', 'breathing', 'severe-illness'].includes(condition)
+        );
     
     if (hasRedFlags) {
         showRedFlagWarning();
@@ -845,18 +823,11 @@ function performBasicAnalysis() {
 }
 
 async function performAIAnalysis() {
-    // 기본 레드 플래그 체크만 수행 (API 호출 없이)
-    const hasRedFlags = painData.questionnaire.redFlags.some(flag => 
-        redFlagConditions.includes(flag)
-    );
-    
-    if (hasRedFlags) {
-        showRedFlagWarning();
-        return;
-    }
+    console.log('📊 performAIAnalysis 함수 시작');
     
     // AI 기반 통증 분석 (한 번의 API 호출로 레드 플래그와 분석 모두 수행)
     const aiAnalysis = await analyzeWithAI();
+    console.log('📋 AI 분석 결과 받음:', aiAnalysis);
     
     // 결과 저장
     painData.analysis = {
@@ -865,19 +836,35 @@ async function performAIAnalysis() {
         aiEnhanced: true
     };
     
+    console.log('💾 painData.analysis 저장됨:', painData.analysis);
+    
     // GPT 결과만 표시 (내부 트리거 포인트 분석 제거)
     displayGPTResults(aiAnalysis);
 }
 
 function displayGPTResults(aiAnalysis) {
+    console.log('🎨 displayGPTResults 함수 시작:', aiAnalysis);
+    
     const massageGuide = document.getElementById('massage-guide');
     const container = document.getElementById('massage-steps');
+    
+    // 컨테이너가 존재하는지 확인
+    if (!container) {
+        console.error('massage-steps container not found');
+        return;
+    }
+    
+    console.log('✅ massage-steps 컨테이너 찾음');
     
     // 컨테이너 초기화
     container.innerHTML = '';
     
     // GPT 결과를 HTML로 변환하여 표시
-    const formattedResult = formatTextToHTML(aiAnalysis.analysis || aiAnalysis.text || aiAnalysis);
+    const rawResult = aiAnalysis.aiAnalysis || aiAnalysis.analysis || aiAnalysis.text || aiAnalysis;
+    console.log('🔍 원시 결과:', rawResult);
+    
+    const formattedResult = formatAIResponse(rawResult);
+    console.log('🎭 포맷팅된 결과:', formattedResult);
     
     container.innerHTML = `
         <div class="ai-analysis-result">
@@ -888,17 +875,22 @@ function displayGPTResults(aiAnalysis) {
         </div>
     `;
     
+    console.log('📄 HTML 삽입 완료');
+    
     // 마사지 가이드 표시
-    massageGuide.style.display = 'block';
+    if (massageGuide) {
+        massageGuide.style.display = 'block';
+        console.log('📋 마사지 가이드 표시됨');
+    }
 }
 
 async function checkRedFlagsWithAI() {
     const symptoms = {
-        redFlags: painData.questionnaire.redFlags,
-        painTypes: painData.questionnaire.painTypes,
-        intensity: painData.questionnaire.intensity,
-        duration: painData.questionnaire.duration,
-        description: painData.questionnaire.description
+        nrs: painData.questionnaire.nrs,
+        aggravatingActions: painData.questionnaire.aggravatingActions,
+        aggravatingOther: painData.questionnaire.aggravatingOther,
+        medicalConditions: painData.questionnaire.medicalConditions,
+        medicalOther: painData.questionnaire.medicalOther
     };
     
     const prompt = `환자 증상: ${JSON.stringify(symptoms, null, 2)}`;
@@ -915,12 +907,10 @@ async function checkRedFlagsWithAI() {
         };
     } catch (error) {
         console.error('레드 플래그 AI 분석 실패:', error);
-        // 안전을 위해 기본 체크 사용
+        // 간단한 분석이므로 응급상황 없음
         return {
-            isEmergency: painData.questionnaire.redFlags.some(flag => 
-                redFlagConditions.includes(flag)
-            ),
-            reason: '기본 안전 체크 사용'
+            isEmergency: false,
+            reason: '간단한 분석 사용'
         };
     }
 }
@@ -929,25 +919,25 @@ async function analyzeWithAI() {
     const q = painData.questionnaire;
     const areas = painData.selectedAreas.map(area => getAreaDisplayName(area));
     
-    const prompt = `환자 정보:
-가장 힘든 동작: ${q.mostDifficultMovement}
-다친 기억: ${q.injuryHistory}${q.injuryType ? ` (${q.injuryType}${q.injuryOther ? ': ' + q.injuryOther : ''})` : ''}
-통증 지속 기간: ${q.duration}
-통증 강도: ${q.nrs}/10
-통증 성격: ${q.painQuality.join(', ')}${q.painQualityOther ? ' (' + q.painQualityOther + ')' : ''}
-통증 양상: ${q.painPattern.join(', ')}
-밤에 잠깸: ${q.nightWake}
-악화 요인: ${q.worsenFactors || '없음'}
-완화 요인: ${q.improveFactors || '없음'}
-통증 부위: ${areas.join(', ')}
-
-위 정보를 바탕으로 분석해주세요.`;
+    // 입력 최적화: 간결한 형태로 변경
+    const prompt = `부위: ${areas.join(', ')}
+악화: ${q.painDescription}`;
+    
+    console.log('🔍 AI 분석 요청:', { areas, painDescription: q.painDescription });
+    console.log('📋 전송할 프롬프트:', prompt);
+    console.log('🔧 시스템 프롬프트:', window.MEDICAL_PROMPTS.PAIN_ANALYSIS);
+    console.log('🤖 OpenAI Config:', window.openaiConfig);
+    console.log('🔑 API 키 존재:', window.openaiConfig.hasApiKey());
     
     try {
+        console.log('⏳ makeRequest 호출 시작...');
         const analysis = await window.openaiConfig.makeRequest(
             [{ role: 'user', content: prompt }],
             window.MEDICAL_PROMPTS.PAIN_ANALYSIS
         );
+        
+        console.log('✅ AI 분석 응답:', analysis);
+        console.log('📏 응답 길이:', analysis?.length || 0);
         
         return {
             aiAnalysis: analysis,
@@ -955,7 +945,8 @@ async function analyzeWithAI() {
             aiEnhanced: true
         };
     } catch (error) {
-        console.error('AI 분석 실패:', error);
+        console.error('❌ AI 분석 실패:', error);
+        console.error('❌ 오류 스택:', error.stack);
         throw error;
     }
 }
@@ -1013,23 +1004,23 @@ function analyzeTriggerPoints() {
                 foundTriggerPoints.add(triggerPoint.name);
                 
                 // 트리거 액션과 매칭하여 신뢰도 결정
-                const triggers = painData.questionnaire.worsenFactors ? 
-                    painData.questionnaire.worsenFactors.toLowerCase() : '';
+                const triggers = painData.questionnaire.aggravatingActions ? 
+                    painData.questionnaire.aggravatingActions.join(' ').toLowerCase() : '';
                 
                 const actionMatch = triggerPoint.triggers.some(trigger => {
-                    const triggerKeywords = {
-                        'sitting': ['앉', '의자', '컴퓨터'],
-                        'stress': ['스트레스', '긴장', '피로'],
-                        'poor-posture': ['자세', '구부정', '앞으로'],
-                        'computer-work': ['컴퓨터', '업무', '모니터', '키보드'],
-                        'heavy-lifting': ['들기', '무거운', '짐'],
-                        'sleeping-position': ['잠', '베개', '누워서'],
-                        'prolonged-sitting': ['오래 앉', '장시간'],
-                        'forward-head-posture': ['목 앞으로', '거북목']
+                    const triggerActions = {
+                        'sitting': ['sitting', 'computer-work'],
+                        'stress': ['stress'],
+                        'poor-posture': ['bending', 'reaching'],
+                        'computer-work': ['sitting', 'computer-work'],
+                        'heavy-lifting': ['lifting', 'carrying'],
+                        'sleeping-position': ['sleeping'],
+                        'prolonged-sitting': ['sitting'],
+                        'forward-head-posture': ['computer-work', 'reading']
                     };
                     
-                    const keywords = triggerKeywords[trigger] || [trigger];
-                    return keywords.some(keyword => triggers.includes(keyword));
+                    const matchingActions = triggerActions[trigger] || [];
+                    return matchingActions.some(action => triggers.includes(action));
                 });
                 
                 // 통증 강도 고려
@@ -1089,6 +1080,10 @@ function displayAnalysisResults() {
     // AI 분석 결과만 표시
     if (painData.analysis.aiEnhanced && painData.analysis.aiAnalysis) {
         const resultContainer = document.getElementById('ai-analysis-result');
+        if (!resultContainer) {
+            console.error('ai-analysis-result container not found');
+            return;
+        }
         resultContainer.innerHTML = `
             <div class="ai-result-content">
                 ${formatAIResponse(painData.analysis.aiAnalysis)}
@@ -1099,6 +1094,11 @@ function displayAnalysisResults() {
 
 function displayAIAnalysis() {
     const analysisContainer = document.getElementById('trigger-points-analysis');
+    
+    if (!analysisContainer) {
+        console.error('trigger-points-analysis container not found');
+        return;
+    }
     
     // AI 분석 결과 섹션 추가
     const aiSection = document.createElement('div');
@@ -1115,14 +1115,75 @@ function displayAIAnalysis() {
 }
 
 function formatAIResponse(response) {
-    // AI 응답을 HTML로 포맷팅
+    // AI 응답을 HTML로 포맷팅 (마크다운 지원)
+    console.log('🎨 포맷팅 대상:', typeof response, response);
+    
+    // 문자열이 아닌 경우 처리
+    if (typeof response !== 'string') {
+        if (response && typeof response === 'object') {
+            // 객체인 경우 JSON.stringify로 변환
+            response = JSON.stringify(response, null, 2);
+        } else {
+            // 기타 타입인 경우 String으로 변환
+            response = String(response || '');
+        }
+    }
+    
+    // 빈 문자열 체크
+    if (!response || response.trim() === '') {
+        console.warn('⚠️ 빈 응답 감지');
+        return '<p>AI 분석 결과를 받지 못했습니다. 다시 시도해주세요.</p>';
+    }
+    
     return response
+        // 마크다운 헤딩
+        .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+        .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+        
+        // 마크다운 표 처리
+        .replace(/\|(.+)\|/g, function(match, content) {
+            const cells = content.split('|').map(cell => cell.trim());
+            return '<tr>' + cells.map(cell => `<td>${cell}</td>`).join('') + '</tr>';
+        })
+        
+        // 표 헤더 구분선 제거
+        .replace(/\|[-\s|]+\|/g, '')
+        
+        // 인용문 (> 로 시작)
+        .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
+        
+        // 불릿 포인트
+        .replace(/^• (.*$)/gm, '<li>$1</li>')
+        .replace(/^- (.*$)/gm, '<li>$1</li>')
+        .replace(/^\* (.*$)/gm, '<li>$1</li>')
+        
+        // 볼드 텍스트
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        
+        // 이탤릭 텍스트
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        
+        // 인라인 코드
+        .replace(/`(.*?)`/g, '<code>$1</code>')
+        
+        // 줄바꿈 처리
         .replace(/\n\n/g, '</p><p>')
         .replace(/\n/g, '<br>')
+        
+        // 표 래핑
+        .replace(/(<tr>.*<\/tr>)/gs, '<table class="markdown-table">$1</table>')
+        
+        // 리스트 래핑
+        .replace(/(<li>.*<\/li>)/gs, '<ul class="markdown-list">$1</ul>')
+        
+        // 문단 래핑
         .replace(/^/, '<p>')
         .replace(/$/, '</p>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+        
+        // 빈 문단 정리
+        .replace(/<p><\/p>/g, '')
+        .replace(/<p><br><\/p>/g, '<br>');
 }
 
 function createTriggerPointElement(tp) {
@@ -1253,17 +1314,25 @@ function displayMassageInstructions() {
 function goToStep(stepNumber) {
     // 현재 단계 숨기기
     steps.forEach(step => step.classList.remove('active'));
-    progressSteps.forEach(step => step.classList.remove('active'));
+    if (progressSteps.length > 0) {
+        progressSteps.forEach(step => step.classList.remove('active'));
+    }
     
     // 새 단계 보이기
     document.getElementById(`step${stepNumber}`).classList.add('active');
-    document.querySelector(`[data-step="${stepNumber}"]`).classList.add('active');
+    const progressStep = document.querySelector(`[data-step="${stepNumber}"]`);
+    if (progressStep) {
+        progressStep.classList.add('active');
+    }
     
     currentStep = stepNumber;
     updateProgressBar();
 }
 
 function updateProgressBar() {
+    // Only update if progress steps exist
+    if (progressSteps.length === 0) return;
+    
     progressSteps.forEach((step, index) => {
         if (index < currentStep) {
             step.classList.add('completed');
@@ -1282,19 +1351,31 @@ function resetApp() {
         analysis: {}
     };
     
-    // 폼 초기화
-    document.getElementById('pain-questionnaire').reset();
-    const intensityValue = document.getElementById('intensity-value');
-    if (intensityValue) {
-        intensityValue.textContent = '5';
+    // 텍스트 영역 초기화
+    const painDescription = document.getElementById('pain-description');
+    if (painDescription) {
+        painDescription.value = '';
+    }
+    
+    // 글자 수 카운터 초기화
+    const charCount = document.getElementById('char-count');
+    if (charCount) {
+        charCount.textContent = '0';
     }
     
     // 선택 영역 초기화
     clearSelection();
     
     // 경고 숨기기
-    document.getElementById('red-flag-warning').classList.add('hidden');
-    document.getElementById('massage-guide').style.display = 'block';
+    const redFlagWarning = document.getElementById('red-flag-warning');
+    if (redFlagWarning) {
+        redFlagWarning.classList.add('hidden');
+    }
+    
+    const massageGuide = document.getElementById('massage-guide');
+    if (massageGuide) {
+        massageGuide.style.display = 'block';
+    }
     
     currentStep = 1;
 }
@@ -1452,26 +1533,8 @@ function updateUsageDisplay() {
     
     const aiText = document.getElementById('ai-text');
     if (aiText) {
-        const remaining = window.openaiConfig.getRemainingRequests();
-        aiText.innerHTML = `AI 분석 활성화 (남은 요청: ${remaining}회)`;
+        aiText.innerHTML = `AI 분석 활성화`;
     }
-    
-    // 헤더에 사용량 표시 추가
-    let usageDisplay = document.getElementById('usage-display');
-    if (!usageDisplay) {
-        const aiStatus = document.getElementById('ai-status');
-        usageDisplay = document.createElement('div');
-        usageDisplay.id = 'usage-display';
-        usageDisplay.className = 'usage-display';
-        aiStatus.appendChild(usageDisplay);
-    }
-    
-    usageDisplay.innerHTML = `
-        <small>
-            일일: ${stats.daily.used}/${stats.daily.limit} | 
-            월간: ${stats.monthly.used}/${stats.monthly.limit}
-        </small>
-    `;
 }
 
 function showSuccessMessage(message) {

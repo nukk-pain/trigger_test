@@ -139,7 +139,7 @@ class EnvLoader {
 
     // AI 모델 설정
     getModel() {
-        return this.get('OPENAI_MODEL', 'gpt-o4-mini');
+        return this.get('OPENAI_MODEL', 'o4-mini-2025-04-16');
     }
 
     getMaxTokens() {
@@ -147,7 +147,7 @@ class EnvLoader {
     }
 
     getTemperature() {
-        return parseFloat(this.get('TEMPERATURE', '0.3'));
+        return parseFloat(this.get('TEMPERATURE', '1'));
     }
 
     // 기능 활성화 여부
