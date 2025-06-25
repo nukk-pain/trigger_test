@@ -18,11 +18,10 @@ class OpenAIConfig {
         this.model = window.envLoader.getModel();
         this.maxTokens = window.envLoader.getMaxTokens();
         this.temperature = window.envLoader.getTemperature();
-        
+
         // o4 모델의 경우 추론 토큰을 고려하여 더 많은 토큰 할당
         if (this.model.startsWith('o4-')) {
             this.maxTokens = Math.max(this.maxTokens, 4000);
-            console.log('🧠 o4 모델 감지: 최대 토큰을', this.maxTokens, '로 증가');
         }
 
         return this.hasApiKey();
@@ -99,12 +98,6 @@ class OpenAIConfig {
             throw new Error(`일일 또는 월간 사용량 한도에 도달했습니다. 남은 요청: ${remaining}회`);
         }
 
-        console.log('📤 API 요청 준비:', {
-            model: this.model,
-            systemPrompt: systemPrompt ? systemPrompt.substring(0, 100) + '...' : 'None',
-            messages: messages
-        });
-
         // o1 모델은 system prompt를 지원하지 않으므로 user message에 포함
         let requestMessages;
         if (this.model.startsWith('o1-') || this.model.startsWith('o4-')) {
@@ -127,14 +120,12 @@ class OpenAIConfig {
                 messages;
         }
 
-        console.log('📨 최종 요청 메시지:', requestMessages);
-
         // 모델별 request body 구성
         const modelSupportsTemperature = !this.model.startsWith('o1-') && !this.model.startsWith('o3-') && !this.model.startsWith('o4-');
-        
+
         // 일부 모델은 temperature=1만 지원하므로 안전하게 설정
         const safeTemperature = modelSupportsTemperature ? 1 : undefined;
-        
+
         const requestBody = {
             model: this.model,
             messages: requestMessages,
@@ -143,13 +134,11 @@ class OpenAIConfig {
             stream: false,
             logprobs: false
         };
-        
+
         // temperature를 지원하는 모델에만 추가
         if (safeTemperature !== undefined) {
             requestBody.temperature = safeTemperature;
         }
-
-        console.log('🔧 요청 본문:', requestBody);
 
         try {
             const response = await fetch(`${this.baseURL}/chat/completions`, {
@@ -161,35 +150,23 @@ class OpenAIConfig {
                 body: JSON.stringify(requestBody)
             });
 
-            console.log('📡 API 응답 상태:', response.status);
-
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error('❌ API 오류 응답:', errorData);
                 throw new Error(errorData.error?.message || `HTTP ${response.status}`);
             }
 
             const data = await response.json();
-            console.log('📥 API 응답 데이터:', data);
-            console.log('🔍 choices 배열:', data.choices);
-            console.log('🔍 첫 번째 choice:', data.choices[0]);
-            console.log('🔍 메시지 객체:', data.choices[0]?.message);
-            console.log('🔍 메시지 내용:', data.choices[0]?.message?.content);
 
             // 성공적인 요청 기록
             window.usageTracker.recordRequest();
 
             const result = data.choices[0]?.message?.content || '';
             const finishReason = data.choices[0]?.finish_reason;
-            
-            console.log('✅ 최종 결과:', result);
-            console.log('📏 결과 길이:', result.length);
-            console.log('🏁 완료 이유:', finishReason);
-            
+
             if (finishReason === 'length' && result.length === 0) {
                 throw new Error('토큰 제한으로 인해 응답이 생성되지 않았습니다. 더 간단한 질문을 해주세요.');
             }
-            
+
             return result;
         } catch (error) {
             console.error('OpenAI API 요청 실패:', error);
@@ -216,21 +193,27 @@ class OpenAIConfig {
 
 // 의료 전문 프롬프트 템플릿
 const MEDICAL_PROMPTS = {
-    PAIN_ANALYSIS: `근골격계 전문가로서 통증 부위와 악화 상황을 분석해 트리거 포인트 마사지를 안내하세요.
+    PAIN_ANALYSIS: `근골격계 물리치료 전문가로서 통증 부위와 악화 상황을 분석해 셀프 마사지 방법을 안내하세요.
 
 출력 형식:
-## 요약
-> 증상·원인·목표 (3줄 이하)
+## 타겟 근육
+**주요 치료 대상:** 근육명들을 명시 (예: 승모근 상부섬유, 흉쇄유돌근, 후두하근)
 
 ## 마사지 방법
-| 단계 | 방법 | 시간 | 주의점 |
-최대 4단계, 안전 체크 포함
+**1단계: [근육명]**
+- 방법: 구체적인 마사지 방법
+- 시간: 권장 시간
+- 주의: 안전 주의사항
+
+**2단계: [근육명]**
+- 방법: 구체적인 마사지 방법  
+- 시간: 권장 시간
+- 주의: 안전 주의사항
+
+최대 4단계까지 작성
 
 ## 주의사항
 ⚠️ 중단 기준 및 전문 진료 권유
-
-## 면책
-셀프케어 안내이며 진단이 아닙니다. 심한 경우 전문 진료 받으세요.
 
 존댓말 사용, 간결하게 작성하세요.`,
 

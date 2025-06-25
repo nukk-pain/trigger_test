@@ -2928,3 +2928,96 @@ input[type="range"]::-webkit-slider-thumb {
         font-size: 0.85rem;
     }
 }
+
+/* 마사지 단계 카드 스타일 */
+.massage-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.step-card {
+    background: white;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.step-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.step-number {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.step-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.step-method,
+.step-time,
+.step-note {
+    padding: 8px 12px;
+    border-radius: 6px;
+    line-height: 1.5;
+}
+
+.step-method {
+    background-color: #f8f9ff;
+    border-left: 3px solid #667eea;
+}
+
+.step-time {
+    background-color: #fff8f0;
+    border-left: 3px solid #ff9500;
+}
+
+.step-note {
+    background-color: #fff5f5;
+    border-left: 3px solid #e53e3e;
+}
+
+.step-method strong,
+.step-time strong,
+.step-note strong {
+    color: #2d3748;
+    margin-right: 8px;
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+    .step-card {
+        padding: 15px;
+        margin: 0 10px;
+    }
+    
+    .step-number {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .step-content {
+        gap: 8px;
+    }
+    
+    .step-method,
+    .step-time,
+    .step-note {
+        padding: 6px 10px;
+        font-size: 0.9rem;
+    }
+}
