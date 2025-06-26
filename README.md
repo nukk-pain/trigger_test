@@ -1,21 +1,21 @@
 # 🩺 통증 가이드 도우미
 
-AI 기반 트리거 포인트 및 근막 경선 분석을 통한 셀프 마사지 가이드 애플리케이션
+AI 기반 통증 분석 및 셀프 마사지 가이드 제공 웹 애플리케이션
 
 ## ✨ 주요 기능
 
 ### 🧠 AI 강화 분석
-- **OpenAI GPT-4o-mini** 기반 정밀 통증 분석
+- **OpenAI o4-mini** 기반 정밀 통증 분석 (추론 모델 지원)
 - **개인화된 트리거 포인트** 매핑 및 권장사항
 - **근막 경선 이론** 적용 (Thomas Myers의 Anatomy Trains)
 - **실시간 레드 플래그** 감지 및 응급상황 알림
 
-### 📝 2단계 입력 시스템
-1. **텍스트 기반 문진**: 통증 성격, 유발요인, 지속기간 등
-2. **인체 지도 선택**: SVG 기반 정확한 부위 지정
+### 📝 간소화된 입력 시스템
+1. **인체 지도 선택**: 상세한 SVG 기반 부위 선택 (앞면/뒷면)
+2. **텍스트 기반 설명**: 통증이 심해지는 상황 자유 기술
 
 ### 🔒 사용량 관리
-- **일일/월간 사용량 제한**: 기본 50회/일, 1000회/월
+- **일일/월간 사용량 제한**: 기본 50회/일, 1000회/월 (localStorage 기반 추적)
 - **실시간 사용량 추적**: 헤더에 현재 사용현황 표시
 - **자동 제한**: 한도 초과 시 요청 차단
 
@@ -93,15 +93,17 @@ EOF
 ## 📁 파일 구조
 
 ```
-pain-guide/
-├── index.html          # 메인 HTML
+code_test/
+├── index.html          # 메인 HTML (통증 부위 선택 SVG 포함)
 ├── styles.css          # 스타일시트
-├── script.js           # 메인 로직
+├── script.js           # 메인 로직 (트리거 포인트 DB 포함)
+├── config.js           # OpenAI API 설정 및 의료 프롬프트
 ├── env-loader.js       # 환경변수 로더
+├── server.js           # Express 서버 (로컬 개발용)
 ├── api/
 │   └── env.js          # Vercel 서버리스 함수
-├── vercel.json         # Vercel 설정
-├── .env.local          # 로컬 환경변수 (git에 포함 안됨)
+├── package.json        # 의존성 관리
+├── package-lock.json   # 의존성 락 파일
 └── README.md           # 이 파일
 ```
 
@@ -110,11 +112,13 @@ pain-guide/
 ### .env.local (로컬 개발용)
 ```bash
 OPENAI_API_KEY=sk-your-openai-api-key
-OPENAI_MODEL=gpt-4o-mini
-MAX_TOKENS=2000
-TEMPERATURE=0.7
-DAILY_LIMIT=20
-MONTHLY_LIMIT=200
+OPENAI_MODEL=o4-mini
+MAX_TOKENS=4000
+TEMPERATURE=1.0
+DAILY_REQUEST_LIMIT=50
+MONTHLY_REQUEST_LIMIT=1000
+ENABLE_AI_QA=true
+ENABLE_DETAILED_ANALYSIS=true
 
 # Vercel Analytics (선택사항)
 NEXT_PUBLIC_VERCEL_ANALYTICS_ID=your-analytics-id
@@ -170,31 +174,36 @@ console.log(await window.envLoader.loadEnv());
 | 변수명 | 기본값 | 설명 |
 |--------|--------|------|
 | `OPENAI_API_KEY` | - | OpenAI API 키 (필수) |
-| `DAILY_LIMIT` | 20 | 일일 요청 제한 |
-| `MONTHLY_LIMIT` | 200 | 월간 요청 제한 |
-| `OPENAI_MODEL` | gpt-4o-mini | 사용할 OpenAI 모델 |
-| `MAX_TOKENS` | 2000 | 최대 토큰 수 |
-| `TEMPERATURE` | 0.7 | AI 창의성 수준 |
+| `DAILY_REQUEST_LIMIT` | 50 | 일일 요청 제한 |
+| `MONTHLY_REQUEST_LIMIT` | 1000 | 월간 요청 제한 |
+| `OPENAI_MODEL` | o4-mini | 사용할 OpenAI 모델 |
+| `MAX_TOKENS` | 4000 | 최대 토큰 수 (o4 모델용 증가) |
+| `TEMPERATURE` | 1.0 | AI 창의성 수준 (o4 모델 최적화) |
+| `ENABLE_AI_QA` | true | AI 질문 도우미 활성화 |
+| `ENABLE_DETAILED_ANALYSIS` | true | 상세 분석 활성화 |
 | `NEXT_PUBLIC_VERCEL_ANALYTICS_ID` | - | Vercel Analytics ID (선택사항) |
 
 ## 🎯 사용 방법
 
-### 1단계: 통증 정보 입력
-- 통증 부위와 성격을 구체적으로 설명
-- 악화 요인 선택 (앉기, 서기, 움직임 등)
-- 통증 강도 (1-10) 및 지속 기간 입력
-- **중요**: 레드 플래그 증상 체크
+### 1단계: 통증 정보 입력 (한 화면에서 완료)
+**통증 부위 선택:**
+- **인체 지도 클릭**: 앞면/뒷면 전환하여 정확한 통증 부위 선택
+- **다중 선택 가능**: 여러 부위를 동시에 선택 가능
+- **실시간 확인**: 선택된 부위가 우측 패널에 실시간 표시
+- **세밀한 부위 구분**: 머리, 목, 어깨, 등, 허리, 팔, 다리의 상세 구역별 선택
 
-### 2단계: 부위 선택
-- 인체 그림에서 정확한 통증 부위 클릭
-- 앞면/뒷면 전환하여 세밀한 위치 지정
-- 여러 부위 선택 가능
+**통증 상황 설명:**
+- **자유로운 텍스트 입력**: "어떨 때 더 아프세요?" 질문에 답변
+- **구체적 기술**: 통증이 심해지는 상황을 자세히 기술 (최대 500자)
+- **예시**: "컴퓨터 작업을 30분 이상 하면 목이 뻣뻣해지고, 잠에서 깰 때 어깨가 결린다"
 
-### 3단계: AI 분석 결과
-- **AI 전문 분석**: 개인화된 트리거 포인트 권장
-- **마사지 가이드**: 단계별 셀프 마사지 방법
-- **주의사항**: 안전한 마사지를 위한 주의점
-- **AI 질문 도우미**: 추가 질문과 답변
+**분석 시작**: "분석하기" 버튼 클릭
+
+### 2단계: AI 분석 결과 및 마사지 가이드
+- **타겟 근육 식별**: 통증 원인이 되는 주요 근육군 AI 분석
+- **단계별 마사지 가이드**: 구체적인 셀프 마사지 방법 제시
+- **안전 주의사항**: 마사지 시 주의할 점과 중단 기준 안내
+- **응급상황 감지**: 레드 플래그 증상 시 병원 방문 권고
 
 ## ⚠️ 안전 가이드라인
 
@@ -215,9 +224,9 @@ console.log(await window.envLoader.loadEnv());
 ## 📊 사용량 관리
 
 ### 제한 사항
-- **일일 제한**: 20회 (기본값)
-- **월간 제한**: 200회 (기본값)
-- **토큰 제한**: 요청당 2000 토큰
+- **일일 제한**: 50회 (기본값)
+- **월간 제한**: 1000회 (기본값)
+- **토큰 제한**: 요청당 4000 토큰 (o4 모델 최적화)
 
 ### 사용량 확인
 - 헤더에서 실시간 사용량 확인
@@ -238,12 +247,14 @@ console.log(await window.envLoader.loadEnv());
 ## 🔧 기술 스택
 
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **AI**: OpenAI GPT-4o-mini API
+- **Backend**: Express.js (로컬 개발 서버)
+- **AI**: OpenAI o4-mini API (추론 최적화 모델)
 - **Analytics**: Vercel Analytics (Web Vitals, 페이지 뷰)
 - **의학 이론**: 
   - 트리거 포인트 치료법 (Dr. Janet Travell)
   - 근막 경선 이론 (Thomas Myers)
 - **데이터 저장**: localStorage (로컬 저장)
+- **보안**: API 키 서버사이드 관리
 
 ## 🛡️ 개인정보 보호
 
@@ -255,12 +266,12 @@ console.log(await window.envLoader.loadEnv());
 
 ## 💰 비용 예상
 
-GPT-4o-mini 기준 (2024년 기준):
+o4-mini 기준 (2025년 기준):
 - **입력**: $0.15 / 1M 토큰
 - **출력**: $0.60 / 1M 토큰
 - **예상 비용**: 요청당 약 $0.002-0.003 (약 3-4원)
 
-일일 50회 사용 시 월 약 $3-5 (약 4,000-7,000원)
+일일 50회 사용 시 월 약 $5-8 (약 7,000-11,000원) - o4 모델 추론 비용 포함
 
 ## 🤝 기여하기
 
