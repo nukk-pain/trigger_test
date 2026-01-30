@@ -165,6 +165,34 @@ describe('triggerPointsDB', () => {
       expect(tp.massage.precaution).toBeDefined();
     });
   });
+
+  it('should have at least 15 trigger points for comprehensive coverage', () => {
+    expect(triggerPointsDB.length).toBeGreaterThanOrEqual(15);
+  });
+
+  it('should cover major body regions', () => {
+    // 모든 painAreas를 수집
+    const allPainAreas = new Set();
+    triggerPointsDB.forEach(tp => {
+      tp.painAreas.forEach(area => allPainAreas.add(area));
+    });
+
+    // 주요 신체 영역이 포함되어야 함
+    const majorRegions = [
+      'neck-front', 'neck-back-upper', 'neck-back-lower',
+      'shoulder-left-front', 'shoulder-right-front',
+      'upper-back-center', 'lower-back-center',
+      'chest-left', 'chest-right',
+      'head-front', 'head-back', 'occipital',
+      'buttock-left-upper', 'buttock-right-upper',
+      'thigh-front-left', 'thigh-front-right',
+      'calf-back-left', 'calf-back-right'
+    ];
+
+    majorRegions.forEach(region => {
+      expect(allPainAreas.has(region)).toBe(true);
+    });
+  });
 });
 
 describe('fascialLinesDB', () => {

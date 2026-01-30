@@ -1,8 +1,7 @@
-// OpenAI API 설정 및 관리 (사용량 제한 포함)
+// Gemini API 설정 및 관리 (사용량 제한 포함)
 
-class OpenAIConfig {
+class GeminiConfig {
     constructor() {
-        this.baseURL = 'https://api.openai.com/v1';
         this.initialized = false;
     }
 
@@ -16,13 +15,10 @@ class OpenAIConfig {
 
         // 환경 설정에서 값 로드
         this.model = window.envLoader.getModel();
-        this.maxTokens = window.envLoader.getMaxTokens();
+        this.maxOutputTokens = window.envLoader.getMaxOutputTokens();
         this.temperature = window.envLoader.getTemperature();
-
-        // o4 모델의 경우 추론 토큰을 고려하여 더 많은 토큰 할당
-        if (this.model.startsWith('o4-')) {
-            this.maxTokens = Math.max(this.maxTokens, 4000);
-        }
+        this.topP = window.envLoader.getTopP();
+        this.topK = window.envLoader.getTopK();
 
         return this.hasApiKey();
     }
@@ -41,7 +37,7 @@ class OpenAIConfig {
 
     hasApiKey() {
         const apiKey = this.getApiKey();
-        return apiKey && apiKey.length > 0 && apiKey.startsWith('sk-');
+        return apiKey && apiKey.length > 0;
     }
 
     async testApiKey() {
@@ -51,13 +47,16 @@ class OpenAIConfig {
 
         try {
             const apiKey = this.getApiKey();
-            console.log('🔍 API 키 테스트 중:', `${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 4)}`);
+            console.log('🔍 API 키 테스트 중:', `${apiKey.substring(0, 10)}...`);
 
-            const response = await fetch(`${this.baseURL}/models`, {
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                }
+            // Gemini API 테스트 - 서버 엔드포인트 호출
+            const response = await fetch('/api/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: '테스트입니다. "OK"라고만 응답해주세요.',
+                    history: []
+                })
             });
 
             console.log('📡 API 응답 상태:', response.status);
@@ -67,11 +66,11 @@ class OpenAIConfig {
                 console.error('❌ API 오류 상세:', errorData);
 
                 if (response.status === 401) {
-                    throw new Error(`API 키가 유효하지 않거나 만료되었습니다. OpenAI Platform에서 새 키를 발급받아주세요.`);
+                    throw new Error('API 키가 유효하지 않습니다. Google AI Studio에서 새 키를 발급받아주세요.');
                 } else if (response.status === 429) {
-                    throw new Error('API 사용량 한도를 초과했습니다. 잠시 후 다시 시도하거나 결제 정보를 확인해주세요.');
+                    throw new Error('API 사용량 한도를 초과했습니다. 잠시 후 다시 시도해주세요.');
                 } else {
-                    throw new Error(`API 오류 (${response.status}): ${errorData.error?.message || '알 수 없는 오류'}`);
+                    throw new Error(`API 오류 (${response.status}): ${errorData.error || '알 수 없는 오류'}`);
                 }
             }
 
@@ -85,11 +84,11 @@ class OpenAIConfig {
 
     async makeRequest(messages, systemPrompt = '') {
         if (!this.initialized) {
-            throw new Error('OpenAI 설정이 초기화되지 않았습니다.');
+            throw new Error('Gemini 설정이 초기화되지 않았습니다.');
         }
 
         if (!this.hasApiKey()) {
-            throw new Error('유효한 OpenAI API 키가 필요합니다.');
+            throw new Error('유효한 Gemini API 키가 필요합니다.');
         }
 
         // 사용량 제한 확인
@@ -98,61 +97,43 @@ class OpenAIConfig {
             throw new Error(`일일 또는 월간 사용량 한도에 도달했습니다. 남은 요청: ${remaining}회`);
         }
 
-        // o1 모델은 system prompt를 지원하지 않으므로 user message에 포함
-        let requestMessages;
-        if (this.model.startsWith('o1-') || this.model.startsWith('o4-')) {
-            if (systemPrompt && messages.length > 0) {
-                // system prompt를 첫 번째 user message에 포함
-                const firstMessage = messages[0];
-                const combinedContent = `${systemPrompt}\n\n${firstMessage.content}`;
-                requestMessages = [
-                    { role: 'user', content: combinedContent },
-                    ...messages.slice(1)
-                ];
-            } else if (systemPrompt) {
-                requestMessages = [{ role: 'user', content: systemPrompt }];
-            } else {
-                requestMessages = messages;
-            }
-        } else {
-            requestMessages = systemPrompt ?
-                [{ role: 'system', content: systemPrompt }, ...messages] :
-                messages;
+        // 메시지를 Gemini 형식으로 변환
+        const history = [];
+        let currentPrompt = '';
+
+        // 시스템 프롬프트가 있으면 첫 번째 사용자 메시지에 포함
+        const fullMessages = [...messages];
+
+        if (systemPrompt && fullMessages.length > 0) {
+            fullMessages[0] = {
+                ...fullMessages[0],
+                content: `${systemPrompt}\n\n${fullMessages[0].content}`
+            };
         }
 
-        // 모델별 request body 구성
-        const modelSupportsTemperature = !this.model.startsWith('o1-') && !this.model.startsWith('o3-') && !this.model.startsWith('o4-');
-
-        // 일부 모델은 temperature=1만 지원하므로 안전하게 설정
-        const safeTemperature = modelSupportsTemperature ? 1 : undefined;
-
-        const requestBody = {
-            model: this.model,
-            messages: requestMessages,
-            max_completion_tokens: this.maxTokens,
-            // 토큰 절약을 위한 설정
-            stream: false,
-            logprobs: false
-        };
-
-        // temperature를 지원하는 모델에만 추가
-        if (safeTemperature !== undefined) {
-            requestBody.temperature = safeTemperature;
+        // 마지막 메시지를 현재 프롬프트로, 나머지는 히스토리로
+        for (let i = 0; i < fullMessages.length; i++) {
+            const msg = fullMessages[i];
+            if (i === fullMessages.length - 1) {
+                currentPrompt = msg.content;
+            } else {
+                history.push({
+                    role: msg.role === 'assistant' ? 'model' : 'user',
+                    parts: [{ text: msg.content }]
+                });
+            }
         }
 
         try {
-            const response = await fetch(`${this.baseURL}/chat/completions`, {
+            const response = await fetch('/api/gemini', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.getApiKey()}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestBody)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: currentPrompt, history })
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+                throw new Error(errorData.error || `HTTP ${response.status}`);
             }
 
             const data = await response.json();
@@ -160,16 +141,13 @@ class OpenAIConfig {
             // 성공적인 요청 기록
             window.usageTracker.recordRequest();
 
-            const result = data.choices[0]?.message?.content || '';
-            const finishReason = data.choices[0]?.finish_reason;
-
-            if (finishReason === 'length' && result.length === 0) {
-                throw new Error('토큰 제한으로 인해 응답이 생성되지 않았습니다. 더 간단한 질문을 해주세요.');
+            if (data.error) {
+                throw new Error(data.error);
             }
 
-            return result;
+            return data.output || '';
         } catch (error) {
-            console.error('OpenAI API 요청 실패:', error);
+            console.error('Gemini API 요청 실패:', error);
             throw error;
         }
     }
@@ -206,7 +184,7 @@ const MEDICAL_PROMPTS = {
 - 주의: 안전 주의사항
 
 **2단계: [근육명]**
-- 방법: 구체적인 마사지 방법  
+- 방법: 구체적인 마사지 방법
 - 시간: 권장 시간
 - 주의: 안전 주의사항
 
@@ -243,6 +221,9 @@ const MEDICAL_PROMPTS = {
 응답은 '응급상황' 또는 '일반관리' 중 하나로 시작하고, 간단한 이유를 제시해주세요.`
 };
 
-// 전역 OpenAI 설정 인스턴스
-window.openaiConfig = new OpenAIConfig();
+// 전역 Gemini 설정 인스턴스
+window.geminiConfig = new GeminiConfig();
 window.MEDICAL_PROMPTS = MEDICAL_PROMPTS;
+
+// 이전 코드와의 호환성을 위한 alias
+window.openaiConfig = window.geminiConfig;

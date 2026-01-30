@@ -1,163 +1,8 @@
 // 통증 가이드 도우미 - 메인 JavaScript (OpenAI API 통합)
 
-// 트리거 포인트 데이터베이스 - 통증 부위별 실제 치료 포인트 매핑
-const triggerPointsDB = [
-    // 승모근 상부섬유 - 목, 어깨, 두통의 주요 원인
-    {
-        name: '승모근 상부섬유',
-        location: 'neck-shoulder-junction',
-        anatomicalPosition: '목과 어깨 경계 부분',
-        referredPain: ['목', '어깨', '머리', '관자놀이', '뒤통수'],
-        painAreas: ['neck-front', 'neck-left', 'neck-right', 'neck-back-upper', 'neck-back-lower', 
-                   'shoulder-left-front', 'shoulder-right-front', 'shoulder-top-left', 'shoulder-top-right',
-                   'head-temple-left', 'head-temple-right', 'head-back', 'occipital'],
-        triggers: ['sitting', 'stress', 'poor-posture', 'computer-work'],
-        massage: {
-            method: '목과 어깨 경계 부분을 엄지손가락으로 5-10초간 지압',
-            frequency: '하루 3-5회',
-            duration: '각 부위 5-10초',
-            precaution: '너무 강하게 누르지 말고, 혈관이나 신경 피하기'
-        }
-    },
-    // 후두하근 - 두통과 목 통증의 주요 원인
-    {
-        name: '후두하근',
-        location: 'skull-base',
-        anatomicalPosition: '뒤통수와 목 경계선',
-        referredPain: ['뒤통수', '목', '눈 주변', '이마'],
-        painAreas: ['head-back', 'occipital', 'head-front', 'neck-back-upper', 'neck-back-lower'],
-        triggers: ['computer-work', 'reading', 'forward-head-posture'],
-        massage: {
-            method: '뒤통수 아래 목 경계선을 부드럽게 원을 그리며 마사지',
-            frequency: '하루 2-3회',
-            duration: '5분',
-            precaution: '경추 신경 주의, 부드럽게 마사지'
-        }
-    },
-    // 흉쇄유돌근 - 목과 두통의 숨은 원인
-    {
-        name: '흉쇄유돌근',
-        location: 'neck-side',
-        anatomicalPosition: '목 옆쪽, 귀 아래에서 쇄골까지',
-        referredPain: ['목 옆쪽', '귀', '관자놀이', '이마', '어깨'],
-        painAreas: ['neck-left', 'neck-right', 'head-temple-left', 'head-temple-right', 'head-front'],
-        triggers: ['neck-turning', 'stress', 'sleeping-position'],
-        massage: {
-            method: '목 옆쪽을 위에서 아래로 부드럽게 쓸어내리기',
-            frequency: '하루 2-3회',
-            duration: '3-5분',
-            precaution: '경동맥 부위 피하고 부드럽게'
-        }
-    },
-    // 승모근 중부섬유 - 어깨와 등 통증
-    {
-        name: '승모근 중부섬유',
-        location: 'shoulder-blade-top',
-        anatomicalPosition: '어깨 날개뼈 위쪽 가장자리',
-        referredPain: ['어깨', '목', '팔', '등 위쪽'],
-        painAreas: ['shoulder-blade-left', 'shoulder-blade-right', 'shoulder-top-left', 'shoulder-top-right',
-                   'upper-back-left', 'upper-back-right', 'upper-arm-left', 'upper-arm-right'],
-        triggers: ['heavy-lifting', 'sleeping-position', 'stress'],
-        massage: {
-            method: '어깨 날개뼈 위쪽을 반대손으로 누르며 마사지',
-            frequency: '하루 3회',
-            duration: '5-10분',
-            precaution: '관절 직접 압박 금지, 근육 부분만'
-        }
-    },
-    // 능형근 - 어깨 날개뼈 사이 통증
-    {
-        name: '능형근',
-        location: 'between-shoulder-blades',
-        anatomicalPosition: '양쪽 어깨 날개뼈 사이',
-        referredPain: ['등', '어깨 날개뼈', '어깨'],
-        painAreas: ['upper-back-center', 'shoulder-blade-left', 'shoulder-blade-right', 'mid-back-center'],
-        triggers: ['slouching', 'carrying-bags', 'computer-work'],
-        massage: {
-            method: '테니스공을 벽에 대고 어깨 날개뼈 사이 굴리기',
-            frequency: '하루 2회',
-            duration: '10분',
-            precaution: '척추 직접 압박 금지, 근육 부분만'
-        }
-    },
-    // 요방형근 - 허리 통증의 주요 원인
-    {
-        name: '요방형근',
-        location: 'lower-back-sides',
-        anatomicalPosition: '허리 양쪽 옆구리',
-        referredPain: ['허리', '엉덩이', '사타구니'],
-        painAreas: ['lower-back-left', 'lower-back-right', 'lower-back-center', 
-                   'buttock-left-upper', 'buttock-right-upper', 'groin-left', 'groin-right'],
-        triggers: ['prolonged-sitting', 'lifting', 'uneven-posture'],
-        massage: {
-            method: '옆으로 누워서 테니스공을 허리 옆구리에 대고 굴리기',
-            frequency: '하루 2-3회',
-            duration: '10-15분',
-            precaution: '디스크 의심시 중단, 신장 부위 피하기'
-        }
-    },
-    // 전거근 - 갈비뼈와 어깨 통증
-    {
-        name: '전거근',
-        location: 'side-ribs',
-        anatomicalPosition: '겨드랑이 아래 갈비뼈 옆면',
-        referredPain: ['갈비뼈', '어깨', '팔', '등'],
-        painAreas: ['chest-left', 'chest-right', 'upper-arm-left', 'upper-arm-right', 'upper-back-left', 'upper-back-right'],
-        triggers: ['reaching-overhead', 'carrying-heavy', 'breathing-issues'],
-        massage: {
-            method: '겨드랑이 아래 갈비뼈를 손가락으로 부드럽게 마사지',
-            frequency: '하루 2회',
-            duration: '5분',
-            precaution: '갈비뼈 골절 주의, 부드럽게'
-        }
-    },
-    // 이상근 - 엉덩이와 다리 통증
-    {
-        name: '이상근',
-        location: 'deep-buttock',
-        anatomicalPosition: '엉덩이 깊숙한 부분',
-        referredPain: ['엉덩이', '허벅지 뒤', '종아리'],
-        painAreas: ['buttock-left-upper', 'buttock-right-upper', 'buttock-left-lower', 'buttock-right-lower',
-                   'thigh-back-left', 'thigh-back-right', 'hamstring-left', 'hamstring-right'],
-        triggers: ['prolonged-sitting', 'running', 'hip-tightness'],
-        massage: {
-            method: '테니스공에 앉아서 엉덩이 압박, 다리 움직이기',
-            frequency: '하루 2회',
-            duration: '10분',
-            precaution: '좌골신경 압박 주의'
-        }
-    }
-];
-
-// 근막 경선 데이터 (Thomas Myers Anatomy Trains 기반)
-const fascialLinesDB = {
-    'superficial-back-line': {
-        name: '표재후선(Superficial Back Line)',
-        path: ['발바닥', '종아리', '햄스트링', '천골', '척추기립근', '후두골'],
-        commonIssues: ['허리통증', '목통증', '자세불량'],
-        relatedAreas: ['lower-back', 'upper-back', 'neck'],
-        treatment: '전체 라인을 따라 순차적 이완'
-    },
-    'deep-front-line': {
-        name: '심층전선(Deep Front Line)',
-        path: ['발등', '정강이', '골반저근', '대요근', '횡격막', '목'],
-        commonIssues: ['골반통증', '호흡장애', '목긴장'],
-        relatedAreas: ['abdomen', 'chest', 'neck'],
-        treatment: '호흡과 함께 심층근 이완'
-    },
-    'lateral-line': {
-        name: '측면선(Lateral Line)',
-        path: ['발외측', '종아리외측', '대퇴외측', '골반', '늑간근', '목측면'],
-        commonIssues: ['측면통증', '균형장애'],
-        relatedAreas: ['thigh', 'abdomen', 'neck'],
-        treatment: '측면 스트레칭과 마사지'
-    }
-};
-
-// 레드 플래그 조건
-const redFlagConditions = [
-    'fever', 'severe-numbness', 'weakness', 'bladder', 'chest-pain', 'breathing'
-];
+// 모듈에서 필요한 함수 import
+import { getAreaDisplayName, formatAIResponse, validateStep1 as validateStep1Pure } from './lib/utils.js';
+import { analyzeTriggerPoints as analyzeTriggerPointsLib, analyzeFascialLines as analyzeFascialLinesLib } from './lib/analysis.js';
 
 // 애플리케이션 상태
 let currentStep = 1;
@@ -401,24 +246,15 @@ function setupBodyMapEvents() {
 }
 
 function validateStep1() {
-    // 1단계: 부위 선택 + 통증 설명 검증
-    if (painData.selectedAreas.length === 0) {
-        alert('아픈 곳을 선택해 주세요.');
-        return false;
-    }
-    
-    // 통증 설명 검증
+    // lib/utils.js의 순수 함수 사용
     const painDescription = document.getElementById('pain-description').value.trim();
-    if (painDescription.length === 0) {
-        alert('통증이 심해지는 상황을 설명해 주세요.');
+    const result = validateStep1Pure(painData.selectedAreas, painDescription);
+
+    if (!result.valid) {
+        showNotification(result.message, 'warning');
         return false;
     }
-    
-    if (painDescription.length < 10) {
-        alert('조금 더 자세히 설명해 주세요. (최소 10자)');
-        return false;
-    }
-    
+
     return true;
 }
 
@@ -566,156 +402,7 @@ function removeSelectedArea(areaToRemove) {
     updateSelectedAreasList();
 }
 
-function getAreaDisplayName(area) {
-    const areaNames = {
-        // 머리 부위
-        'head-front': '이마/앞머리',
-        'head-back': '뒷머리',
-        'head-crown': '정수리',
-        'head-temple-left': '왼쪽 관자놀이',
-        'head-temple-right': '오른쪽 관자놀이',
-        'occipital': '후두부',
-        'jaw-left': '왼쪽 턱',
-        'jaw-right': '오른쪽 턱',
-        
-        // 목 부위
-        'neck-front': '목 앞쪽',
-        'neck-left': '목 왼쪽',
-        'neck-right': '목 오른쪽',
-        'neck-back-upper': '목 뒤 윗부분',
-        'neck-back-lower': '목 뒤 아래부분',
-        'neck-side-left-back': '목 뒤 왼쪽',
-        'neck-side-right-back': '목 뒤 오른쪽',
-        
-        // 어깨 부위
-        'shoulder-left-front': '왼쪽 어깨 앞',
-        'shoulder-right-front': '오른쪽 어깨 앞',
-        'shoulder-blade-left': '왼쪽 어깨뼈',
-        'shoulder-blade-right': '오른쪽 어깨뼈',
-        'shoulder-top-left': '왼쪽 어깨 윗부분',
-        'shoulder-top-right': '오른쪽 어깨 윗부분',
-        'collar-left': '왼쪽 쇄골',
-        'collar-right': '오른쪽 쇄골',
-        
-        // 가슴 부위
-        'chest-upper': '가슴 윗부분',
-        'chest-left': '왼쪽 가슴',
-        'chest-right': '오른쪽 가슴',
-        'sternum': '가슴뼈',
-        
-        // 복부 부위
-        'upper-abdomen': '명치/상복부',
-        'abdomen-left': '왼쪽 배',
-        'abdomen-right': '오른쪽 배',
-        'navel': '배꼽 주변',
-        'lower-abdomen': '아랫배',
-        
-        // 등 부위
-        'upper-back-center': '등 윗부분 중앙',
-        'upper-back-left': '등 윗부분 왼쪽',
-        'upper-back-right': '등 윗부분 오른쪽',
-        'mid-back-center': '등 중간 부분',
-        'lower-back-upper': '허리 윗부분',
-        'lower-back-left': '허리 왼쪽',
-        'lower-back-right': '허리 오른쪽',
-        'lower-back-center': '허리 중앙',
-        'sacral': '천골 부위',
-        
-        // 엉덩이 부위
-        'buttock-left-upper': '왼쪽 엉덩이 위',
-        'buttock-right-upper': '오른쪽 엉덩이 위',
-        'buttock-left-lower': '왼쪽 엉덩이 아래',
-        'buttock-right-lower': '오른쪽 엉덩이 아래',
-        'tailbone': '꼬리뼈',
-        
-        // 골반 부위
-        'pelvis-left': '왼쪽 골반',
-        'pelvis-right': '오른쪽 골반',
-        'groin-left': '왼쪽 사타구니',
-        'groin-right': '오른쪽 사타구니',
-        
-        // 팔 부위
-        'upper-arm-left': '왼쪽 윗팔',
-        'upper-arm-right': '오른쪽 윗팔',
-        'upper-arm-back-left': '왼쪽 윗팔 뒤',
-        'upper-arm-back-right': '오른쪽 윗팔 뒤',
-        'elbow-left': '왼쪽 팔꿈치',
-        'elbow-right': '오른쪽 팔꿈치',
-        'elbow-back-left': '왼쪽 팔꿈치 뒤',
-        'elbow-back-right': '오른쪽 팔꿈치 뒤',
-        'forearm-left': '왼쪽 아래팔',
-        'forearm-right': '오른쪽 아래팔',
-        'forearm-back-left': '왼쪽 아래팔 뒤',
-        'forearm-back-right': '오른쪽 아래팔 뒤',
-        'wrist-left': '왼쪽 손목',
-        'wrist-right': '오른쪽 손목',
-        'hand-left': '왼손',
-        'hand-right': '오른손',
-        
-        // 허벅지 부위
-        'thigh-front-left': '왼쪽 허벅지 앞',
-        'thigh-front-right': '오른쪽 허벅지 앞',
-        'thigh-inner-left': '왼쪽 허벅지 안쪽',
-        'thigh-inner-right': '오른쪽 허벅지 안쪽',
-        'thigh-outer-left': '왼쪽 허벅지 바깥',
-        'thigh-outer-right': '오른쪽 허벅지 바깥',
-        'thigh-back-left': '왼쪽 허벅지 뒤',
-        'thigh-back-right': '오른쪽 허벅지 뒤',
-        'hamstring-left': '왼쪽 햄스트링',
-        'hamstring-right': '오른쪽 햄스트링',
-        
-        // 무릎 부위
-        'knee-front-left': '왼쪽 무릎 앞',
-        'knee-front-right': '오른쪽 무릎 앞',
-        'knee-back-left': '왼쪽 무릎 뒤',
-        'knee-back-right': '오른쪽 무릎 뒤',
-        
-        // 정강이/종아리 부위
-        'shin-left': '왼쪽 정강이',
-        'shin-right': '오른쪽 정강이',
-        'calf-front-left': '왼쪽 종아리 앞',
-        'calf-front-right': '오른쪽 종아리 앞',
-        'calf-back-left': '왼쪽 종아리 뒤',
-        'calf-back-right': '오른쪽 종아리 뒤',
-        'achilles-left': '왼쪽 아킬레스건',
-        'achilles-right': '오른쪽 아킬레스건',
-        
-        // 발 부위
-        'ankle-left': '왼쪽 발목',
-        'ankle-right': '오른쪽 발목',
-        'foot-top-left': '왼발 등',
-        'foot-top-right': '오른발 등',
-        'heel-left': '왼쪽 발뒤꿈치',
-        'heel-right': '오른쪽 발뒤꿈치',
-        'foot-sole-left': '왼발 바닥',
-        'foot-sole-right': '오른발 바닥',
-        
-        // 기존 호환성
-        'neck': '목',
-        'neck-back': '목 뒤',
-        'shoulder-left': '왼쪽 어깨',
-        'shoulder-right': '오른쪽 어깨',
-        'shoulder-back-left': '왼쪽 어깨 뒤',
-        'shoulder-back-right': '오른쪽 어깨 뒤',
-        'chest': '가슴',
-        'upper-back': '등 상부',
-        'lower-back': '허리',
-        'abdomen': '배',
-        'buttocks': '엉덩이',
-        'thigh-left': '왼쪽 허벅지',
-        'thigh-right': '오른쪽 허벅지',
-        'knee-left': '왼쪽 무릎',
-        'knee-right': '오른쪽 무릎',
-        'arm-left': '왼쪽 팔',
-        'arm-right': '오른쪽 팔',
-        'arm-back-left': '왼쪽 팔 뒤',
-        'arm-back-right': '오른쪽 팔 뒤',
-        'calf-left': '왼쪽 종아리',
-        'calf-right': '오른쪽 종아리'
-    };
-    
-    return areaNames[area] || area;
-}
+// getAreaDisplayName는 lib/utils.js에서 import됨
 
 function clearSelection() {
     painData.selectedAreas.forEach(area => {
@@ -956,89 +643,15 @@ function showRedFlagWarning(aiReason = null) {
     painData.analysis.hasRedFlags = true;
 }
 
+// analyzeTriggerPoints와 analyzeFascialLines는 lib/analysis.js에서 import됨
+// 로컬 래퍼 함수 - painData 전역 상태를 전달
 function analyzeTriggerPoints() {
-    const recommendations = [];
-    const foundTriggerPoints = new Set(); // 중복 방지
-    
-    // 선택된 통증 부위에 대해 해당 부위에 통증을 유발하는 트리거 포인트들을 찾기
-    painData.selectedAreas.forEach(selectedArea => {
-        triggerPointsDB.forEach(triggerPoint => {
-            // 이 트리거 포인트가 선택된 부위에 통증을 유발하는지 확인
-            const causesSelectedPain = triggerPoint.painAreas.includes(selectedArea);
-            
-            if (causesSelectedPain && !foundTriggerPoints.has(triggerPoint.name)) {
-                foundTriggerPoints.add(triggerPoint.name);
-                
-                // 트리거 액션과 매칭하여 신뢰도 결정
-                const triggers = painData.questionnaire.aggravatingActions ? 
-                    painData.questionnaire.aggravatingActions.join(' ').toLowerCase() : '';
-                
-                const actionMatch = triggerPoint.triggers.some(trigger => {
-                    const triggerActions = {
-                        'sitting': ['sitting', 'computer-work'],
-                        'stress': ['stress'],
-                        'poor-posture': ['bending', 'reaching'],
-                        'computer-work': ['sitting', 'computer-work'],
-                        'heavy-lifting': ['lifting', 'carrying'],
-                        'sleeping-position': ['sleeping'],
-                        'prolonged-sitting': ['sitting'],
-                        'forward-head-posture': ['computer-work', 'reading']
-                    };
-                    
-                    const matchingActions = triggerActions[trigger] || [];
-                    return matchingActions.some(action => triggers.includes(action));
-                });
-                
-                // 통증 강도 고려
-                const intensityMatch = painData.questionnaire.nrs >= 6;
-                
-                let confidence = 'low';
-                if (actionMatch && intensityMatch) {
-                    confidence = 'high';
-                } else if (actionMatch || intensityMatch) {
-                    confidence = 'medium';
-                }
-                
-                recommendations.push({
-                    ...triggerPoint,
-                    confidence: confidence,
-                    matchReason: actionMatch ? 'trigger-action-match' : 'pain-area-match'
-                });
-            }
-        });
-    });
-    
-    // 신뢰도순으로 정렬 (high > medium > low)
-    const confidenceOrder = { 'high': 3, 'medium': 2, 'low': 1 };
-    recommendations.sort((a, b) => confidenceOrder[b.confidence] - confidenceOrder[a.confidence]);
-    
-    return recommendations;
+    return analyzeTriggerPointsLib(painData.selectedAreas, painData.questionnaire);
 }
 
 function analyzeFascialLines() {
-    const recommendations = [];
-    
-    // 선택된 부위를 기반으로 관련 근막 경선 찾기
-    Object.keys(fascialLinesDB).forEach(lineKey => {
-        const line = fascialLinesDB[lineKey];
-        const hasRelatedArea = line.relatedAreas.some(area => 
-            painData.selectedAreas.some(selected => 
-                mapAreaToGroup(selected) === area
-            )
-        );
-        
-        if (hasRelatedArea) {
-            recommendations.push({
-                ...line,
-                key: lineKey
-            });
-        }
-    });
-    
-    return recommendations;
+    return analyzeFascialLinesLib(painData.selectedAreas);
 }
-
-// mapAreaToGroup 함수 제거 - 이제 직접 painAreas 배열로 매칭
 
 function displayAnalysisResults() {
     if (painData.analysis.hasRedFlags) return;
@@ -1080,142 +693,7 @@ function displayAIAnalysis() {
     analysisContainer.insertBefore(aiSection, analysisContainer.firstChild);
 }
 
-function formatAIResponse(response) {
-    // AI 응답을 HTML로 포맷팅 (마크다운 지원)
-    // 문자열이 아닌 경우 처리
-    if (typeof response !== 'string') {
-        if (response && typeof response === 'object') {
-            // 객체인 경우 JSON.stringify로 변환
-            response = JSON.stringify(response, null, 2);
-        } else {
-            // 기타 타입인 경우 String으로 변환
-            response = String(response || '');
-        }
-    }
-    
-    // 빈 문자열 체크
-    if (!response || response.trim() === '') {
-        return '<p>AI 분석 결과를 받지 못했습니다. 다시 시도해주세요.</p>';
-    }
-    
-    // 마크다운 표를 단계별 카드로 변환
-    function convertTableToSteps(text) {
-        const lines = text.split('\n');
-        let result = '';
-        let tableLines = [];
-        let inTable = false;
-        
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            
-            if (line.startsWith('|') && line.endsWith('|')) {
-                // 구분선 스킵
-                if (line.match(/^\|[\s\-:|]+\|$/)) {
-                    continue;
-                }
-                
-                if (!inTable) {
-                    inTable = true;
-                    tableLines = [line];
-                } else {
-                    tableLines.push(line);
-                }
-            } else {
-                // 표 끝
-                if (inTable && tableLines.length > 1) {
-                    // 헤더와 데이터 분리
-                    const headerLine = tableLines[0];
-                    const dataLines = tableLines.slice(1);
-                    
-                    // 헤더 파싱
-                    const headers = headerLine.slice(1, -1).split('|').map(h => h.trim());
-                    
-                    // 단계별 카드 생성
-                    let stepsHtml = '<div class="massage-steps">';
-                    
-                    dataLines.forEach((dataLine, index) => {
-                        const cells = dataLine.slice(1, -1).split('|').map(c => c.trim());
-                        
-                        stepsHtml += `
-                            <div class="step-card">
-                                <div class="step-number">단계 ${index + 1}</div>
-                                <div class="step-content">
-                                    <div class="step-method"><strong>방법:</strong> ${cells[1] || ''}</div>
-                                    <div class="step-time"><strong>시간:</strong> ${cells[2] || ''}</div>
-                                    <div class="step-note"><strong>주의:</strong> ${cells[3] || ''}</div>
-                                </div>
-                            </div>`;
-                    });
-                    
-                    stepsHtml += '</div>';
-                    result += stepsHtml + '\n';
-                    
-                    inTable = false;
-                    tableLines = [];
-                } else if (inTable) {
-                    inTable = false;
-                    tableLines = [];
-                }
-                
-                result += line + '\n';
-            }
-        }
-        
-        return result;
-    }
-    
-    // 표를 단계별 카드로 변환
-    response = convertTableToSteps(response);
-    
-    return response
-        // 마크다운 헤딩
-        .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-        
-        // 인용문 (> 로 시작)
-        .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
-        
-        // 불릿 포인트
-        .replace(/^• (.*$)/gm, '<li>$1</li>')
-        .replace(/^- (.*$)/gm, '<li>$1</li>')
-        .replace(/^\* (.*$)/gm, '<li>$1</li>')
-        
-        // 볼드 텍스트
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        
-        // 이탤릭 텍스트
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        
-        // 인라인 코드
-        .replace(/`(.*?)`/g, '<code>$1</code>')
-        
-        // 리스트 래핑 (연속된 li들을 ul로 감싸기)
-        .replace(/(<li>.*?<\/li>)(\s*<li>.*?<\/li>)*/gs, '<ul class="markdown-list">$&</ul>')
-        
-        // 연속된 줄바꿈만 단락으로 변환 (2개 이상의 줄바꿈)
-        .replace(/\n\s*\n\s*/g, '</p><p>')
-        
-        // 단일 줄바꿈은 공백으로 변환 (불필요한 <br> 제거)
-        .replace(/\n/g, ' ')
-        
-        // 문단 래핑
-        .replace(/^(.)/gm, '<p>$1')
-        .replace(/(.)$/gm, '$1</p>')
-        
-        // 태그 정리
-        .replace(/<p>(<h[1-6]>)/g, '$1')
-        .replace(/(<\/h[1-6]>)<\/p>/g, '$1')
-        .replace(/<p>(<table)/g, '$1')
-        .replace(/(<\/table>)<\/p>/g, '$1')
-        .replace(/<p>(<ul)/g, '$1')
-        .replace(/(<\/ul>)<\/p>/g, '$1')
-        .replace(/<p>(<blockquote)/g, '$1')
-        .replace(/(<\/blockquote>)<\/p>/g, '$1')
-        
-        // 빈 문단 정리
-        .replace(/<p><\/p>/g, '');
-}
+// formatAIResponse는 lib/utils.js에서 import됨
 
 function createTriggerPointElement(tp) {
     const div = document.createElement('div');
@@ -1300,17 +778,7 @@ function createFascialLineElement(line) {
     return div;
 }
 
-function getLocationDescription(location) {
-    const descriptions = {
-        'neck-shoulder-junction': '목과 어깨 경계 부분',
-        'skull-base': '머리 뒤쪽 경계선',
-        'shoulder-blade-top': '어깨 날개뼈 위쪽',
-        'between-shoulder-blades': '양쪽 어깨 날개뼈 사이',
-        'lower-back-sides': '허리 양쪽'
-    };
-    
-    return descriptions[location] || location;
-}
+// getLocationDescription는 lib/utils.js에서 import됨
 
 function displayMassageInstructions() {
     const container = document.getElementById('massage-steps');
@@ -1433,25 +901,36 @@ function hideLoadingIndicator() {
     }
 }
 
-function showErrorMessage(message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.innerHTML = `
-        <div class="error-content">
-            <span class="error-icon">⚠️</span>
+function showNotification(message, type = 'error') {
+    const icons = {
+        error: '⚠️',
+        warning: '⚠️',
+        info: 'ℹ️',
+        success: '✅'
+    };
+
+    const notificationDiv = document.createElement('div');
+    notificationDiv.className = `notification-message ${type}`;
+    notificationDiv.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">${icons[type] || icons.error}</span>
             <span>${message}</span>
             <button onclick="this.parentElement.parentElement.remove()">✕</button>
         </div>
     `;
-    
-    document.body.appendChild(errorDiv);
-    
+
+    document.body.appendChild(notificationDiv);
+
     // 5초 후 자동 제거
     setTimeout(() => {
-        if (errorDiv.parentNode) {
-            errorDiv.remove();
+        if (notificationDiv.parentNode) {
+            notificationDiv.remove();
         }
     }, 5000);
+}
+
+function showErrorMessage(message) {
+    showNotification(message, 'error');
 }
 
 function showAPIKeyDialog() {

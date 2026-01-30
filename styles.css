@@ -1111,6 +1111,65 @@ input[type="range"]::-webkit-slider-thumb {
     }
 }
 
+/* 토스트 알림 스타일 (showNotification) */
+.notification-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1500;
+    min-width: 300px;
+    max-width: 400px;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease-out;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+.notification-message.error {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+    color: white;
+    border-left: 4px solid #c0392b;
+}
+
+.notification-message.warning {
+    background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+    color: #856404;
+    border-left: 4px solid #f39c12;
+}
+
+.notification-message.info {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    color: white;
+    border-left: 4px solid #2980b9;
+}
+
+.notification-message.success {
+    background: linear-gradient(135deg, #00b894, #00a085);
+    color: white;
+    border-left: 4px solid #27ae60;
+}
+
+@keyframes notificationFadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+.notification-message.fade-out {
+    animation: notificationFadeOut 0.3s ease-in forwards;
+}
+
 /* AI 분석 결과 스타일 */
 .ai-analysis-section {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
