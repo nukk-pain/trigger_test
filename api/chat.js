@@ -21,12 +21,25 @@ function applyCors(req, res, env) {
     return true;
   }
 
-  if (allowedOrigins.has(origin)) {
+  if (allowedOrigins.has(origin) || isSameOriginRequest(origin, req.headers)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     return true;
   }
 
   return false;
+}
+
+function isSameOriginRequest(origin, headers = {}) {
+  const host = headers.host || headers['x-forwarded-host'];
+  if (!host) {
+    return false;
+  }
+
+  try {
+    return new URL(origin).host === host;
+  } catch (_error) {
+    return false;
+  }
 }
 
 export default async function handler(req, res) {

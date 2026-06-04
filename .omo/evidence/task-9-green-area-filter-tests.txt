@@ -1,0 +1,13 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/selection-ui.test.js tests/script.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+
+ Test Files  2 passed (2)
+      Tests  48 passed (48)
+   Start at  16:27:17
+   Duration  407ms (transform 62ms, setup 25ms, import 64ms, tests 26ms, environment 501ms)
+

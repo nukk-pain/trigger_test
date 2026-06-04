@@ -1,0 +1,13 @@
+HTTP/1.1 403 Forbidden
+X-Powered-By: Express
+Vary: Origin
+Access-Control-Allow-Methods: POST, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Content-Type: application/json; charset=utf-8
+Content-Length: 30
+ETag: W/"1e-RHzhvOpmTvwzUnJG2pxtfHaca48"
+Date: Thu, 04 Jun 2026 07:55:02 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Origin not allowed"}

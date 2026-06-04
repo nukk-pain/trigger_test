@@ -1,0 +1,36 @@
+
+> pain-guide-helper@1.0.0 test:coverage
+> vitest run --coverage
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+      Coverage enabled with v8
+
+
+ Test Files  21 passed (21)
+      Tests  223 passed (223)
+   Start at  17:21:01
+   Duration  1.33s (transform 708ms, setup 304ms, import 821ms, tests 351ms, environment 8.20s)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |    98.4 |    91.97 |   97.22 |   98.78 |                   
+ lib               |   97.22 |    95.28 |   93.93 |   97.84 |                   
+  ...st-builder.js |      50 |       50 |      50 |      50 | 7                 
+  ...own-format.js |   94.73 |     87.5 |     100 |   94.44 | 70-71             
+  ...ter-client.js |   85.71 |      100 |   66.66 |     100 |                   
+ lib/env-loader    |     100 |    85.36 |     100 |     100 |                   
+  env-loader.js    |     100 |    85.18 |     100 |     100 | 17-19,48,72       
+  usage-tracker.js |     100 |    85.71 |     100 |     100 | 61-66             
+ ...nrouter-config |     100 |    86.66 |     100 |     100 |                   
+  proxy-errors.js  |     100 |    71.42 |     100 |     100 | 8                 
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 98.4% ( 247/251 )
+Branches     : 91.97% ( 149/162 )
+Functions    : 97.22% ( 70/72 )
+Lines        : 98.78% ( 243/246 )
+================================================================================

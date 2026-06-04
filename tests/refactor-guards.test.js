@@ -110,4 +110,101 @@ describe('refactor guardrails', () => {
     expect(fs.existsSync(path.join(process.cwd(), 'api/gemini.js'))).toBe(false);
     expect(read('lib/env-loader.js')).not.toContain('/api/config');
   });
+
+  it('keeps the residual stylesheet split by feature surface', () => {
+    const index = read('index.html');
+    const residualCss = read('styles.css');
+    const imports = residualCss.trim().split(/\n+/).map(line => line.trim()).filter(Boolean);
+
+    expect(imports).toEqual([
+      '@import url("styles/controls.css");',
+      '@import url("styles/status.css");',
+      '@import url("styles/questionnaire.css");',
+      '@import url("styles/responsive.css");',
+      '@import url("styles/selection.css");',
+      '@import url("styles/guides.css");'
+    ]);
+    expect(index).not.toContain('href="styles/status.css"');
+    expect(index).not.toContain('href="styles/questionnaire.css"');
+    [
+      'styles/controls.css',
+      'styles/status.css',
+      'styles/questionnaire.css',
+      'styles/responsive.css',
+      'styles/selection.css',
+      'styles/guides.css'
+    ].forEach(cssPath => {
+      expect(fs.existsSync(path.join(process.cwd(), cssPath))).toBe(true);
+    });
+    expect(residualCss).not.toMatch(/OpenAI API|API 키 설정/);
+  });
+
+  it('keeps project docs aligned with the current OpenRouter API and data modules', async () => {
+    const agents = read('AGENTS.md');
+    const dataCodemap = read('codemaps/data.md');
+    const { triggerPointsDB } = await import('../lib/data/trigger-points.js');
+
+    expect(agents).not.toContain('api/gemini.js');
+    expect(agents).toContain('api/chat.js');
+    expect(agents).toContain('api/status.js');
+    expect(dataCodemap).toContain('lib/data/trigger-points.js');
+    expect(dataCodemap).toContain('lib/data/fascial-lines.js');
+    expect(dataCodemap).toContain('lib/data/red-flags.js');
+    expect(dataCodemap).toContain(`${triggerPointsDB.length} entries`);
+  });
+
+  it('splits selection UI state/rendering from event wiring without SVG inline styles', () => {
+    const selectionUi = read('src/browser/selection-ui.js');
+
+    expect(selectionUi.split('\n').length).toBeLessThanOrEqual(130);
+    expect(selectionUi).toContain("from './selection-state.js'");
+    expect(selectionUi).toContain("from './selection-renderer.js'");
+    expect(read('src/browser/selection-state.js')).toContain('export function toggleSelectedArea');
+    expect(read('src/browser/selection-renderer.js')).toContain('export function renderSelectedAreas');
+    expect(selectionUi).not.toMatch(/\.style\.(fill|stroke|strokeWidth|opacity|fillOpacity)\s*=/);
+    expect(selectionUi).not.toMatch(/mouseover|mouseout/);
+  });
+
+  it('splits guide step data from modal controls and uses class-based navigation state', () => {
+    const guideModal = read('src/browser/guide-modal.js');
+
+    expect(guideModal.split('\n').length).toBeLessThanOrEqual(50);
+    expect(guideModal).toContain("from './guide-controller.js'");
+    expect(read('src/browser/guide-data.js')).toContain("from './guide-steps.js'");
+    expect(read('src/browser/guide-steps.js')).toContain('export function getGuideSteps');
+    expect(read('src/browser/guide-controller.js')).toContain('export function startInteractiveGuide');
+    expect(guideModal).not.toContain('style="display: none;"');
+    expect(guideModal).not.toMatch(/\.style\.display\s*=/);
+  });
+
+  it('keeps env loader and usage tracker behind a small compatibility barrel', () => {
+    const envLoader = read('lib/env-loader.js');
+
+    expect(envLoader.split('\n').length).toBeLessThanOrEqual(30);
+    expect(envLoader).toContain("from './env-loader/env-loader.js'");
+    expect(envLoader).toContain("from './env-loader/usage-tracker.js'");
+    expect(read('lib/env-loader/env-loader.js')).toContain('export class EnvLoader');
+    expect(read('lib/env-loader/usage-tracker.js')).toContain('export class UsageTracker');
+  });
+
+  it('shares public client config payloads between local Express and Vercel handlers', () => {
+    expect(read('server.js')).toContain("require('./lib/public-env-config.cjs')");
+    expect(read('api/env.js')).toContain("require('../lib/public-env-config.cjs')");
+    expect(read('lib/client-config.cjs')).toContain('getClientEnvPayload');
+    expect(read('lib/public-env-config.cjs')).toContain('getPublicEnvPayload');
+  });
+
+  it('keeps the OpenRouter browser wrapper as a small coordinator over helper modules', () => {
+    const config = read('lib/config.js');
+
+    expect(config.split('\n').length).toBeLessThanOrEqual(90);
+    expect(config).toContain("from './openrouter-client.js'");
+    expect(config).toContain("from './chat-request-builder.js'");
+    expect(read('lib/openrouter-client.js')).toContain('export class OpenRouterClient');
+    expect(read('lib/chat-request-builder.js')).toContain('export function buildChatMessages');
+    expect(fs.existsSync(path.join(process.cwd(), 'lib/openrouter-config/runtime-options.js'))).toBe(true);
+    expect(fs.existsSync(path.join(process.cwd(), 'lib/openrouter-config/request-messages.js'))).toBe(true);
+    expect(fs.existsSync(path.join(process.cwd(), 'lib/openrouter-config/proxy-errors.js'))).toBe(true);
+    expect(fs.existsSync(path.join(process.cwd(), 'lib/openrouter-config/usage-allowance.js'))).toBe(true);
+  });
 });

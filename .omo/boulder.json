@@ -1,0 +1,16 @@
+{
+  "schema_version": 2,
+  "active_work_id": "mvp-stabilization-from-assessment",
+  "works": {
+    "mvp-stabilization-from-assessment": {
+      "work_id": "mvp-stabilization-from-assessment",
+      "active_plan": ".omo/plans/mvp-stabilization-from-assessment.md",
+      "plan_name": "mvp-stabilization-from-assessment",
+      "session_ids": [
+        "codex:019e914d-6c28-70d0-9c5a-3a97c418d75c"
+      ],
+      "status": "active",
+      "worktree_path": null
+    }
+  }
+}

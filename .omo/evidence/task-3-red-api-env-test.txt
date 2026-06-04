@@ -1,0 +1,30 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/api-env.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+ ❯ tests/api-env.test.js (4 tests | 1 failed) 5ms
+     × documents the MVP runtime env contract without exposing server-only secrets 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/api-env.test.js > api/env handler > documents the MVP runtime env contract without exposing server-only secrets
+Error: ENOENT: no such file or directory, open '.env.example'
+ ❯ tests/api-env.test.js:91:24
+     89|     };
+     90|
+     91|     const envExample = readFileSync('.env.example', 'utf8');
+       |                        ^
+     92|     const requiredKeys = [
+     93|       'OPENROUTER_API_KEY',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  16:01:55
+   Duration  373ms (transform 17ms, setup 17ms, import 10ms, tests 5ms, environment 246ms)
+

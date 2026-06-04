@@ -2,13 +2,11 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { handleChatRequest } = require('./lib/openrouter-proxy.cjs');
+const { getPublicEnvPayload } = require('./lib/public-env-config.cjs');
 const { getStatusPayload } = require('./lib/server-status.cjs');
 
 const app = express();
 const port = process.env.PORT || 3000;
-
-// Parse JSON body
-app.use(express.json());
 
 // Parse .env.local file
 function loadEnvFile() {
@@ -35,8 +33,8 @@ function loadEnvFile() {
             if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
                 console.log('📊 설정된 환경변수:');
                 Object.keys(envConfig).forEach(key => {
-                    if (key === 'OPENROUTER_API_KEY') {
-                        console.log(`   ${key}: ${envConfig[key].substring(0, 10)}...`);
+                    if (isSensitiveEnvKey(key)) {
+                        console.log(`   ${key}: [REDACTED]`);
                     } else {
                         console.log(`   ${key}: ${envConfig[key]}`);
                     }
@@ -52,42 +50,86 @@ function loadEnvFile() {
     return envConfig;
 }
 
+function isSensitiveEnvKey(key) {
+    return /(?:API_KEY|TOKEN|SECRET|PASSWORD)$/i.test(key);
+}
+
 // Load environment variables
 const envConfig = { ...process.env, ...loadEnvFile() };
 
-function getClientConfig() {
-    return {
-        DAILY_REQUEST_LIMIT: envConfig.DAILY_REQUEST_LIMIT || '50',
-        MONTHLY_REQUEST_LIMIT: envConfig.MONTHLY_REQUEST_LIMIT || '1000',
-        OPENROUTER_MODEL: envConfig.OPENROUTER_MODEL || 'openrouter/auto',
-        MAX_TOKENS: envConfig.MAX_TOKENS || '1500',
-        TEMPERATURE: envConfig.TEMPERATURE || '1',
-        ENABLE_AI_QA: envConfig.ENABLE_AI_QA || 'true',
-        ENABLE_DETAILED_ANALYSIS: envConfig.ENABLE_DETAILED_ANALYSIS || 'true',
-        OPENROUTER_SITE_URL: envConfig.OPENROUTER_SITE_URL || '',
-        OPENROUTER_APP_NAME: envConfig.OPENROUTER_APP_NAME || ''
-    };
+function parsePositiveInteger(value, fallback) {
+    const parsed = parseInt(value, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
+
+// Parse JSON body
+app.use(express.json({ limit: parsePositiveInteger(envConfig.MAX_CHAT_BODY_BYTES, 16384) }));
+
+app.use((error, req, res, next) => {
+    if (error?.type === 'entity.too.large' || error?.status === 413) {
+        res.status(413).json({
+            error: '요청 본문이 너무 큽니다.',
+            code: 'PAYLOAD_TOO_LARGE'
+        });
+        return;
+    }
+    next(error);
+});
 
 // Serve static files
 app.use(express.static(__dirname));
 
+function getAllowedOrigins(env) {
+    return new Set([
+        ...(env.ALLOWED_ORIGINS || '').split(',').map(origin => origin.trim()).filter(Boolean),
+        env.OPENROUTER_SITE_URL
+    ].filter(Boolean));
+}
+
+function isSameOriginRequest(origin, headers = {}) {
+    const host = headers.host || headers['x-forwarded-host'];
+    if (!host) return false;
+
+    try {
+        return new URL(origin).host === host;
+    } catch (_error) {
+        return false;
+    }
+}
+
+function isChatOriginAllowed(req) {
+    const origin = req.headers?.origin;
+    if (!origin) return true;
+    return getAllowedOrigins(envConfig).has(origin) || isSameOriginRequest(origin, req.headers);
+}
+
+app.use('/api/chat', (req, res, next) => {
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (!isChatOriginAllowed(req)) {
+        res.status(403).json({ error: 'Origin not allowed' });
+        return;
+    }
+
+    const origin = req.headers?.origin;
+    if (origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    next();
+});
+
 app.get('/api/env', (req, res) => {
-    const config = getClientConfig();
-    res.json({
-        success: true,
-        data: {
-            ...config,
-            MAX_TOKENS: parseInt(config.MAX_TOKENS),
-            TEMPERATURE: parseFloat(config.TEMPERATURE),
-            DAILY_LIMIT: parseInt(config.DAILY_REQUEST_LIMIT),
-            MONTHLY_LIMIT: parseInt(config.MONTHLY_REQUEST_LIMIT)
-        }
-    });
+    res.json(getPublicEnvPayload(envConfig));
 });
 
 app.get('/api/status', (req, res) => {
     res.json(getStatusPayload(envConfig));
+});
+
+app.options('/api/chat', (req, res) => {
+    res.status(200).end();
 });
 
 app.post('/api/chat', async (req, res) => {
@@ -96,6 +138,10 @@ app.post('/api/chat', async (req, res) => {
         res.setHeader(key, value);
     });
     res.status(result.status).json(result.body);
+});
+
+app.all('/api/chat', (req, res) => {
+    res.status(405).json({ error: 'Method not allowed' });
 });
 
 // Serve the main page

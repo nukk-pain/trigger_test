@@ -1,0 +1,13 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+
+ Test Files  19 passed (19)
+      Tests  209 passed (209)
+   Start at  16:27:22
+   Duration  1.11s (transform 589ms, setup 259ms, import 844ms, tests 275ms, environment 7.09s)
+

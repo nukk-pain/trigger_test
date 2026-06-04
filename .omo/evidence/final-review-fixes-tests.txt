@@ -1,0 +1,13 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/rate-limit-store.test.js tests/api-env.test.js tests/env-loader/env-loader.test.js tests/openrouter-api.test.js tests/runtime-config.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+
+ Test Files  5 passed (5)
+      Tests  64 passed (64)
+   Start at  16:45:34
+   Duration  537ms (transform 95ms, setup 63ms, import 101ms, tests 40ms, environment 1.49s)
+

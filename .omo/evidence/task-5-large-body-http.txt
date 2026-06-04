@@ -1,0 +1,10 @@
+HTTP/1.1 413 Payload Too Large
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 73
+ETag: W/"49-u5g0DojsnVa6ix+oIaKmQWiBeHk"
+Date: Thu, 04 Jun 2026 07:10:25 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"요청 본문이 너무 큽니다.","code":"PAYLOAD_TOO_LARGE"}

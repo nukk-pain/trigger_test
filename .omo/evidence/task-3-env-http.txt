@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 293
+ETag: W/"125-Mn8FcDBz85FEXv6Kg1OuuPOtf8w"
+Date: Thu, 04 Jun 2026 07:02:56 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"success":true,"data":{"DAILY_REQUEST_LIMIT":"50","MONTHLY_REQUEST_LIMIT":"1000","OPENROUTER_MODEL":"test/model","MAX_TOKENS":1500,"TEMPERATURE":1,"DAILY_LIMIT":50,"MONTHLY_LIMIT":1000,"ENABLE_AI_QA":"true","ENABLE_DETAILED_ANALYSIS":"true","OPENROUTER_SITE_URL":"","OPENROUTER_APP_NAME":""}}

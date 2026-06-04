@@ -1,0 +1,13 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/manual-qa-script.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  16:36:06
+   Duration  651ms (transform 49ms, setup 50ms, import 13ms, tests 2ms, environment 448ms)
+

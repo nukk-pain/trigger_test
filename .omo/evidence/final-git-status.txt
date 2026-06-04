@@ -1,0 +1,74 @@
+ M .gitignore
+ M CLAUDE.md
+ M README.md
+ M api/chat.js
+ M api/env.js
+ M index.html
+ M lib/config.js
+ M lib/env-loader.js
+ M lib/openrouter-proxy.cjs
+ M lib/prompts.js
+ M lib/server-status.cjs
+ M package-lock.json
+ M package.json
+ M server.js
+ M src/browser/analysis-flow.js
+ M src/browser/analysis-renderer.js
+ M src/browser/app.js
+ M src/browser/guide-modal.js
+ M src/browser/selection-ui.js
+ M styles.css
+ M styles/analysis.css
+ M tests/analysis-flow.test.js
+ M tests/api-env.test.js
+ M tests/env-loader/env-loader.test.js
+ M tests/openrouter-api.test.js
+ M tests/prompts.test.js
+ M tests/refactor-guards.test.js
+ M tests/server-routes.test.js
+ M vitest.config.js
+?? .env.example
+?? .github/
+?? .omo/boulder.json
+?? .omo/evidence/
+?? .omo/plans/mvp-stabilization-from-assessment.md
+?? .omo/plans/next10-followup-refactors.md
+?? .omo/plans/refactor-next10.md
+?? .omo/start-work/
+?? AGENTS.md
+?? codemaps/data.md
+?? lib/chat-request-builder.js
+?? lib/chat-validation.cjs
+?? lib/client-config.cjs
+?? lib/env-loader/
+?? lib/openrouter-client.js
+?? lib/openrouter-config/
+?? lib/public-env-config.cjs
+?? lib/rate-limit-store.cjs
+?? playwright.config.js
+?? scripts/
+?? src/browser/guide-controller.js
+?? src/browser/guide-data.js
+?? src/browser/guide-steps.js
+?? src/browser/mvp-area-support.js
+?? src/browser/red-flags.js
+?? src/browser/selection-events.js
+?? src/browser/selection-renderer.js
+?? src/browser/selection-state.js
+?? src/browser/structured-guidance.js
+?? styles/controls.css
+?? styles/guides.css
+?? styles/questionnaire.css
+?? styles/responsive.css
+?? styles/selection.css
+?? styles/status.css
+?? tests/analysis-renderer.test.js
+?? tests/chat-validation.test.js
+?? tests/deployment-readiness.test.js
+?? tests/e2e/
+?? tests/guide-modal.test.js
+?? tests/manual-qa-script.test.js
+?? tests/openrouter-config.test.js
+?? tests/rate-limit-store.test.js
+?? tests/selection-ui.test.js
+?? vercel.json

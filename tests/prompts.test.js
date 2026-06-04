@@ -12,4 +12,12 @@ describe('MEDICAL_PROMPTS', () => {
     expect(MEDICAL_PROMPTS.PAIN_ANALYSIS).toContain('의사 전문 진료 권유');
     expect(MEDICAL_PROMPTS.AI_QUESTION).toContain('의학적 진단은 하지 말고');
   });
+
+  it('requires the pain analysis prompt to return the structured JSON contract', () => {
+    expect(MEDICAL_PROMPTS.PAIN_ANALYSIS).toContain('JSON');
+    for (const key of ['targetMuscles', 'summary', 'steps', 'stopIf', 'seekCareIf', 'disclaimer']) {
+      expect(MEDICAL_PROMPTS.PAIN_ANALYSIS).toContain(key);
+    }
+    expect(MEDICAL_PROMPTS.PAIN_ANALYSIS).toContain('최대 4');
+  });
 });

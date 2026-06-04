@@ -1,0 +1,39 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/selection-ui.test.js tests/script.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+ ❯ tests/selection-ui.test.js (2 tests | 1 failed) 23ms
+     × keeps unsupported MVP areas out of selection and shows a notice 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/selection-ui.test.js > selection UI > keeps unsupported MVP areas out of selection and shows a notice
+AssertionError: expected [ 'wrist-left' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "wrist-left",
++ ]
+
+ ❯ tests/selection-ui.test.js:53:45
+     51|     }));
+     52|
+     53|     expect(appState.painData.selectedAreas).toEqual([]);
+       |                                             ^
+     54|     expect(document.querySelector('[data-area="wrist-left"]').classLis…
+     55|     expect(document.getElementById('mvp-area-notice').textContent).toC…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 47 passed (48)
+   Start at  16:26:53
+   Duration  407ms (transform 60ms, setup 26ms, import 61ms, tests 29ms, environment 490ms)
+

@@ -1,0 +1,87 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/rate-limit-store.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+ ❯ tests/rate-limit-store.test.js (5 tests | 4 failed) 6ms
+     × normalizes forwarded client IPs before building limiter keys 3ms
+     × uses Upstash REST counters without persisting API keys or prompt text 0ms
+     × fails closed in production when durable Upstash configuration is missing 1ms
+     × enforces estimated daily token budget before upstream calls 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/rate-limit-store.test.js > durable rate limit store adapter > normalizes forwarded client IPs before building limiter keys
+AssertionError: expected '203.0.113.10, 10.0.0.1' to be '203.0.113.10' // Object.is equality
+
+Expected: "203.0.113.10"
+Received: "203.0.113.10, 10.0.0.1"
+
+ ❯ tests/rate-limit-store.test.js:20:9
+     18|       headers: { 'x-forwarded-for': '203.0.113.10, 10.0.0.1' },
+     19|       socket: { remoteAddress: '127.0.0.1' }
+     20|     })).toBe('203.0.113.10');
+       |         ^
+     21|
+     22|     expect(getClientKey({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/rate-limit-store.test.js > durable rate limit store adapter > uses Upstash REST counters without persisting API keys or prompt text
+AssertionError: expected "vi.fn()" to be called 2 times, but got 0 times
+ ❯ tests/rate-limit-store.test.js:85:23
+     83|
+     84|     expect(result.allowed).toBe(true);
+     85|     expect(fetchImpl).toHaveBeenCalledTimes(2);
+       |                       ^
+     86|     expect(fetchImpl.mock.calls[0][0]).toBe('https://redis.example/pip…
+     87|     expect(fetchImpl.mock.calls[0][1].headers.Authorization).toBe('Bea…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/rate-limit-store.test.js > durable rate limit store adapter > fails closed in production when durable Upstash configuration is missing
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/rate-limit-store.test.js:105:28
+    103|     }, new Date('2026-06-01T12:00:00.000Z'), vi.fn());
+    104|
+    105|     expect(result.allowed).toBe(false);
+       |                            ^
+    106|     expect(result.status).toBe(503);
+    107|     expect(result.body).toMatchObject({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/rate-limit-store.test.js > durable rate limit store adapter > enforces estimated daily token budget before upstream calls
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/rate-limit-store.test.js:127:28
+    125|     }, req, new Date('2026-06-01T12:00:00.000Z'));
+    126|
+    127|     expect(result.allowed).toBe(false);
+       |                            ^
+    128|     expect(result.body).toMatchObject({
+    129|       exhaustedWindow: 'dailyTokens',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 1 passed (5)
+   Start at  16:13:43
+   Duration  363ms (transform 12ms, setup 12ms, import 6ms, tests 6ms, environment 238ms)
+

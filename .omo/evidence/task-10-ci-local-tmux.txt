@@ -1,0 +1,39 @@
+
+added 179 packages, and audited 180 packages in 724ms
+
+42 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+> pain-guide-helper@1.0.0 test
+> vitest run
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+
+ Test Files  20 passed (20)
+      Tests  212 passed (212)
+   Start at  16:32:54
+   Duration  1.17s (transform 752ms, setup 358ms, import 952ms, tests 242ms, environment 7.71s)
+
+
+> pain-guide-helper@1.0.0 test:e2e
+> PORT=3104 playwright test
+
+(node:48369) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:48406) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:48406) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(node:48406) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/homepage-smoke.spec.js:4:1 › homepage smoke shows the AI self massage guide heading (435ms)
+
+  1 passed (1.2s)
+found 0 vulnerabilities
+TASK10_CI_EXIT:0

@@ -39,6 +39,46 @@
     font-size: 1.3rem;
 }
 
+.medical-safety-notice {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-left: 4px solid #ea580c;
+    border-radius: 8px;
+    color: #7c2d12;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+}
+
+.medical-safety-notice p {
+    margin: 6px 0;
+}
+
+.structured-section {
+    margin-top: 16px;
+}
+
+.structured-steps {
+    display: grid;
+    gap: 12px;
+}
+
+.structured-step-card {
+    background: white;
+    border: 1px solid #d7e3ea;
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.structured-disclaimer {
+    color: #6b3f13;
+    font-weight: 600;
+    margin-top: 16px;
+}
+
+.fallback-guidance {
+    border-left: 4px solid #d97706;
+}
+
 /* 가이드 카드 */
 .trigger-point-card,
 .fascial-line-card {

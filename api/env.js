@@ -1,3 +1,8 @@
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const { getPublicEnvPayload } = require('../lib/public-env-config.cjs');
+
 export default function handler(req, res) {
     // CORS 헤더 설정
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,21 +20,8 @@ export default function handler(req, res) {
     }
 
     try {
-        // Vercel 환경변수에서 로드
-        const envData = {
-            OPENROUTER_MODEL: process.env.OPENROUTER_MODEL || 'openrouter/auto',
-            MAX_TOKENS: parseInt(process.env.MAX_TOKENS || '1500'),
-            TEMPERATURE: parseFloat(process.env.TEMPERATURE || '1'),
-            DAILY_LIMIT: parseInt(process.env.DAILY_REQUEST_LIMIT || '50'),
-            MONTHLY_LIMIT: parseInt(process.env.MONTHLY_REQUEST_LIMIT || '1000'),
-            ENABLE_AI_QA: process.env.ENABLE_AI_QA || 'true',
-            ENABLE_DETAILED_ANALYSIS: process.env.ENABLE_DETAILED_ANALYSIS || 'true',
-            OPENROUTER_SITE_URL: process.env.OPENROUTER_SITE_URL || '',
-            OPENROUTER_APP_NAME: process.env.OPENROUTER_APP_NAME || ''
-        };
-
         console.log('✅ Vercel에서 환경변수를 성공적으로 로드했습니다.');
-        res.status(200).json({ success: true, data: envData });
+        res.status(200).json(getPublicEnvPayload(process.env));
 
     } catch (error) {
         console.error('❌ 환경변수 로드 실패:', error);

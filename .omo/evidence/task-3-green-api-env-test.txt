@@ -1,0 +1,13 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/api-env.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  16:02:39
+   Duration  364ms (transform 15ms, setup 15ms, import 10ms, tests 3ms, environment 242ms)
+

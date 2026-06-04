@@ -133,8 +133,8 @@ describe('EnvLoader', () => {
       expect(envLoader.getDailyLimit()).toBe(100);
     });
 
-    it('should return default 50 when not configured', () => {
-      expect(envLoader.getDailyLimit()).toBe(50);
+    it('should return default 20 when not configured', () => {
+      expect(envLoader.getDailyLimit()).toBe(20);
     });
   });
 
@@ -144,8 +144,8 @@ describe('EnvLoader', () => {
       expect(envLoader.getMonthlyLimit()).toBe(2000);
     });
 
-    it('should return default 1000 when not configured', () => {
-      expect(envLoader.getMonthlyLimit()).toBe(1000);
+    it('should return default 200 when not configured', () => {
+      expect(envLoader.getMonthlyLimit()).toBe(200);
     });
   });
 
@@ -155,8 +155,8 @@ describe('EnvLoader', () => {
       expect(envLoader.getModel()).toBe('anthropic/claude-sonnet-4.5');
     });
 
-    it('should return default model when not configured', () => {
-      expect(envLoader.getModel()).toBe('openrouter/auto');
+    it('should return empty model when not configured', () => {
+      expect(envLoader.getModel()).toBe('');
     });
   });
 
@@ -166,8 +166,8 @@ describe('EnvLoader', () => {
       expect(envLoader.getMaxTokens()).toBe(4000);
     });
 
-    it('should return default 1500 when not configured', () => {
-      expect(envLoader.getMaxTokens()).toBe(1500);
+    it('should return default 800 when not configured', () => {
+      expect(envLoader.getMaxTokens()).toBe(800);
     });
   });
 
@@ -193,8 +193,8 @@ describe('EnvLoader', () => {
       expect(envLoader.isAIQAEnabled()).toBe(false);
     });
 
-    it('should return true by default', () => {
-      expect(envLoader.isAIQAEnabled()).toBe(true);
+    it('should return false by default', () => {
+      expect(envLoader.isAIQAEnabled()).toBe(false);
     });
   });
 
@@ -225,13 +225,22 @@ describe('EnvLoader', () => {
       expect(envLoader.config.OPENROUTER_MODEL).toBe('openrouter/auto');
     });
 
-    it('should not load server proxy from localStorage', () => {
-      const savedConfig = { OPENROUTER_API_KEY: 'sk-secret', DAILY_REQUEST_LIMIT: '75' };
+    it('should not load server-only secrets from localStorage', () => {
+      const savedConfig = {
+        OPENROUTER_API_KEY: 'sk-secret',
+        UPSTASH_REDIS_REST_TOKEN: 'redis-secret',
+        PRIVATE_SECRET: 'secret',
+        DB_PASSWORD: 'password',
+        DAILY_REQUEST_LIMIT: '75'
+      };
       localStorage.getItem.mockReturnValue(JSON.stringify(savedConfig));
 
       envLoader.loadFromLocalStorage();
 
       expect(envLoader.config.OPENROUTER_API_KEY).toBeUndefined();
+      expect(envLoader.config.UPSTASH_REDIS_REST_TOKEN).toBeUndefined();
+      expect(envLoader.config.PRIVATE_SECRET).toBeUndefined();
+      expect(envLoader.config.DB_PASSWORD).toBeUndefined();
       expect(envLoader.config.DAILY_REQUEST_LIMIT).toBe('75');
     });
 
@@ -249,10 +258,13 @@ describe('EnvLoader', () => {
   });
 
   describe('saveToLocalStorage', () => {
-    it('should save config without server proxy', () => {
+    it('should save config without server-only secrets', () => {
       envLoader.config = {
         OPENAI_API_KEY: 'sk-secret',
         OPENROUTER_API_KEY: 'sk-or-secret',
+        UPSTASH_REDIS_REST_TOKEN: 'redis-secret',
+        PRIVATE_SECRET: 'secret',
+        DB_PASSWORD: 'password',
         DAILY_REQUEST_LIMIT: '75',
         OPENROUTER_MODEL: 'openrouter/auto'
       };
@@ -264,6 +276,9 @@ describe('EnvLoader', () => {
 
       expect(savedConfig.OPENAI_API_KEY).toBeUndefined();
       expect(savedConfig.OPENROUTER_API_KEY).toBeUndefined();
+      expect(savedConfig.UPSTASH_REDIS_REST_TOKEN).toBeUndefined();
+      expect(savedConfig.PRIVATE_SECRET).toBeUndefined();
+      expect(savedConfig.DB_PASSWORD).toBeUndefined();
       expect(savedConfig.DAILY_REQUEST_LIMIT).toBe('75');
       expect(savedConfig.OPENROUTER_MODEL).toBe('openrouter/auto');
     });

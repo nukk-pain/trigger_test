@@ -1,0 +1,66 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/analysis-flow.test.js tests/prompts.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+ ❯ tests/analysis-flow.test.js (10 tests | 7 failed) 23ms
+     × detects deterministic red flag text: breathing trouble 3ms
+     × detects deterministic red flag text: fever 1ms
+     × detects deterministic red flag text: trauma 1ms
+     × detects deterministic red flag text: severe numbness 0ms
+     × detects deterministic red flag text: bowel/bladder changes 1ms
+     × detects deterministic red flag text: rapidly worsening pain 1ms
+     × shows non-diagnosis, stop, and care-seeking copy on safe AI results 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/analysis-flow.test.js > analysis flow safety handling > detects deterministic red flag text: breathing trouble
+ FAIL  tests/analysis-flow.test.js > analysis flow safety handling > detects deterministic red flag text: fever
+ FAIL  tests/analysis-flow.test.js > analysis flow safety handling > detects deterministic red flag text: trauma
+ FAIL  tests/analysis-flow.test.js > analysis flow safety handling > detects deterministic red flag text: severe numbness
+ FAIL  tests/analysis-flow.test.js > analysis flow safety handling > detects deterministic red flag text: bowel/bladder changes
+ FAIL  tests/analysis-flow.test.js > analysis flow safety handling > detects deterministic red flag text: rapidly worsening pain
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/analysis-flow.test.js:55:58
+     53|     appState.painData.questionnaire.painDescription = description;
+     54|
+     55|     expect(analysisFallbacks.hasQuestionnaireRedFlags()).toBe(true);
+       |                                                          ^
+     56|   });
+     57|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  tests/analysis-flow.test.js > analysis flow safety handling > shows non-diagnosis, stop, and care-seeking copy on safe AI results
+AssertionError: expected '' to contain '이 도구는 진단이 아니며'
+
+- Expected
++ Received
+
+- 이 도구는 진단이 아니며
+
+ ❯ tests/analysis-flow.test.js:67:24
+     65|
+     66|     const resultText = document.getElementById('massage-guide').textCo…
+     67|     expect(resultText).toContain('이 도구는 진단이 아니며');
+       |                        ^
+     68|     expect(resultText).toContain('중단');
+     69|     expect(resultText).toContain('의료기관');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  7 failed | 5 passed (12)
+   Start at  16:17:22
+   Duration  437ms (transform 59ms, setup 33ms, import 56ms, tests 25ms, environment 500ms)
+

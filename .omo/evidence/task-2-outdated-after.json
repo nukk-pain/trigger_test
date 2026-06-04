@@ -1,0 +1,9 @@
+{
+  "express": {
+    "current": "4.22.2",
+    "wanted": "4.22.2",
+    "latest": "5.2.1",
+    "dependent": "trigger_test",
+    "location": "/Users/smpain/Developer/github.com/trigger_test/node_modules/express"
+  }
+}

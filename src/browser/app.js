@@ -1,6 +1,6 @@
 // 모듈에서 필요한 함수 import
 import { appState, resetPainData } from './app-state.js';
-import { analyzePain } from './analysis-flow.js';
+import { analyzePain, analysisFallbacks } from './analysis-flow.js';
 import { setupAIEventListeners, setupDynamicFormEvents, updateAIStatus } from './ai-question.js';
 import { configureGuideModal } from './guide-modal.js';
 import {
@@ -93,8 +93,14 @@ function showStartupError(message) {
 function setupEventListeners() {
     // 1단계 (부위 선택 + 동작 선택) -> 3단계 (분석)
     document.getElementById('analyze-pain').addEventListener('click', function() {
+        collectActionData();
+        if (analysisFallbacks.hasQuestionnaireRedFlags()) {
+            analyzePain();
+            goToStep(2);
+            return;
+        }
+
         if (validateStep1()) {
-            collectActionData();
             analyzePain();
             goToStep(2);
         }

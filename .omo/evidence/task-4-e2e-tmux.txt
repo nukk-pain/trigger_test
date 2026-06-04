@@ -1,0 +1,44 @@
+npm run test:e2e; echo "npm run test:e2e exit: $?"; npm test; echo "npm test exi
+t: $?"; touch .omo/evidence/task-4-e2e.done; echo __DONE__
+smpain@smpain trigger_test % npm run test:e2e; echo "npm run test:e2e exit: $?";
+ npm test; echo "npm test exit: $?"; touch .omo/evidence/task-4-e2e.done; echo _
+_DONE__
+
+> pain-guide-helper@1.0.0 test:e2e
+> PORT=3104 playwright test
+
+(node:7756) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use
+ `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:7792) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env
+being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7792) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use
+ `module.registerHooks()` instead.
+(node:7792) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env
+being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 ….js:4:1 › homepage smoke shows the AI self massage guide heading (452ms)
+
+  1 passed (1.2s)
+npm run test:e2e exit: 0
+
+> pain-guide-helper@1.0.0 test
+> vitest run
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+
+ Test Files  16 passed (16)
+      Tests  180 passed (180)
+   Start at  16:06:37
+   Duration  997ms (transform 565ms, setup 267ms, import 684ms, tests 190ms, env
+ironment 5.73s)
+
+npm test exit: 0
+__DONE__
+smpain@smpain trigger_test %

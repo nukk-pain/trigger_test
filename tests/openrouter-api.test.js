@@ -4,7 +4,7 @@ import envHandler from '../api/env.js';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { resetUsage } = require('../lib/openrouter-proxy.cjs');
+const { checkRateLimit, getUsageBucket, resetUsage } = require('../lib/openrouter-proxy.cjs');
 
 function createResponse() {
   const response = {
@@ -177,6 +177,30 @@ describe('OpenRouter chat API', () => {
     expect(res.headers['Access-Control-Allow-Origin']).toBe('https://pain-guide.test');
   });
 
+  it('allows default same-origin browser requests without explicit origin config', async () => {
+    delete process.env.ALLOWED_ORIGINS;
+    delete process.env.OPENROUTER_SITE_URL;
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ choices: [{ message: { content: 'ok' } }] })
+    });
+
+    const req = {
+      method: 'POST',
+      headers: {
+        origin: 'https://pain-guide.test',
+        host: 'pain-guide.test'
+      },
+      body: { messages: [{ role: 'user', content: '목 통증' }] }
+    };
+    const res = createResponse();
+
+    await chatHandler(req, res);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.headers['Access-Control-Allow-Origin']).toBe('https://pain-guide.test');
+  });
+
   it('enforces server-side daily request limit', async () => {
     process.env.DAILY_REQUEST_LIMIT = '1';
     process.env.SERVER_RATE_LIMIT_MAX = '1';
@@ -205,11 +229,86 @@ describe('OpenRouter chat API', () => {
     expect(second.statusCode).toBe(429);
     expect(second.body.error).toContain('서버 사용량 한도');
     expect(second.body).toMatchObject({
+      exhaustedWindow: 'daily',
       retryAfterSeconds: 60,
       limit: 1,
       windowSeconds: 60
     });
     expect(second.headers['Retry-After']).toBe('60');
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('tracks daily and monthly request windows independently', () => {
+    const clientKey = '203.0.113.42';
+    const juneFirst = new Date('2026-06-01T12:00:00.000Z');
+    const juneSecond = new Date('2026-06-02T12:00:00.000Z');
+    const julyFirst = new Date('2026-07-01T12:00:00.000Z');
+
+    const firstDay = getUsageBucket(clientKey, juneFirst);
+    firstDay.record();
+    firstDay.record();
+
+    const secondDay = getUsageBucket(clientKey, juneSecond);
+    expect(secondDay.daily).toBe(0);
+    expect(secondDay.monthly).toBe(2);
+    secondDay.record();
+
+    const nextMonth = getUsageBucket(clientKey, julyFirst);
+    expect(nextMonth.daily).toBe(0);
+    expect(nextMonth.monthly).toBe(0);
+  });
+
+  it('names daily and monthly rate-limit exhaustion windows', async () => {
+    const req = { headers: { 'x-forwarded-for': '203.0.113.43' } };
+    const juneFirst = new Date('2026-06-01T12:00:00.000Z');
+    const juneSecond = new Date('2026-06-02T12:00:00.000Z');
+
+    const dailyEnv = { SERVER_RATE_LIMIT_MAX: '1', MONTHLY_REQUEST_LIMIT: '10' };
+    const firstDaily = await checkRateLimit(dailyEnv, req, juneFirst);
+    await firstDaily.record();
+    const secondDaily = await checkRateLimit(dailyEnv, req, juneFirst);
+    expect(secondDaily.allowed).toBe(false);
+    expect(secondDaily.body).toMatchObject({
+      exhaustedWindow: 'daily',
+      limit: 1
+    });
+
+    resetUsage();
+    const monthlyEnv = { SERVER_RATE_LIMIT_MAX: '10', MONTHLY_REQUEST_LIMIT: '2' };
+    await (await checkRateLimit(monthlyEnv, req, juneFirst)).record();
+    await (await checkRateLimit(monthlyEnv, req, juneFirst)).record();
+    const thirdMonthly = await checkRateLimit(monthlyEnv, req, juneSecond);
+    expect(thirdMonthly.allowed).toBe(false);
+    expect(thirdMonthly.body).toMatchObject({
+      exhaustedWindow: 'monthly',
+      limit: 2
+    });
+  });
+
+  it('falls back to sane server rate-limit defaults for malformed env values', async () => {
+    const req = { headers: { 'x-forwarded-for': '203.0.113.44' } };
+    const result = await checkRateLimit({
+      SERVER_RATE_LIMIT_MAX: 'not-a-number',
+      DAILY_REQUEST_LIMIT: 'also-bad',
+      MONTHLY_REQUEST_LIMIT: 'bad',
+      SERVER_RATE_LIMIT_WINDOW_SECONDS: 'bad'
+    }, req, new Date('2026-06-01T12:00:00.000Z'));
+
+    expect(result.allowed).toBe(true);
+    for (let i = 0; i < 20; i += 1) {
+      await (await checkRateLimit({}, req, new Date('2026-06-01T12:00:00.000Z'))).record();
+    }
+
+    const exhausted = await checkRateLimit({
+      SERVER_RATE_LIMIT_MAX: 'not-a-number',
+      MONTHLY_REQUEST_LIMIT: 'bad',
+      SERVER_RATE_LIMIT_WINDOW_SECONDS: 'bad'
+    }, req, new Date('2026-06-01T12:00:00.000Z'));
+    expect(exhausted.allowed).toBe(false);
+    expect(exhausted.body).toMatchObject({
+      exhaustedWindow: 'daily',
+      limit: 20,
+      retryAfterSeconds: 86400
+    });
   });
 });

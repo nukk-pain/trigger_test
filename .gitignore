@@ -2,6 +2,7 @@
 .env.local
 .env
 .env.*
+!.env.example
 
 # Node modules
 node_modules/
@@ -26,6 +27,12 @@ pids
 
 # Coverage directory used by tools like istanbul
 coverage/
+
+# Local docs and repo assessments
+docs/
+
+# Local agent evidence
+.omo/ulw-loop/
 
 # Vercel
 .vercel

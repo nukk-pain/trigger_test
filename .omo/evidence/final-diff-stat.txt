@@ -1,0 +1,27 @@
+ .gitignore                       |    7 +
+ CLAUDE.md                        |   11 +-
+ README.md                        |  121 +-
+ api/chat.js                      |   15 +-
+ api/env.js                       |   20 +-
+ index.html                       |    7 +-
+ lib/config.js                    |   95 +-
+ lib/env-loader.js                |  250 +----
+ lib/openrouter-proxy.cjs         |  111 +-
+ lib/prompts.js                   |   45 +-
+ package-lock.json                | 2228 +++++++++++++++++-------------------
+ package.json                     |   13 +-
+ server.js                        |   49 +-
+ src/browser/analysis-flow.js     |   28 +-
+ src/browser/analysis-renderer.js |   36 +-
+ src/browser/guide-modal.js       |  203 +---
+ src/browser/selection-ui.js      |  201 +---
+ styles.css                       | 2306 +-------------------------------------
+ styles/analysis.css              |   40 +
+ tests/analysis-flow.test.js      |   42 +-
+ tests/api-env.test.js            |   70 ++
+ tests/openrouter-api.test.js     |  101 +-
+ tests/prompts.test.js            |    8 +
+ tests/refactor-guards.test.js    |   97 ++
+ tests/server-routes.test.js      |   69 ++
+ vitest.config.js                 |    3 +-
+ 26 files changed, 1733 insertions(+), 4443 deletions(-)

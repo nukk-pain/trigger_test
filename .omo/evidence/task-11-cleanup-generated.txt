@@ -1,0 +1,2 @@
+ls: playwright-report: No such file or directory
+ls: test-results: No such file or directory

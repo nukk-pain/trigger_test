@@ -1,0 +1,46 @@
+git status --short > .omo/evidence/task-1-git-status.txt; echo '--- git status c
+aptured ---'; npm test; echo "npm test exit: $?"; npm audit --json > .omo/eviden
+ce/task-1-audit.json; echo "npm audit exit: $?"; npm outdated --json > .omo/evid
+ence/task-1-outdated.json; echo "npm outdated exit: $?"; touch .omo/evidence/tas
+k-1-baseline.done; echo __DONE__
+smpain@smpain trigger_test % git status --short > .omo/evidence/task-1-git-statu
+s.txt; echo '--- git status captured ---'; npm test; echo "npm test exit: $?"; n
+pm audit --json > .omo/evidence/task-1-audit.json; echo "npm audit exit: $?"; np
+m outdated --json > .omo/evidence/task-1-outdated.json; echo "npm outdated exit:
+ $?"; touch .omo/evidence/task-1-baseline.done; echo __DONE__
+--- git status captured ---
+
+> pain-guide-helper@1.0.0 test
+> vitest run
+
+
+ RUN  v4.0.18 /Users/smpain/Developer/github.com/trigger_test
+
+ ✓ tests/refactor-guards.test.js (17 tests) 17ms
+ ✓ tests/openrouter-api.test.js (9 tests) 6ms
+ ✓ tests/env-loader/env-loader.test.js (43 tests) 5ms
+ ✓ tests/safe-html.test.js (2 tests) 20ms
+ ✓ tests/script.test.js (46 tests) 6ms
+ ✓ tests/runtime-config.test.js (1 test) 48ms
+ ✓ tests/config.test.js (27 tests) 6ms
+ ✓ tests/guide-modal.test.js (1 test) 17ms
+ ✓ tests/selection-ui.test.js (1 test) 19ms
+ ✓ tests/analysis-flow.test.js (1 test) 9ms
+ ✓ tests/server-routes.test.js (2 tests) 12ms
+ ✓ tests/env-loader/usage-tracker.test.js (19 tests) 3ms
+ ✓ tests/app-state.test.js (2 tests) 2ms
+ ✓ tests/openrouter-config.test.js (3 tests) 2ms
+ ✓ tests/prompts.test.js (2 tests) 1ms
+ ✓ tests/api-env.test.js (3 tests) 3ms
+
+ Test Files  16 passed (16)
+      Tests  179 passed (179)
+   Start at  15:57:29
+   Duration  947ms (transform 599ms, setup 259ms, import 663ms, tests 175ms, env
+ironment 5.62s)
+
+npm test exit: 0
+npm audit exit: 1
+npm outdated exit: 1
+__DONE__
+smpain@smpain trigger_test %

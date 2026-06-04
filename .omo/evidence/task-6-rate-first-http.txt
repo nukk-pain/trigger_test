@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 42
+ETag: W/"2a-wK+cUofjsTqbFufTgG74nnGSoZ0"
+Date: Thu, 04 Jun 2026 07:15:29 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"output":"ok","usage":{"total_tokens":1}}

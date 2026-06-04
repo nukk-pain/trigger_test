@@ -1,0 +1,13 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/chat-validation.test.js tests/server-routes.test.js tests/openrouter-api.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+
+ Test Files  3 passed (3)
+      Tests  19 passed (19)
+   Start at  16:10:00
+   Duration  424ms (transform 65ms, setup 53ms, import 73ms, tests 22ms, environment 781ms)
+

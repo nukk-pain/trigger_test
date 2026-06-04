@@ -1,0 +1,108 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/chat-validation.test.js tests/server-routes.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+ ❯ tests/chat-validation.test.js (6 tests | 5 failed) 8ms
+     × Given 'invalid role' When validating chat messages Then it rejects before upstream fetch 4ms
+     × Given 'empty content' When validating chat messages Then it rejects before upstream fetch 0ms
+     × Given 'too many messages' When validating chat messages Then it rejects before upstream fetch 1ms
+     × Given 'overlong content' When validating chat messages Then it rejects before upstream fetch 0ms
+     × Given upstream failure with sensitive text When proxying Then it returns a sanitized error contract 0ms
+ ❯ tests/server-routes.test.js (4 tests | 1 failed) 18ms
+     × rejects oversized local chat JSON before proxy handling 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/chat-validation.test.js > chat proxy request validation > Given 'invalid role' When validating chat messages Then it rejects before upstream fetch
+ FAIL  tests/chat-validation.test.js > chat proxy request validation > Given 'empty content' When validating chat messages Then it rejects before upstream fetch
+AssertionError: expected { error: '유효한 messages 배열이 필요합니다.' } to match object { code: 'CHAT_VALIDATION_FAILED' }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "code": "CHAT_VALIDATION_FAILED",
++   "error": "유효한 messages 배열이 필요합니다.",
+  }
+
+ ❯ tests/chat-validation.test.js:79:25
+     77|
+     78|     expect(result.status).toBe(400);
+     79|     expect(result.body).toMatchObject({
+       |                         ^
+     80|       code: 'CHAT_VALIDATION_FAILED'
+     81|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/chat-validation.test.js > chat proxy request validation > Given 'too many messages' When validating chat messages Then it rejects before upstream fetch
+ FAIL  tests/chat-validation.test.js > chat proxy request validation > Given 'overlong content' When validating chat messages Then it rejects before upstream fetch
+AssertionError: expected 500 to be 400 // Object.is equality
+
+- Expected
++ Received
+
+- 400
++ 500
+
+ ❯ tests/chat-validation.test.js:78:27
+     76|     const result = await handleChatRequest({ req, env: process.env, fe…
+     77|
+     78|     expect(result.status).toBe(400);
+       |                           ^
+     79|     expect(result.body).toMatchObject({
+     80|       code: 'CHAT_VALIDATION_FAILED'
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/chat-validation.test.js > chat proxy request validation > Given upstream failure with sensitive text When proxying Then it returns a sanitized error contract
+AssertionError: expected { Object (error) } to deeply equal { …(2) }
+
+- Expected
++ Received
+
+  {
+-   "code": "UPSTREAM_CHAT_FAILED",
+-   "error": "AI 응답을 가져오지 못했습니다. 잠시 후 다시 시도해주세요.",
++   "error": "upstream exploded with sk-or-secret and stack trace",
+  }
+
+ ❯ tests/chat-validation.test.js:105:25
+    103|
+    104|     expect(result.status).toBe(502);
+    105|     expect(result.body).toEqual({
+       |                         ^
+    106|       error: 'AI 응답을 가져오지 못했습니다. 잠시 후 다시 시도해주세요.',
+    107|       code: 'UPSTREAM_CHAT_FAILED'
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/server-routes.test.js > local server API routes > rejects oversized local chat JSON before proxy handling
+AssertionError: expected 401 to be 413 // Object.is equality
+
+- Expected
++ Received
+
+- 413
++ 401
+
+ ❯ tests/server-routes.test.js:117:29
+    115|     const payload = JSON.parse(response.body);
+    116|
+    117|     expect(response.status).toBe(413);
+       |                             ^
+    118|     expect(payload).toEqual({
+    119|       error: '요청 본문이 너무 큽니다.',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  6 failed | 4 passed (10)
+   Start at  16:09:02
+   Duration  412ms (transform 33ms, setup 27ms, import 47ms, tests 26ms, environment 500ms)
+

@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Vary: Origin
+Access-Control-Allow-Methods: POST, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Date: Thu, 04 Jun 2026 07:55:02 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Content-Length: 0
+

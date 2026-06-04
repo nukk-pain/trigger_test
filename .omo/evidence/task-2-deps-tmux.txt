@@ -1,0 +1,38 @@
+npm test; echo "npm test exit: $?"; npm audit --audit-level=high; echo "npm audi
+t high exit: $?"; node -e 'const p=require("./package.json"); if (!p.dependencie
+s.express.startsWith("^4.")) process.exit(1); console.log("express major ok", p.
+dependencies.express)'; echo "express major check exit: $?"; npm ls express path
+-to-regexp; echo "npm ls exit: $?"; touch .omo/evidence/task-2-deps.done; echo _
+_DONE__
+smpain@smpain trigger_test % npm test; echo "npm test exit: $?"; npm audit --aud
+it-level=high; echo "npm audit high exit: $?"; node -e 'const p=require("./packa
+ge.json"); if (!p.dependencies.express.startsWith("^4.")) process.exit(1); conso
+le.log("express major ok", p.dependencies.express)'; echo "express major check e
+xit: $?"; npm ls express path-to-regexp; echo "npm ls exit: $?"; touch .omo/evid
+ence/task-2-deps.done; echo __DONE__
+
+> pain-guide-helper@1.0.0 test
+> vitest run
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+
+ Test Files  16 passed (16)
+      Tests  179 passed (179)
+   Start at  15:59:51
+   Duration  1.29s (transform 464ms, setup 269ms, import 820ms, tests 238ms, env
+ironment 7.71s)
+
+npm test exit: 0
+found 0 vulnerabilities
+npm audit high exit: 0
+express major ok ^4.22.2
+express major check exit: 0
+pain-guide-helper@1.0.0 /Users/smpain/Developer/github.com/trigger_test
+└─┬ express@4.22.2
+  └── path-to-regexp@0.1.13
+
+npm ls exit: 0
+__DONE__
+smpain@smpain trigger_test %

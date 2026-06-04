@@ -1,0 +1,26 @@
+
+> pain-guide-helper@1.0.0 test:e2e
+> PORT=3104 playwright test
+
+(node:50787) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Running 5 tests using 2 workers
+
+(node:50862) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50863) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50862) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(node:50863) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(node:50862) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50863) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/homepage-smoke.spec.js:4:1 › homepage smoke shows the AI self massage guide heading (510ms)
+  ✓  2 [chromium] › tests/e2e/mvp-workflows.spec.js:28:1 › safe happy path renders structured guidance (1.3s)
+  ✓  3 [chromium] › tests/e2e/mvp-workflows.spec.js:44:1 › red flag path blocks chat requests (1.2s)
+  ✓  4 [chromium] › tests/e2e/mvp-workflows.spec.js:60:1 › unsupported area path shows MVP notice without selecting area (465ms)
+  ✓  5 [chromium] › tests/e2e/mvp-workflows.spec.js:70:1 › malformed AI output renders safe fallback (1.2s)
+
+  5 passed (5.1s)

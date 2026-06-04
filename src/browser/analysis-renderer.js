@@ -2,8 +2,29 @@ import { formatAIResponse } from '../../lib/utils.js';
 import { appState } from './app-state.js';
 import { startInteractiveGuide } from './guide-modal.js';
 import { setSafeHtml } from './safe-html.js';
+import { renderStructuredGuidance } from './structured-guidance.js';
 
 const painData = appState.painData;
+
+const safetyNoticeHtml = `
+    <div id="medical-safety-notice" class="medical-safety-notice">
+        <p>이 도구는 진단이 아니며 응급 증상이 있으면 즉시 119 또는 의료기관에 문의하세요.</p>
+        <p><strong>중단 기준:</strong> 통증이 날카롭게 심해지거나 저림, 마비, 어지러움, 숨참이 생기면 즉시 중단하세요.</p>
+        <p><strong>진료 기준:</strong> 통증이 빠르게 악화되거나 발열, 외상, 감각 저하, 배뇨/배변 변화가 있으면 의료기관에 문의하세요.</p>
+    </div>
+`;
+
+function showSafetyNotice(parent) {
+    if (!parent) return;
+
+    let notice = parent.querySelector('#medical-safety-notice');
+    if (!notice) {
+        notice = document.createElement('div');
+        parent.insertBefore(notice, parent.firstChild);
+    }
+    setSafeHtml(notice, safetyNoticeHtml);
+}
+
 export function displayGPTResults(aiAnalysis) {
     const massageGuide = document.getElementById('massage-guide');
     const container = document.getElementById('massage-steps');
@@ -16,19 +37,10 @@ export function displayGPTResults(aiAnalysis) {
 
     // 컨테이너 초기화
     setSafeHtml(container, '');
+    showSafetyNotice(massageGuide);
 
-    // GPT 결과를 HTML로 변환하여 표시
     const rawResult = aiAnalysis.aiAnalysis || aiAnalysis.analysis || aiAnalysis.text || aiAnalysis;
-    const formattedResult = formatAIResponse(rawResult);
-
-    setSafeHtml(container, `
-        <div class="ai-analysis-result">
-            <h3>🤖 AI 전문가 분석</h3>
-            <div class="analysis-content">
-                ${formattedResult}
-            </div>
-        </div>
-    `);
+    setSafeHtml(container, renderStructuredGuidance(rawResult));
 
     // 마사지 가이드 표시
     if (massageGuide) {
@@ -44,6 +56,7 @@ export function showRedFlagWarning(aiReason = null) {
     // AI 분석 결과가 있으면 추가 정보 표시
     if (aiReason) {
         const emergencyNotice = warningElement.querySelector('.emergency-notice');
+        if (!emergencyNotice) return;
         const aiAnalysisDiv = document.createElement('div');
         aiAnalysisDiv.className = 'ai-analysis';
         setSafeHtml(aiAnalysisDiv, `
@@ -67,6 +80,7 @@ export function displayAnalysisResults() {
             return;
         }
         setSafeHtml(resultContainer, `
+            ${safetyNoticeHtml}
             <div class="ai-result-content">
                 ${formatAIResponse(painData.analysis.aiAnalysis)}
             </div>

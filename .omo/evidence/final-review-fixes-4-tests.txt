@@ -1,0 +1,13 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/rate-limit-store.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  17:08:04
+   Duration  678ms (transform 41ms, setup 34ms, import 26ms, tests 8ms, environment 432ms)
+

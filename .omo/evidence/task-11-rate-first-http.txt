@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Vary: Origin
+Access-Control-Allow-Methods: POST, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Content-Type: application/json; charset=utf-8
+Content-Length: 42
+ETag: W/"2a-wK+cUofjsTqbFufTgG74nnGSoZ0"
+Date: Thu, 04 Jun 2026 07:55:02 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"output":"ok","usage":{"total_tokens":1}}

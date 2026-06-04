@@ -28,7 +28,7 @@
             <h2>아픈 곳을 선택하세요</h2>
             <div class="selection-status-bar">
                 <span id="live-selection-text">부위를 클릭하세요</span>
-                <button type="button" id="quick-clear" class="quick-clear-btn" style="display: none;">지우기</button>
+                <button type="button" id="quick-clear" class="quick-clear-btn" hidden>지우기</button>
             </div>
 
             <div class="body-map-container">
@@ -310,6 +310,11 @@
             <!-- 악화 동작 선택 -->
             <div class="action-selection">
                 <h3>어떨 때 더 아프세요?</h3>
+                <div class="medical-safety-notice initial-safety-notice">
+                    <p>이 도구는 진단이 아니며 응급 증상이 있으면 즉시 119 또는 의료기관에 문의하세요.</p>
+                    <p><strong>중단 기준:</strong> 통증이 날카롭게 심해지거나 저림, 마비, 어지러움, 숨참이 생기면 즉시 중단하세요.</p>
+                    <p><strong>진료 기준:</strong> 통증이 빠르게 악화되거나 발열, 외상, 감각 저하, 배뇨/배변 변화가 있으면 의료기관에 문의하세요.</p>
+                </div>
                 <div class="pain-description-input">
                     <label for="pain-description">통증이 심해지는 상황을 자세히 적어주세요:</label>
                     <textarea id="pain-description" name="pain-description"
@@ -332,7 +337,10 @@
         <section id="step2" class="step-section">
             <div id="red-flag-warning" class="warning-section hidden">
                 <h2>⚠️ 병원 방문 필요</h2>
-                <p>즉시 병원을 방문하세요. 응급실: 119</p>
+                <div class="emergency-notice">
+                    <p>즉시 병원을 방문하세요. 응급실: 119</p>
+                    <p>이 도구는 진단이 아니며 응급 증상이 있으면 즉시 119 또는 의료기관에 문의하세요.</p>
+                </div>
             </div>
 
             <div id="massage-guide" class="guide-section">

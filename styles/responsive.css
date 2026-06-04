@@ -1,0 +1,84 @@
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    header {
+        padding: 20px;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .step-section {
+        padding: 20px;
+    }
+    
+    .checkbox-group {
+        grid-template-columns: 1fr;
+    }
+    
+    .body-map-container {
+        flex-direction: column;
+    }
+    
+    .selected-areas-list {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .step-navigation {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .progress-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    header p {
+        font-size: 1rem;
+    }
+    
+    .step-section h2 {
+        font-size: 1.5rem;
+    }
+    
+    #body-svg {
+        max-width: 300px;
+    }
+}
+
+/* 접근성 개선 */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+    .clickable-area {
+        stroke-width: 3;
+    }
+    
+    .trigger-point-card,
+    .fascial-line-card {
+        border-width: 3px;
+    }
+}

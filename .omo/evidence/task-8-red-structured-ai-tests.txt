@@ -1,0 +1,200 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/analysis-renderer.test.js tests/safe-html.test.js tests/prompts.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+ ❯ tests/prompts.test.js (3 tests | 1 failed) 4ms
+     × requires the pain analysis prompt to return the structured JSON contract 3ms
+ ❯ tests/analysis-renderer.test.js (5 tests | 4 failed) 26ms
+     × renders valid structured guidance without showing raw JSON 15ms
+     × renders safe fallback for malformed JSON 3ms
+     × renders safe fallback for empty output 2ms
+     × renders safe fallback for too many steps 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/analysis-renderer.test.js > structured AI guidance rendering > renders valid structured guidance without showing raw JSON
+AssertionError: expected '\n    \n        이 도구는 진단이 아니며 응급 증상이 …' not to contain '"targetMuscles"'
+
+- Expected
++ Received
+
+- "targetMuscles"
++
++     
++         이 도구는 진단이 아니며 응급 증상이 있으면 즉시 119 또는 의료기관에 문의하세요.
++         중단 기준: 통증이 날카롭게 심해지거나 저림, 마비, 어지러움, 숨참이 생기면 즉시 중단하세요.
++         진료 기준: 통증이 빠르게 악화되거나 발열, 외상, 감각 저하, 배뇨/배변 변화가 있으면 의료기관에 문의하세요.
++     
++
++         
++         
++             🤖 AI 전문가 분석
++             
++                 {"targetMuscles":["상부 승모근"],"summary":"목 뒤 긴장과 관련된 자가 관리 안내입니다.","steps":[{"title":"상부 승모근 이완","method":"손가락으로 천천히 압박합니다.","duration":"30초","caution":"저림이 생기면 멈춥니다."}],"stopIf":["통증이 날카롭게 심해지면 중단"],"seekCareIf":["증상이 빠르게 악화되면 진료"],"disclaimer":"이 안내는 진단이 아닙니다."} 
++             
++         
++     
++       
+
+ ❯ tests/analysis-renderer.test.js:35:35
+     33|     expect(guide.textContent).toContain('통증이 날카롭게');
+     34|     expect(guide.textContent).toContain('이 안내는 진단이 아닙니다.');
+     35|     expect(guide.textContent).not.toContain('"targetMuscles"');
+       |                                   ^
+     36|   });
+     37|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/analysis-renderer.test.js > structured AI guidance rendering > renders safe fallback for malformed JSON
+AssertionError: expected '\n    \n        이 도구는 진단이 아니며 응급 증상이 …' to contain '안전하게 형식화할 수 없습니다'
+
+- Expected
++ Received
+
+- 안전하게 형식화할 수 없습니다
++
++     
++         이 도구는 진단이 아니며 응급 증상이 있으면 즉시 119 또는 의료기관에 문의하세요.
++         중단 기준: 통증이 날카롭게 심해지거나 저림, 마비, 어지러움, 숨참이 생기면 즉시 중단하세요.
++         진료 기준: 통증이 빠르게 악화되거나 발열, 외상, 감각 저하, 배뇨/배변 변화가 있으면 의료기관에 문의하세요.
++     
++
++         
++         
++             🤖 AI 전문가 분석
++             
++                 alert(1)bad 
++             
++         
++     
++       
+
+ ❯ tests/analysis-renderer.test.js:58:31
+     56|
+     57|     const guide = document.getElementById('massage-guide');
+     58|     expect(guide.textContent).toContain('안전하게 형식화할 수 없습니다');
+       |                               ^
+     59|     expect(guide.textContent).toContain('의료기관');
+     60|     expect(guide.querySelector('script')).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/analysis-renderer.test.js > structured AI guidance rendering > renders safe fallback for empty output
+AssertionError: expected '\n    \n        이 도구는 진단이 아니며 응급 증상이 …' to contain '안전하게 형식화할 수 없습니다'
+
+- Expected
++ Received
+
+- 안전하게 형식화할 수 없습니다
++
++     
++         이 도구는 진단이 아니며 응급 증상이 있으면 즉시 119 또는 의료기관에 문의하세요.
++         중단 기준: 통증이 날카롭게 심해지거나 저림, 마비, 어지러움, 숨참이 생기면 즉시 중단하세요.
++         진료 기준: 통증이 빠르게 악화되거나 발열, 외상, 감각 저하, 배뇨/배변 변화가 있으면 의료기관에 문의하세요.
++     
++
++         
++         
++             🤖 AI 전문가 분석
++             
++                 { "aiAnalysis": "" } 
++             
++         
++     
++       
+
+ ❯ tests/analysis-renderer.test.js:58:31
+     56|
+     57|     const guide = document.getElementById('massage-guide');
+     58|     expect(guide.textContent).toContain('안전하게 형식화할 수 없습니다');
+       |                               ^
+     59|     expect(guide.textContent).toContain('의료기관');
+     60|     expect(guide.querySelector('script')).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/analysis-renderer.test.js > structured AI guidance rendering > renders safe fallback for too many steps
+AssertionError: expected '\n    \n        이 도구는 진단이 아니며 응급 증상이 …' to contain '안전하게 형식화할 수 없습니다'
+
+- Expected
++ Received
+
+- 안전하게 형식화할 수 없습니다
++
++     
++         이 도구는 진단이 아니며 응급 증상이 있으면 즉시 119 또는 의료기관에 문의하세요.
++         중단 기준: 통증이 날카롭게 심해지거나 저림, 마비, 어지러움, 숨참이 생기면 즉시 중단하세요.
++         진료 기준: 통증이 빠르게 악화되거나 발열, 외상, 감각 저하, 배뇨/배변 변화가 있으면 의료기관에 문의하세요.
++     
++
++         
++         
++             🤖 AI 전문가 분석
++             
++                 {"targetMuscles":["상부 승모근"],"summary":"요약","steps":[{"title":"단계 1","method":"방법","duration":"30초","caution":"주의"},{"title":"단계 2","method":"방법","duration":"30초","caution":"주의"},{"title":"단계 3","method":"방법","duration":"30초","caution":"주의"},{"title":"단계 4","method":"방법","duration":"30초","caution":"주의"},{"title":"단계 5","method":"방법","duration":"30초","caution":"주의"}],"stopIf":["중단"],"seekCareIf":["진료"],"disclaimer":"진단 아님"} 
++             
++         
++     
++       
+
+ ❯ tests/analysis-renderer.test.js:58:31
+     56|
+     57|     const guide = document.getElementById('massage-guide');
+     58|     expect(guide.textContent).toContain('안전하게 형식화할 수 없습니다');
+       |                               ^
+     59|     expect(guide.textContent).toContain('의료기관');
+     60|     expect(guide.querySelector('script')).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/prompts.test.js > MEDICAL_PROMPTS > requires the pain analysis prompt to return the structured JSON contract
+AssertionError: expected '근골격계 물리치료 전문가로서 통증 부위와 악화 상황을 분석해 셀프 …' to contain 'JSON'
+
+- Expected
++ Received
+
+- JSON
++ 근골격계 물리치료 전문가로서 통증 부위와 악화 상황을 분석해 셀프 마사지 방법을 안내하세요.
++
++ 출력 형식:
++ ## 타겟 근육
++ **주요 치료 대상:** 근육명들을 명시 (예: 승모근 상부섬유, 흉쇄유돌근, 후두하근)
++
++ ## 마사지 방법
++ **1단계: [근육명]**
++ - 방법: 구체적인 마사지 방법
++ - 시간: 권장 시간
++ - 주의: 안전 주의사항
++
++ **2단계: [근육명]**
++ - 방법: 구체적인 마사지 방법
++ - 시간: 권장 시간
++ - 주의: 안전 주의사항
++
++ 최대 4단계까지 작성
++
++ ## 주의사항
++ ⚠️ 중단 기준 및 의사 전문 진료 권유
++
++ 존댓말 사용, 간결하게 작성하세요.
+
+ ❯ tests/prompts.test.js:17:43
+     15|
+     16|   it('requires the pain analysis prompt to return the structured JSON …
+     17|     expect(MEDICAL_PROMPTS.PAIN_ANALYSIS).toContain('JSON');
+       |                                           ^
+     18|     for (const key of ['targetMuscles', 'summary', 'steps', 'stopIf', …
+     19|       expect(MEDICAL_PROMPTS.PAIN_ANALYSIS).toContain(key);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  5 failed | 5 passed (10)
+   Start at  16:20:47
+   Duration  448ms (transform 67ms, setup 50ms, import 54ms, tests 44ms, environment 804ms)
+

@@ -13,6 +13,7 @@ import {
     displayGPTResults,
     showRedFlagWarning
 } from './analysis-renderer.js';
+import { hasRedFlagCondition, hasRedFlagText } from './red-flags.js';
 
 const painData = appState.painData;
 
@@ -89,31 +90,8 @@ function analyzeFascialLines() {
 }
 
 function hasQuestionnaireRedFlags() {
-    const description = String(painData.questionnaire.painDescription || '').toLowerCase();
-    const redFlagTextPatterns = [
-        '흉통',
-        '가슴 통증',
-        '가슴이 아',
-        '숨이 차',
-        '숨쉬기',
-        '호흡곤란',
-        '마비',
-        '감각이 없어',
-        '힘이 빠',
-        'chest pain',
-        'shortness of breath',
-        'trouble breathing',
-        'numbness',
-        'weakness'
-    ];
-
-    return Boolean(
-        redFlagTextPatterns.some(pattern => description.includes(pattern)) ||
-        (painData.questionnaire.medicalConditions &&
-            painData.questionnaire.medicalConditions.some(condition =>
-                ['chest-pain', 'breathing', 'severe-illness'].includes(condition)
-            ))
-    );
+    return hasRedFlagText(painData.questionnaire.painDescription) ||
+        hasRedFlagCondition(painData.questionnaire.medicalConditions);
 }
 
 export const analysisFallbacks = {

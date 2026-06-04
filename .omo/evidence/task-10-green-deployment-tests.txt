@@ -1,0 +1,13 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/deployment-readiness.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  16:33:36
+   Duration  353ms (transform 11ms, setup 16ms, import 5ms, tests 2ms, environment 237ms)
+

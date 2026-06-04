@@ -1,0 +1,13 @@
+
+> pain-guide-helper@1.0.0 test
+> vitest run tests/analysis-flow.test.js tests/prompts.test.js
+
+
+ RUN  v4.1.8 /Users/smpain/Developer/github.com/trigger_test
+
+
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+   Start at  16:18:40
+   Duration  423ms (transform 55ms, setup 24ms, import 53ms, tests 20ms, environment 496ms)
+

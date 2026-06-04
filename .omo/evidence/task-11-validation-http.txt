@@ -1,0 +1,13 @@
+HTTP/1.1 400 Bad Request
+X-Powered-By: Express
+Vary: Origin
+Access-Control-Allow-Methods: POST, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Content-Type: application/json; charset=utf-8
+Content-Length: 94
+ETag: W/"5e-Ya1hb8Ko6eSPV696IiYAoLjzMHg"
+Date: Thu, 04 Jun 2026 07:55:02 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"유효한 chat messages 배열이 필요합니다.","code":"CHAT_VALIDATION_FAILED"}

@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "express": "^4.22.2"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.8",
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.8"
+  },
+  "lockExpress": "4.22.2",
+  "lockPathToRegexp": "0.1.13"
+}

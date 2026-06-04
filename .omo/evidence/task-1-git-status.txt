@@ -1,0 +1,44 @@
+ M .gitignore
+ M CLAUDE.md
+ M api/chat.js
+ M api/env.js
+ M index.html
+ M lib/config.js
+ M lib/env-loader.js
+ M lib/openrouter-proxy.cjs
+ M server.js
+ M src/browser/guide-modal.js
+ M src/browser/selection-ui.js
+ M styles.css
+ M tests/api-env.test.js
+ M tests/openrouter-api.test.js
+ M tests/refactor-guards.test.js
+ M vitest.config.js
+?? .omo/boulder.json
+?? .omo/evidence/
+?? .omo/plans/mvp-stabilization-from-assessment.md
+?? .omo/plans/next10-followup-refactors.md
+?? .omo/plans/refactor-next10.md
+?? AGENTS.md
+?? codemaps/data.md
+?? lib/chat-request-builder.js
+?? lib/client-config.cjs
+?? lib/env-loader/
+?? lib/openrouter-client.js
+?? lib/openrouter-config/
+?? lib/public-env-config.cjs
+?? src/browser/guide-controller.js
+?? src/browser/guide-data.js
+?? src/browser/guide-steps.js
+?? src/browser/selection-events.js
+?? src/browser/selection-renderer.js
+?? src/browser/selection-state.js
+?? styles/controls.css
+?? styles/guides.css
+?? styles/questionnaire.css
+?? styles/responsive.css
+?? styles/selection.css
+?? styles/status.css
+?? tests/guide-modal.test.js
+?? tests/openrouter-config.test.js
+?? tests/selection-ui.test.js

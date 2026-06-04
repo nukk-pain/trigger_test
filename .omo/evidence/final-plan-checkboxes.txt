@@ -1,0 +1,15 @@
+145:- [x] 1. Capture Baseline And Ownership Ledger
+181:- [x] 2. Patch Dependency Security Baseline
+219:- [x] 3. Add Public/Private Runtime Env Contract
+257:- [x] 4. Add Playwright E2E Scaffold
+296:- [x] 5. Harden Chat API Validation And Error Contract
+336:- [x] 6. Add Durable Rate And Cost Limiter Adapter
+378:- [x] 7. Expand Red-Flag Safety And Always-Visible Medical Copy
+424:- [x] 8. Implement Structured AI Output Contract And Safe Fallback
+476:- [x] 9. Add MVP Body-Area Support Filter
+517:- [x] 10. Add CI And Vercel Deployment Readiness
+555:- [x] 11. Add Full E2E And Manual QA Workflows
+600:- [x] F1. Plan Compliance Audit
+605:- [x] F2. Code Quality Review
+610:- [x] F3. Real Manual QA
+617:- [x] F4. Scope Fidelity Check

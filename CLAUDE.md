@@ -24,18 +24,19 @@ curl http://localhost:3000/api/env
 All state is managed via global window objects initialized on page load:
 - `window.envLoader` - Environment variable loader (EnvLoader class in env-loader.js)
 - `window.openRouterConfig` - OpenRouter server-proxy API wrapper in config.js
-- `window.usageTracker` - Usage statistics tracker (UsageTracker class in config.js)
+- `window.usageTracker` - Usage statistics tracker (UsageTracker class re-exported from env-loader.js)
 - `window.MEDICAL_PROMPTS` - System prompts for AI analysis
 
 ### Data Flow
-1. User selects body areas on SVG map → stored in `selectedAreas` Set
-2. User enters pain description → stored in `document.getElementById('pain-situation').value`
+1. User selects body areas on SVG map → stored in `appState.painData.selectedAreas`
+2. User enters pain description → stored from `#pain-description`
 3. Click "Analyze" → `openRouterConfig.makeRequest()` sends messages to server `/api/chat` with `MEDICAL_PROMPTS.PAIN_ANALYSIS`
 4. Response parsed and displayed → browser usage display updates; authoritative rate limiting stays server-side
 
-### Key Data Structures (embedded in script.js)
-- `triggerPointsDB`: 7+ trigger points with anatomical locations, massage techniques, safety precautions
+### Key Data Structures
+- `triggerPointsDB`: 17 trigger points in `lib/data/trigger-points.js` with anatomical locations, massage techniques, safety precautions
 - `fascialLinesDB`: 3 fascial lines based on Thomas Myers' Anatomy Trains theory
+- `redFlagConditions`: emergency screening codes in `lib/data/red-flags.js`
 - 60+ clickable SVG body regions mapped to trigger point associations
 
 ### Environment Loading

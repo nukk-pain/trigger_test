@@ -1,0 +1,24 @@
+
+> pain-guide-helper@1.0.0 start
+> node server.js
+
+⚠️ .env.local 파일이 없습니다.
+🚀 통증 가이드 도우미가 http://localhost:3107 에서 실행 중입니다.
+✅ OpenRouter API 키가 설정되었습니다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
