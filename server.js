@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { handleChatRequest } = require('./lib/openrouter-proxy.cjs');
+const { getStatusPayload } = require('./lib/server-status.cjs');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -71,10 +72,6 @@ function getClientConfig() {
 // Serve static files
 app.use(express.static(__dirname));
 
-app.get('/api/config', (req, res) => {
-    res.json(getClientConfig());
-});
-
 app.get('/api/env', (req, res) => {
     const config = getClientConfig();
     res.json({
@@ -90,25 +87,7 @@ app.get('/api/env', (req, res) => {
 });
 
 app.get('/api/status', (req, res) => {
-    const proxyConfigured = Boolean(envConfig.OPENROUTER_API_KEY);
-    res.json({
-        success: true,
-        data: {
-            provider: 'openrouter',
-            proxyConfigured,
-            proxyReady: proxyConfigured,
-            model: envConfig.OPENROUTER_MODEL || 'openrouter/auto',
-            limits: {
-                daily: parseInt(envConfig.DAILY_REQUEST_LIMIT || '50', 10),
-                monthly: parseInt(envConfig.MONTHLY_REQUEST_LIMIT || '1000', 10)
-            },
-            rateLimit: {
-                limit: parseInt(envConfig.SERVER_RATE_LIMIT_MAX || envConfig.DAILY_REQUEST_LIMIT || '50', 10),
-                windowSeconds: parseInt(envConfig.SERVER_RATE_LIMIT_WINDOW_SECONDS || '86400', 10)
-            },
-            environment: envConfig.NODE_ENV || 'development'
-        }
-    });
+    res.json(getStatusPayload(envConfig));
 });
 
 app.post('/api/chat', async (req, res) => {

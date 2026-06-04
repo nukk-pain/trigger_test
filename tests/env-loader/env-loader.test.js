@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { EnvLoader, UsageTracker } from '../lib/env-loader.js';
+import { EnvLoader } from '../../lib/env-loader.js';
 
 describe('EnvLoader', () => {
   let envLoader;
@@ -273,7 +273,10 @@ describe('EnvLoader', () => {
     it('should load from Vercel API first', async () => {
       const mockData = {
         OPENROUTER_MODEL: 'openrouter/auto',
-        DAILY_LIMIT: 100
+        DAILY_LIMIT: 100,
+        OPENROUTER_API_KEY: 'sk-or-regression',
+        OPENAI_API_KEY: 'sk-openai-regression',
+        GEMINI_API_KEY: 'gemini-regression'
       };
 
       globalThis.fetch.mockResolvedValueOnce({
@@ -285,219 +288,21 @@ describe('EnvLoader', () => {
 
       expect(envLoader.loaded).toBe(true);
       expect(envLoader.config.OPENROUTER_API_KEY).toBeUndefined();
+      expect(envLoader.config.OPENAI_API_KEY).toBeUndefined();
+      expect(envLoader.config.GEMINI_API_KEY).toBeUndefined();
     });
 
-    it('should fallback to local server when Vercel fails', async () => {
-      const mockConfig = { OPENROUTER_MODEL: 'openrouter/auto' };
-
-      globalThis.fetch
-        .mockRejectedValueOnce(new Error('Vercel failed'))
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockConfig)
-        });
-
-      await envLoader.loadEnv();
-
-      expect(envLoader.config.OPENROUTER_MODEL).toBe('openrouter/auto');
-    });
-
-    it('should fallback to localStorage when both APIs fail', async () => {
+    it('should not call legacy /api/config when /api/env fails', async () => {
       const savedConfig = { DAILY_REQUEST_LIMIT: '75' };
       localStorage.getItem.mockReturnValue(JSON.stringify(savedConfig));
 
-      globalThis.fetch
-        .mockRejectedValueOnce(new Error('Vercel failed'))
-        .mockRejectedValueOnce(new Error('Local failed'));
+      globalThis.fetch.mockRejectedValueOnce(new Error('Server failed'));
 
       await envLoader.loadEnv();
 
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+      expect(globalThis.fetch).toHaveBeenCalledWith('/api/env');
       expect(envLoader.config.DAILY_REQUEST_LIMIT).toBe('75');
-    });
-  });
-});
-
-describe('UsageTracker', () => {
-  let tracker;
-
-  beforeEach(() => {
-    tracker = new UsageTracker();
-  });
-
-  describe('constructor', () => {
-    it('should initialize with default usage structure', () => {
-      expect(tracker.usage).toEqual({
-        daily: {},
-        monthly: {},
-        total: 0
-      });
-    });
-
-    it('should load existing usage from localStorage', () => {
-      const existingUsage = {
-        daily: { '2024-01-15': 5 },
-        monthly: { '2024-01': 50 },
-        total: 100
-      };
-      localStorage.getItem.mockReturnValue(JSON.stringify(existingUsage));
-
-      const newTracker = new UsageTracker();
-
-      expect(newTracker.usage).toEqual(existingUsage);
-    });
-  });
-
-  describe('getToday', () => {
-    it('should return date in YYYY-MM-DD format', () => {
-      const today = tracker.getToday();
-      expect(today).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    });
-  });
-
-  describe('getThisMonth', () => {
-    it('should return month in YYYY-MM format', () => {
-      const thisMonth = tracker.getThisMonth();
-      expect(thisMonth).toMatch(/^\d{4}-\d{2}$/);
-    });
-  });
-
-  describe('getDailyUsage', () => {
-    it('should return 0 when no usage today', () => {
-      expect(tracker.getDailyUsage()).toBe(0);
-    });
-
-    it('should return correct usage for today', () => {
-      const today = tracker.getToday();
-      tracker.usage.daily[today] = 10;
-
-      expect(tracker.getDailyUsage()).toBe(10);
-    });
-  });
-
-  describe('getMonthlyUsage', () => {
-    it('should return 0 when no usage this month', () => {
-      expect(tracker.getMonthlyUsage()).toBe(0);
-    });
-
-    it('should return correct usage for this month', () => {
-      const thisMonth = tracker.getThisMonth();
-      tracker.usage.monthly[thisMonth] = 100;
-
-      expect(tracker.getMonthlyUsage()).toBe(100);
-    });
-  });
-
-  describe('canMakeRequest', () => {
-    const mockEnvLoader = {
-      getDailyLimit: () => 50,
-      getMonthlyLimit: () => 1000
-    };
-
-    it('should return true when under both limits', () => {
-      expect(tracker.canMakeRequest(mockEnvLoader)).toBe(true);
-    });
-
-    it('should return false when daily limit reached', () => {
-      const today = tracker.getToday();
-      tracker.usage.daily[today] = 50;
-
-      expect(tracker.canMakeRequest(mockEnvLoader)).toBe(false);
-    });
-
-    it('should return false when monthly limit reached', () => {
-      const thisMonth = tracker.getThisMonth();
-      tracker.usage.monthly[thisMonth] = 1000;
-
-      expect(tracker.canMakeRequest(mockEnvLoader)).toBe(false);
-    });
-  });
-
-  describe('recordRequest', () => {
-    it('should increment daily usage', () => {
-      const today = tracker.getToday();
-      tracker.recordRequest();
-
-      expect(tracker.usage.daily[today]).toBe(1);
-    });
-
-    it('should increment monthly usage', () => {
-      const thisMonth = tracker.getThisMonth();
-      tracker.recordRequest();
-
-      expect(tracker.usage.monthly[thisMonth]).toBe(1);
-    });
-
-    it('should save to localStorage', () => {
-      tracker.recordRequest();
-
-      expect(localStorage.setItem).toHaveBeenCalled();
-    });
-  });
-
-  describe('cleanupOldData', () => {
-    it('should remove data older than 30 days', () => {
-      const oldDate = new Date();
-      oldDate.setDate(oldDate.getDate() - 35);
-      const oldDateStr = oldDate.toISOString().split('T')[0];
-
-      tracker.usage.daily[oldDateStr] = 10;
-      tracker.cleanupOldData();
-
-      expect(tracker.usage.daily[oldDateStr]).toBeUndefined();
-    });
-
-    it('should keep data within 30 days', () => {
-      const recentDate = new Date();
-      recentDate.setDate(recentDate.getDate() - 15);
-      const recentDateStr = recentDate.toISOString().split('T')[0];
-
-      tracker.usage.daily[recentDateStr] = 10;
-      tracker.cleanupOldData();
-
-      expect(tracker.usage.daily[recentDateStr]).toBe(10);
-    });
-  });
-
-  describe('getUsageStats', () => {
-    const mockEnvLoader = {
-      getDailyLimit: () => 50,
-      getMonthlyLimit: () => 1000
-    };
-
-    it('should return correct usage stats', () => {
-      const today = tracker.getToday();
-      const thisMonth = tracker.getThisMonth();
-      tracker.usage.daily[today] = 10;
-      tracker.usage.monthly[thisMonth] = 100;
-      tracker.usage.total = 500;
-
-      const stats = tracker.getUsageStats(mockEnvLoader);
-
-      expect(stats.daily.used).toBe(10);
-      expect(stats.daily.limit).toBe(50);
-      expect(stats.daily.remaining).toBe(40);
-      expect(stats.monthly.used).toBe(100);
-      expect(stats.monthly.limit).toBe(1000);
-      expect(stats.monthly.remaining).toBe(900);
-      expect(stats.total).toBe(500);
-    });
-  });
-
-  describe('getRemainingRequests', () => {
-    const mockEnvLoader = {
-      getDailyLimit: () => 50,
-      getMonthlyLimit: () => 1000
-    };
-
-    it('should return minimum of daily and monthly remaining', () => {
-      const today = tracker.getToday();
-      const thisMonth = tracker.getThisMonth();
-      tracker.usage.daily[today] = 30;
-      tracker.usage.monthly[thisMonth] = 900;
-
-      const remaining = tracker.getRemainingRequests(mockEnvLoader);
-
-      expect(remaining).toBe(20);
     });
   });
 });

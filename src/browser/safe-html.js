@@ -6,7 +6,7 @@ const ALLOWED_TAGS = new Set([
 
 const ALLOWED_ATTRIBUTES = new Set([
   'class', 'code', 'data-action', 'data-area', 'data-location', 'data-step', 'data-trigger-point',
-  'disabled', 'href', 'id', 'style', 'target', 'title'
+  'disabled', 'href', 'id', 'target', 'title'
 ]);
 
 function sanitizeNode(node) {

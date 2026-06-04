@@ -141,6 +141,42 @@ describe('OpenRouter chat API', () => {
     expect(JSON.stringify(envRes.body)).not.toContain('sk-or-secret');
   });
 
+  it('rejects untrusted browser origins before proxying to OpenRouter', async () => {
+    const req = {
+      method: 'POST',
+      headers: { origin: 'https://evil.example' },
+      body: { messages: [{ role: 'user', content: '목 통증' }] }
+    };
+    const res = createResponse();
+
+    await chatHandler(req, res);
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body.error).toBe('Origin not allowed');
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(res.headers['Access-Control-Allow-Origin']).toBeUndefined();
+  });
+
+  it('allows configured browser origins without wildcard CORS', async () => {
+    process.env.ALLOWED_ORIGINS = 'https://pain-guide.test';
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ choices: [{ message: { content: 'ok' } }] })
+    });
+
+    const req = {
+      method: 'POST',
+      headers: { origin: 'https://pain-guide.test' },
+      body: { messages: [{ role: 'user', content: '목 통증' }] }
+    };
+    const res = createResponse();
+
+    await chatHandler(req, res);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.headers['Access-Control-Allow-Origin']).toBe('https://pain-guide.test');
+  });
+
   it('enforces server-side daily request limit', async () => {
     process.env.DAILY_REQUEST_LIMIT = '1';
     process.env.SERVER_RATE_LIMIT_MAX = '1';

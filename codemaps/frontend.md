@@ -1,5 +1,5 @@
 # Frontend Structure
-> Last updated: 2026-01-28
+> Last updated: 2026-06-04
 
 ## Overview
 
@@ -9,15 +9,24 @@
 
 ```
 /
-├── index.html         # 메인 페이지
-├── styles.css         # 스타일시트
-├── script.js          # UI 로직
+├── index.html                # 메인 페이지
+├── styles.css                # 공용/잔여 스타일
+├── styles/
+│   ├── base.css
+│   ├── layout.css
+│   ├── body-map.css
+│   └── analysis.css
+├── script.js                 # UI 로직
+├── src/browser/
+│   ├── analysis-flow.js      # 분석 orchestration
+│   ├── analysis-ai.js        # AI 호출/파싱
+│   └── analysis-renderer.js  # 결과/경고 렌더링
 └── lib/
-    ├── env-loader.js  # 환경설정 관리
-    ├── config.js      # OpenRouter API 설정
-    ├── utils.js       # 유틸리티 함수
-    ├── data.js        # 트리거포인트/근막 데이터
-    └── analysis.js    # 분석 함수
+    ├── env-loader.js         # 환경설정 관리
+    ├── config.js             # OpenRouter 프록시 설정
+    ├── utils.js              # area/markdown/validation re-export
+    ├── data.js               # data/* re-export
+    └── analysis.js           # 분석 함수
 ```
 
 ---
@@ -66,7 +75,7 @@ class EnvLoader {
 
 ### UsageTracker Class
 
-**Purpose**: API 사용량 추적 및 제한
+**Purpose**: 브라우저별 사용량 표시 및 사전 안내
 
 ```javascript
 class UsageTracker {
@@ -81,8 +90,9 @@ class UsageTracker {
   getDailyUsage(): number
   getMonthlyUsage(): number
 
-  // 제한 체크
+  // 표시용 제한 체크
   canMakeRequest(envLoader): boolean
+  canShowClientRequestAllowance(envLoader): boolean
   getRemainingRequests(envLoader): number
 
   // 기록

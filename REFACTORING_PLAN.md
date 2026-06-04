@@ -79,7 +79,7 @@ App
 | script.js:753-918 | hooks/useAnalyzePain.ts, api/services/ |
 | script.js:1083-1218 | components/Results/MarkdownRenderer.tsx |
 | config.js | api/routes/chat.ts, api/prompts.ts |
-| env-loader.js | .env.local + api/config.ts |
+| env-loader.js | .env.local + api/env.ts |
 | index.html SVG | components/BodyMap/BodyMapSVG.tsx |
 
 ## 검증 방법

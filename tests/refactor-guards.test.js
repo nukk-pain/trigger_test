@@ -56,5 +56,58 @@ describe('refactor guardrails', () => {
 
     expect(index).toContain('href="styles/base.css"');
     expect(index.indexOf('href="styles/base.css"')).toBeLessThan(index.indexOf('href="styles.css"'));
+    expect(index).toContain('href="styles/layout.css"');
+    expect(index).toContain('href="styles/body-map.css"');
+    expect(index).toContain('href="styles/analysis.css"');
+    expect(read('styles.css').split('\n').length).toBeLessThan(2800);
+  });
+
+  it('keeps analysis flow as a coordinator over focused browser modules', () => {
+    const analysisFlow = read('src/browser/analysis-flow.js');
+
+    expect(analysisFlow.split('\n').length).toBeLessThanOrEqual(250);
+    expect(analysisFlow).toContain("from './analysis-ai.js'");
+    expect(analysisFlow).toContain("from './analysis-renderer.js'");
+    expect(read('src/browser/analysis-ai.js')).toContain('export async function analyzeWithAI');
+    expect(read('src/browser/analysis-renderer.js')).toContain('export function displayGPTResults');
+    expect(read('src/browser/analysis-renderer.js')).toContain('export function showRedFlagWarning');
+  });
+
+  it('keeps general utilities split by responsibility while preserving re-exports', () => {
+    const utils = read('lib/utils.js');
+
+    expect(utils.split('\n').length).toBeLessThanOrEqual(80);
+    expect(utils).toContain("from './area-display.js'");
+    expect(utils).toContain("from './markdown-format.js'");
+    expect(utils).toContain("from './validation.js'");
+    expect(read('lib/area-display.js')).toContain('export function getAreaDisplayName');
+    expect(read('lib/markdown-format.js')).toContain('export function formatAIResponse');
+    expect(read('lib/validation.js')).toContain('export function validateStep1');
+  });
+
+  it('keeps data sets in dedicated modules with a compatibility barrel', () => {
+    const data = read('lib/data.js');
+
+    expect(data.split('\n').length).toBeLessThanOrEqual(40);
+    expect(data).toContain("from './data/trigger-points.js'");
+    expect(data).toContain("from './data/fascial-lines.js'");
+    expect(data).toContain("from './data/red-flags.js'");
+    expect(read('lib/data/trigger-points.js')).toContain('export const triggerPointsDB');
+    expect(read('lib/data/fascial-lines.js')).toContain('export const fascialLinesDB');
+    expect(read('lib/data/red-flags.js')).toContain('export const redFlagConditions');
+  });
+
+  it('splits env loader tests by subject', () => {
+    expect(fs.existsSync(path.join(process.cwd(), 'tests/env-loader/env-loader.test.js'))).toBe(true);
+    expect(fs.existsSync(path.join(process.cwd(), 'tests/env-loader/usage-tracker.test.js'))).toBe(true);
+    expect(fs.existsSync(path.join(process.cwd(), 'tests/env-loader.test.js'))).toBe(false);
+  });
+
+  it('uses a single status payload helper and removes legacy API aliases', () => {
+    expect(read('server.js')).toContain("require('./lib/server-status.cjs')");
+    expect(read('api/status.js')).toContain("require('../lib/server-status.cjs')");
+    expect(read('server.js')).not.toContain("app.get('/api/config'");
+    expect(fs.existsSync(path.join(process.cwd(), 'api/gemini.js'))).toBe(false);
+    expect(read('lib/env-loader.js')).not.toContain('/api/config');
   });
 });

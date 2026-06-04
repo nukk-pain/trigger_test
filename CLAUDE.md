@@ -14,9 +14,6 @@ AI-powered pain analysis and self-massage guide web application. Users select pa
 # Local development (Express server on port 3000)
 npm start
 
-# Alternative: static file server for frontend-only testing
-python -m http.server 8000
-
 # Test environment loading
 curl http://localhost:3000/api/env
 ```
@@ -26,25 +23,24 @@ curl http://localhost:3000/api/env
 ### Global State Objects
 All state is managed via global window objects initialized on page load:
 - `window.envLoader` - Environment variable loader (EnvLoader class in env-loader.js)
-- `window.openaiConfig` - backward-compatible alias for the OpenRouter API wrapper in config.js
+- `window.openRouterConfig` - OpenRouter server-proxy API wrapper in config.js
 - `window.usageTracker` - Usage statistics tracker (UsageTracker class in config.js)
 - `window.MEDICAL_PROMPTS` - System prompts for AI analysis
 
 ### Data Flow
 1. User selects body areas on SVG map → stored in `selectedAreas` Set
 2. User enters pain description → stored in `document.getElementById('pain-situation').value`
-3. Click "Analyze" → `openaiConfig.makeRequest()` sends to server `/api/chat` with `MEDICAL_PROMPTS.PAIN_ANALYSIS`
-4. Response parsed and displayed → usage tracked in localStorage
+3. Click "Analyze" → `openRouterConfig.makeRequest()` sends messages to server `/api/chat` with `MEDICAL_PROMPTS.PAIN_ANALYSIS`
+4. Response parsed and displayed → browser usage display updates; authoritative rate limiting stays server-side
 
 ### Key Data Structures (embedded in script.js)
 - `triggerPointsDB`: 7+ trigger points with anatomical locations, massage techniques, safety precautions
 - `fascialLinesDB`: 3 fascial lines based on Thomas Myers' Anatomy Trains theory
 - 60+ clickable SVG body regions mapped to trigger point associations
 
-### Environment Loading (multi-fallback)
-1. Vercel serverless `/api/env` (production)
-2. Express server `/api/env` (local dev)
-3. localStorage fallback (last resort)
+### Environment Loading
+1. `/api/env` returns public runtime config in both Express and Vercel
+2. localStorage fallback keeps only non-sensitive display/config values
 
 ### Medical Safety Features
 - Red flag symptom detection (fever, neurological signs, chest pain, etc.)
@@ -58,8 +54,10 @@ OPENROUTER_API_KEY=sk-or-...   # Required, server-side only
 OPENROUTER_MODEL=openrouter/auto
 MAX_TOKENS=1500
 TEMPERATURE=1.0
-DAILY_REQUEST_LIMIT=50         # localStorage tracked
+DAILY_REQUEST_LIMIT=50
 MONTHLY_REQUEST_LIMIT=1000
+SERVER_RATE_LIMIT_MAX=50
+SERVER_RATE_LIMIT_WINDOW_SECONDS=86400
 ```
 
 ## Security Constraints

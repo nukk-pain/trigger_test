@@ -1,0 +1,126 @@
+/* 3단계: 결과 */
+.warning-section {
+    background: #f8d7da;
+    border: 2px solid #f5c6cb;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.warning-section h2 {
+    color: #721c24;
+    margin-bottom: 20px;
+}
+
+.emergency-notice {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.emergency-notice p {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #721c24;
+}
+
+.emergency-contacts {
+    background: #d4edda;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.emergency-contacts p {
+    font-weight: bold;
+    color: #155724;
+    font-size: 1.3rem;
+}
+
+/* 가이드 카드 */
+.trigger-point-card,
+.fascial-line-card {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    border-left: 5px solid #4CAF50;
+    position: relative;
+}
+
+.trigger-point-card h4,
+.fascial-line-card h4 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.massage-method {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.precaution {
+    color: #e67e22;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.confidence-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.confidence-badge.high {
+    background: #d4edda;
+    color: #155724;
+}
+
+.confidence-badge.medium {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.massage-instruction {
+    background: #e3f2fd;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.massage-timing {
+    background: #f3e5f5;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.precautions {
+    background: #fff3cd;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.precautions ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.precautions li {
+    padding: 8px 0;
+    border-bottom: 1px solid #ffeaa7;
+}
+
+.precautions li:before {
+    content: "⚠️ ";
+    margin-right: 8px;
+}

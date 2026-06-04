@@ -93,17 +93,20 @@ EOF
 ## 📁 파일 구조
 
 ```
-code_test/
+trigger_test/
 ├── index.html          # 메인 HTML (통증 부위 선택 SVG 포함)
-├── styles.css          # 스타일시트
-├── script.js           # 메인 로직 (트리거 포인트 DB 포함)
-├── config.js           # OpenRouter API 설정 및 의료 프롬프트
-├── env-loader.js       # 환경변수 로더
+├── styles.css          # 공용/잔여 스타일
+├── styles/             # 분리된 레이아웃/바디맵/분석 스타일
+├── script.js           # 메인 UI 로직
+├── config.js           # 브라우저 OpenRouter 프록시 설정
+├── env-loader.js       # 브라우저 런타임 설정 로더
 ├── server.js           # Express 서버 (로컬 개발용)
 ├── api/
-│   └── env.js          # Vercel 서버리스 함수
+│   ├── env.js          # 공개 런타임 설정
+│   ├── status.js       # 서버 프록시 상태
+│   └── chat.js         # OpenRouter chat 프록시
+├── lib/                # 공유 브라우저/서버 모듈
 ├── package.json        # 의존성 관리
-├── package-lock.json   # 의존성 락 파일
 └── README.md           # 이 파일
 ```
 
@@ -111,7 +114,7 @@ code_test/
 
 ### .env.local (로컬 개발용)
 ```bash
-OPENROUTER_API_KEY=sk-or-your-openrouter-api-key
+OPENROUTER_API_KEY=sk-or-your-server-proxy-here
 OPENROUTER_MODEL=openrouter/auto
 MAX_TOKENS=1500
 TEMPERATURE=1.0
@@ -152,12 +155,7 @@ vercel env add OPENROUTER_MODEL
 cp .env.example .env.local
 # .env.local 파일에 API 키 설정
 
-# 2. 정적 파일 서버 실행 (개발용)
-python -m http.server 8000
-# 또는
-npx http-server
-
-# 3. Node.js 서버 실행 (프로덕션 테스트용)
+# 2. Node.js 서버 실행
 node server.js
 ```
 
@@ -165,7 +163,10 @@ node server.js
 
 ```bash
 # 환경변수 로드 테스트
-curl http://localhost:8000/api/env
+curl http://localhost:3000/api/env
+
+# 서버 프록시 상태 테스트
+curl http://localhost:3000/api/status
 
 # AI 분석 테스트 (브라우저 개발자 도구 콘솔)
 console.log(await window.envLoader.loadEnv());
@@ -181,6 +182,8 @@ console.log(await window.envLoader.loadEnv());
 | `OPENROUTER_MODEL` | openrouter/auto | 사용할 OpenRouter 모델 |
 | `MAX_TOKENS` | 1500 | 최대 출력 토큰 수 |
 | `TEMPERATURE` | 1.0 | AI 창의성 수준 |
+| `SERVER_RATE_LIMIT_MAX` | `DAILY_REQUEST_LIMIT` | 서버 프록시 rate limit |
+| `SERVER_RATE_LIMIT_WINDOW_SECONDS` | 86400 | 서버 rate limit 윈도우 |
 | `ENABLE_AI_QA` | true | AI 질문 도우미 활성화 |
 | `ENABLE_DETAILED_ANALYSIS` | true | 상세 분석 활성화 |
 | `NEXT_PUBLIC_VERCEL_ANALYTICS_ID` | - | Vercel Analytics ID (선택사항) |

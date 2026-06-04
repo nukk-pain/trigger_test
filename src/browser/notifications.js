@@ -61,11 +61,11 @@ export function showServerStatusDialog() {
 
 export function showServerProxyDialog(errorMessage = null) {
     // 기존 다이얼로그가 있으면 제거
-    const existing = document.querySelector('.api-key-dialog-overlay');
+    const existing = document.querySelector('.server-proxy-dialog-overlay');
     if (existing) existing.remove();
 
     const dialog = document.createElement('div');
-    dialog.className = 'api-key-dialog-overlay mandatory';
+    dialog.className = 'server-proxy-dialog-overlay mandatory';
 
     // 오류 메시지에 따른 제목과 내용 변경
     let title = '🔑 .env.local 파일 설정 필요';
@@ -103,17 +103,17 @@ export function showServerProxyDialog(errorMessage = null) {
     }
 
     setSafeHtml(dialog, `
-        <div class="api-key-dialog">
+        <div class="server-proxy-dialog">
             <h3>${title}</h3>
             <p>${description}</p>
             ${errorMessage ? `<div class="error-details"><strong>오류:</strong> ${errorMessage}</div>` : ''}
-            <div class="api-key-info mandatory">
+            <div class="server-proxy-info mandatory">
                 <p><strong>설정 방법:</strong></p>
                 <ol>
                     <li><a href="https://openrouter.ai/settings/keys" target="_blank">OpenRouter</a>에서 새 서버 프록시 발급</li>
                     <li>프로젝트 폴더의 <code>.env.local</code> 파일 수정</li>
                     <li>파일에서 서버 프록시 업데이트:<br>
-                        <code>OPENROUTER_API_KEY=sk-or-your-api-key-here</code>
+                        <code>OPENROUTER_API_KEY=sk-or-your-server-proxy-here</code>
                     </li>
                     <li>서버 재시작: <code>npm start</code></li>
                 </ol>
@@ -128,12 +128,12 @@ DAILY_REQUEST_LIMIT=50
 MONTHLY_REQUEST_LIMIT=1000
 OPENROUTER_MODEL=openrouter/auto</code></pre>
             </div>
-            <div class="api-key-actions">
+            <div class="server-proxy-actions">
                 <button data-action="reload" class="primary-btn">설정 후 새로고침</button>
                 <button data-action="openrouter-keys" class="secondary-btn">OpenRouter 키 관리</button>
                 <button data-action="openrouter-credits" class="secondary-btn">결제 정보 확인</button>
             </div>
-            <div class="api-key-help">
+            <div class="server-proxy-help">
                 <p><small>
                     💡 Node.js 서버를 실행 중인지 확인하세요: <code>npm start</code><br>
                     🔒 서버 프록시는 절대 코드에 직접 입력하지 마세요.<br>
