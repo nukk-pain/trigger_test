@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
-function loadBrowserScript(relativePath) {
-  const source = fs.readFileSync(path.join(process.cwd(), relativePath), 'utf8');
-  window.eval(source);
+async function loadBrowserModule(relativePath) {
+  const url = pathToFileURL(path.join(process.cwd(), relativePath));
+  url.search = `?t=${Date.now()}-${Math.random()}`;
+  await import(url.href);
 }
 
 describe('runtime OpenRouter config', () => {
@@ -12,8 +13,7 @@ describe('runtime OpenRouter config', () => {
     document.body.innerHTML = '';
     delete window.envLoader;
     delete window.usageTracker;
-    delete window.geminiConfig;
-    delete window.openaiConfig;
+    delete window.openRouterConfig;
     delete window.MEDICAL_PROMPTS;
     globalThis.fetch = vi.fn();
   });
@@ -33,14 +33,14 @@ describe('runtime OpenRouter config', () => {
       })
     });
 
-    loadBrowserScript('env-loader.js');
-    loadBrowserScript('config.js');
+    await loadBrowserModule('env-loader.js');
+    await loadBrowserModule('config.js');
 
-    await expect(window.openaiConfig.initialize()).resolves.toBe(true);
+    await expect(window.openRouterConfig.initialize()).resolves.toBe(true);
 
     expect(window.envLoader.config.OPENROUTER_API_KEY).toBeUndefined();
-    expect(window.openaiConfig.hasApiKey()).toBe(true);
-    expect(window.openaiConfig.model).toBe('openrouter/auto');
+    expect(window.openRouterConfig.isServerProxyReady()).toBe(true);
+    expect(window.openRouterConfig.model).toBe('openrouter/auto');
     expect(window.MEDICAL_PROMPTS.RED_FLAG_CHECK).toContain('응급상황');
 
     globalThis.fetch.mockResolvedValueOnce({
@@ -49,7 +49,7 @@ describe('runtime OpenRouter config', () => {
     });
 
     await expect(
-      window.openaiConfig.makeRequest(
+      window.openRouterConfig.makeRequest(
         [{ role: 'user', content: '통증' }],
         window.MEDICAL_PROMPTS.RED_FLAG_CHECK
       )

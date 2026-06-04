@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const { handleChatRequest } = require('./lib/openrouter-proxy.cjs');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -53,10 +54,6 @@ function loadEnvFile() {
 // Load environment variables
 const envConfig = { ...process.env, ...loadEnvFile() };
 
-function getOpenRouterBaseUrl() {
-    return (envConfig.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
-}
-
 function getClientConfig() {
     return {
         DAILY_REQUEST_LIMIT: envConfig.DAILY_REQUEST_LIMIT || '50',
@@ -68,44 +65,6 @@ function getClientConfig() {
         ENABLE_DETAILED_ANALYSIS: envConfig.ENABLE_DETAILED_ANALYSIS || 'true',
         OPENROUTER_SITE_URL: envConfig.OPENROUTER_SITE_URL || '',
         OPENROUTER_APP_NAME: envConfig.OPENROUTER_APP_NAME || ''
-    };
-}
-
-function isValidMessage(message) {
-    return message &&
-        ['system', 'user', 'assistant'].includes(message.role) &&
-        typeof message.content === 'string' &&
-        message.content.trim().length > 0;
-}
-
-function validateMessages(messages) {
-    return Array.isArray(messages) && messages.length > 0 && messages.every(isValidMessage);
-}
-
-function buildOpenRouterHeaders() {
-    const headers = {
-        Authorization: `Bearer ${envConfig.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json'
-    };
-
-    if (envConfig.OPENROUTER_SITE_URL) {
-        headers['HTTP-Referer'] = envConfig.OPENROUTER_SITE_URL;
-    }
-
-    if (envConfig.OPENROUTER_APP_NAME) {
-        headers['X-Title'] = envConfig.OPENROUTER_APP_NAME;
-    }
-
-    return headers;
-}
-
-function buildOpenRouterBody(messages) {
-    return {
-        model: envConfig.OPENROUTER_MODEL || 'openrouter/auto',
-        messages,
-        max_tokens: parseInt(envConfig.MAX_TOKENS || '1500'),
-        temperature: parseFloat(envConfig.TEMPERATURE || '1'),
-        stream: false
     };
 }
 
@@ -130,48 +89,34 @@ app.get('/api/env', (req, res) => {
     });
 });
 
+app.get('/api/status', (req, res) => {
+    const proxyConfigured = Boolean(envConfig.OPENROUTER_API_KEY);
+    res.json({
+        success: true,
+        data: {
+            provider: 'openrouter',
+            proxyConfigured,
+            proxyReady: proxyConfigured,
+            model: envConfig.OPENROUTER_MODEL || 'openrouter/auto',
+            limits: {
+                daily: parseInt(envConfig.DAILY_REQUEST_LIMIT || '50', 10),
+                monthly: parseInt(envConfig.MONTHLY_REQUEST_LIMIT || '1000', 10)
+            },
+            rateLimit: {
+                limit: parseInt(envConfig.SERVER_RATE_LIMIT_MAX || envConfig.DAILY_REQUEST_LIMIT || '50', 10),
+                windowSeconds: parseInt(envConfig.SERVER_RATE_LIMIT_WINDOW_SECONDS || '86400', 10)
+            },
+            environment: envConfig.NODE_ENV || 'development'
+        }
+    });
+});
+
 app.post('/api/chat', async (req, res) => {
-    try {
-        const { messages } = req.body || {};
-        if (!validateMessages(messages)) {
-            return res.status(400).json({ error: '유효한 messages 배열이 필요합니다.' });
-        }
-
-        if (!envConfig.OPENROUTER_API_KEY) {
-            return res.status(401).json({ error: 'OpenRouter API 키가 서버에 설정되지 않았습니다.' });
-        }
-
-        const upstreamResponse = await fetch(`${getOpenRouterBaseUrl()}/chat/completions`, {
-            method: 'POST',
-            headers: buildOpenRouterHeaders(),
-            body: JSON.stringify(buildOpenRouterBody(messages))
-        });
-        const data = await upstreamResponse.json().catch(() => ({}));
-
-        if (!upstreamResponse.ok) {
-            const message = data.error?.message || data.error || `HTTP ${upstreamResponse.status}`;
-            return res.status(upstreamResponse.status).json({ error: message });
-        }
-
-        const responseText = data.choices?.[0]?.message?.content || '';
-        if (data.usage) {
-            console.log('━━━━━━━━ 토큰 사용량 ━━━━━━━━');
-            console.log(`  입력 토큰: ${data.usage.prompt_tokens}`);
-            console.log(`  출력 토큰: ${data.usage.completion_tokens}`);
-            console.log(`  총 토큰: ${data.usage.total_tokens}`);
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        }
-
-        console.log('API 응답:', responseText.substring(0, 100) + '...');
-        res.json({ output: responseText, usage: data.usage });
-    } catch (error) {
-        console.error('OpenRouter API 호출 오류:', error);
-        console.error('오류 세부 정보:', error.message);
-        res.status(500).json({
-            error: 'OpenRouter API 호출 중 오류 발생',
-            details: error.message || '알 수 없는 오류'
-        });
-    }
+    const result = await handleChatRequest({ req, env: envConfig });
+    Object.entries(result.headers || {}).forEach(([key, value]) => {
+        res.setHeader(key, value);
+    });
+    res.status(result.status).json(result.body);
 });
 
 // Serve the main page

@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import chatHandler from '../api/chat.js';
 import envHandler from '../api/env.js';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const { resetUsage } = require('../lib/openrouter-proxy.cjs');
 
 function createResponse() {
   const response = {
@@ -44,6 +48,7 @@ describe('OpenRouter chat API', () => {
       MONTHLY_REQUEST_LIMIT: '34'
     };
     globalThis.fetch = vi.fn();
+    resetUsage();
   });
 
   afterEach(() => {
@@ -107,7 +112,7 @@ describe('OpenRouter chat API', () => {
     expect(JSON.stringify(res.body)).not.toContain('sk-or-secret');
   });
 
-  it('rejects invalid messages and never exposes OpenRouter keys', async () => {
+  it('rejects invalid messages without contacting OpenRouter and never exposes OpenRouter keys', async () => {
     const malformedReq = { method: 'POST', body: { messages: [] } };
     const malformedRes = createResponse();
 
@@ -134,5 +139,41 @@ describe('OpenRouter chat API', () => {
     expect(envRes.statusCode).toBe(200);
     expect(envRes.body.data.OPENROUTER_API_KEY).toBeUndefined();
     expect(JSON.stringify(envRes.body)).not.toContain('sk-or-secret');
+  });
+
+  it('enforces server-side daily request limit', async () => {
+    process.env.DAILY_REQUEST_LIMIT = '1';
+    process.env.SERVER_RATE_LIMIT_MAX = '1';
+    process.env.SERVER_RATE_LIMIT_WINDOW_SECONDS = '60';
+    globalThis.fetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        choices: [{ message: { content: 'ok' } }],
+        usage: { total_tokens: 1 }
+      })
+    });
+
+    const req = {
+      method: 'POST',
+      headers: { 'x-forwarded-for': '203.0.113.10' },
+      body: { messages: [{ role: 'user', content: '목 통증' }] }
+    };
+
+    const first = createResponse();
+    await chatHandler(req, first);
+
+    const second = createResponse();
+    await chatHandler(req, second);
+
+    expect(first.statusCode).toBe(200);
+    expect(second.statusCode).toBe(429);
+    expect(second.body.error).toContain('서버 사용량 한도');
+    expect(second.body).toMatchObject({
+      retryAfterSeconds: 60,
+      limit: 1,
+      windowSeconds: 60
+    });
+    expect(second.headers['Retry-After']).toBe('60');
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
 });

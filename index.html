@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>통증 가이드 도우미 - AI 셀프 마사지 안내</title>
+    <link rel="stylesheet" href="styles/base.css">
     <link rel="stylesheet" href="styles.css">
     <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
 </head>
@@ -29,13 +30,14 @@
 
             <div class="body-map-container">
                 <div class="body-view-tabs">
-                    <button class="view-tab active" data-view="front">앞면</button>
-                    <button class="view-tab" data-view="back">뒷면</button>
+                    <button type="button" class="view-tab active" data-view="front">앞면</button>
+                    <button type="button" class="view-tab" data-view="back">뒷면</button>
                 </div>
 
                 <div class="body-map" id="body-map">
                     <!-- SVG 인체 그림이 여기에 삽입됩니다 -->
                     <svg id="body-svg" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+                        <title>통증 부위 선택 인체 지도</title>
                         <!-- 앞면 body outline -->
                         <g id="front-view" class="body-view active">
                             <!-- 머리 부위 -->
@@ -341,8 +343,8 @@
     </div>
 
 
-    <script src="env-loader.js"></script>
-    <script src="config.js"></script>
+    <script type="module" src="env-loader.js"></script>
+    <script type="module" src="config.js"></script>
     <script type="module" src="script.js"></script>
 </body>
 

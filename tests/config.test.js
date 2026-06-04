@@ -52,15 +52,15 @@ describe('OpenRouterConfig', () => {
   });
 
   describe('setApiKey', () => {
-    it('should throw error when trying to set API key', () => {
+    it('should throw error when trying to set server proxy', () => {
       expect(() => config.setApiKey()).toThrow(
-        '🚫 보안 정책: API 키는 .env.local 파일에서만 설정할 수 있습니다.'
+        '🚫 보안 정책: 서버 프록시는 .env.local 파일에서만 설정할 수 있습니다.'
       );
     });
   });
 
   describe('getApiKey', () => {
-    it('should not return API key from envLoader', () => {
+    it('should not return server proxy from envLoader', () => {
       window.envLoader.getApiKey.mockReturnValue('sk-test123');
 
       expect(config.getApiKey()).toBe('');
@@ -73,34 +73,34 @@ describe('OpenRouterConfig', () => {
     });
   });
 
-  describe('hasApiKey', () => {
+  describe('isServerProxyReady', () => {
     it('should return true after server config initialization', async () => {
       await config.initialize();
 
-      expect(config.hasApiKey()).toBe(true);
+      expect(config.isServerProxyReady()).toBe(true);
     });
 
-    it('should return false for empty API key', () => {
+    it('should return false for empty server proxy', () => {
       window.envLoader.getApiKey.mockReturnValue('');
 
-      expect(config.hasApiKey()).toBeFalsy();
+      expect(config.isServerProxyReady()).toBeFalsy();
     });
 
-    it('should return false for invalid API key format', () => {
+    it('should return false for invalid server proxy format', () => {
       window.envLoader.getApiKey.mockReturnValue('invalid-key');
 
-      expect(config.hasApiKey()).toBe(false);
+      expect(config.isServerProxyReady()).toBe(false);
     });
   });
 
-  describe('testApiKey', () => {
+  describe('testServerProxy', () => {
     it('should return true when server proxy accepts a test request', async () => {
       globalThis.fetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ output: 'OK' })
       });
 
-      const result = await config.testApiKey();
+      const result = await config.testServerProxy();
 
       expect(result).toBe(true);
       expect(globalThis.fetch).toHaveBeenCalledWith('/api/chat', expect.any(Object));
@@ -114,8 +114,8 @@ describe('OpenRouterConfig', () => {
         json: () => Promise.resolve({})
       });
 
-      await expect(config.testApiKey()).rejects.toThrow(
-        'OpenRouter API 키가 서버에 설정되지 않았거나 유효하지 않습니다.'
+      await expect(config.testServerProxy()).rejects.toThrow(
+        'OpenRouter 서버 프록시가 서버에 설정되지 않았거나 유효하지 않습니다.'
       );
     });
 
@@ -127,7 +127,7 @@ describe('OpenRouterConfig', () => {
         json: () => Promise.resolve({})
       });
 
-      await expect(config.testApiKey()).rejects.toThrow(
+      await expect(config.testServerProxy()).rejects.toThrow(
         'API 사용량 한도를 초과했습니다.'
       );
     });

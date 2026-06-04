@@ -98,7 +98,7 @@ describe('EnvLoader', () => {
   });
 
   describe('getApiKey', () => {
-    it('should not return API key when set', () => {
+    it('should not return server proxy when set', () => {
       envLoader.config.OPENROUTER_API_KEY = 'sk-test123';
       expect(envLoader.getApiKey()).toBe('');
     });
@@ -109,21 +109,21 @@ describe('EnvLoader', () => {
   });
 
   describe('setApiKey', () => {
-    it('should throw error when trying to set API key', () => {
+    it('should throw error when trying to set server proxy', () => {
       expect(() => envLoader.setApiKey('sk-test')).toThrow(
-        'API 키는 .env.local 파일을 통해서만 설정할 수 있습니다.'
+        '서버 프록시는 .env.local 파일을 통해서만 설정할 수 있습니다.'
       );
     });
   });
 
-  describe('hasApiKey', () => {
+  describe('isServerProxyReady', () => {
     it('should return true when server config is loaded', () => {
       envLoader.loaded = true;
-      expect(envLoader.hasApiKey()).toBe(true);
+      expect(envLoader.isServerProxyReady()).toBe(true);
     });
 
-    it('should return false when API key is empty', () => {
-      expect(envLoader.hasApiKey()).toBe(false);
+    it('should return false when server proxy is empty', () => {
+      expect(envLoader.isServerProxyReady()).toBe(false);
     });
   });
 
@@ -225,7 +225,7 @@ describe('EnvLoader', () => {
       expect(envLoader.config.OPENROUTER_MODEL).toBe('openrouter/auto');
     });
 
-    it('should not load API key from localStorage', () => {
+    it('should not load server proxy from localStorage', () => {
       const savedConfig = { OPENROUTER_API_KEY: 'sk-secret', DAILY_REQUEST_LIMIT: '75' };
       localStorage.getItem.mockReturnValue(JSON.stringify(savedConfig));
 
@@ -249,7 +249,7 @@ describe('EnvLoader', () => {
   });
 
   describe('saveToLocalStorage', () => {
-    it('should save config without API key', () => {
+    it('should save config without server proxy', () => {
       envLoader.config = {
         OPENAI_API_KEY: 'sk-secret',
         OPENROUTER_API_KEY: 'sk-or-secret',
