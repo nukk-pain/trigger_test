@@ -1,6 +1,4 @@
-// Gemini API 설정 및 관리 (사용량 제한 포함)
-
-class GeminiConfig {
+class OpenRouterConfig {
     constructor() {
         this.initialized = false;
     }
@@ -15,12 +13,10 @@ class GeminiConfig {
 
         // 환경 설정에서 값 로드
         this.model = window.envLoader.getModel();
-        this.maxOutputTokens = window.envLoader.getMaxOutputTokens();
+        this.maxTokens = window.envLoader.getMaxTokens();
         this.temperature = window.envLoader.getTemperature();
-        this.topP = window.envLoader.getTopP();
-        this.topK = window.envLoader.getTopK();
 
-        return this.hasApiKey();
+        return this.isReady();
     }
 
     setApiKey(key) {
@@ -29,33 +25,24 @@ class GeminiConfig {
     }
 
     getApiKey() {
-        if (window.envLoader) {
-            return window.envLoader.getApiKey();
-        }
         return '';
     }
 
     hasApiKey() {
-        const apiKey = this.getApiKey();
-        return apiKey && apiKey.length > 0;
+        return this.isReady();
+    }
+
+    isReady() {
+        return this.initialized && !!this.model;
     }
 
     async testApiKey() {
-        if (!this.hasApiKey()) {
-            throw new Error('API 키가 설정되지 않았습니다.');
-        }
-
         try {
-            const apiKey = this.getApiKey();
-            console.log('🔍 API 키 테스트 중:', `${apiKey.substring(0, 10)}...`);
-
-            // Gemini API 테스트 - 서버 엔드포인트 호출
-            const response = await fetch('/api/gemini', {
+            const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    prompt: '테스트입니다. "OK"라고만 응답해주세요.',
-                    history: []
+                    messages: [{ role: 'user', content: '테스트입니다. "OK"라고만 응답해주세요.' }]
                 })
             });
 
@@ -66,7 +53,7 @@ class GeminiConfig {
                 console.error('❌ API 오류 상세:', errorData);
 
                 if (response.status === 401) {
-                    throw new Error('API 키가 유효하지 않습니다. Google AI Studio에서 새 키를 발급받아주세요.');
+                    throw new Error('OpenRouter API 키가 서버에 설정되지 않았거나 유효하지 않습니다.');
                 } else if (response.status === 429) {
                     throw new Error('API 사용량 한도를 초과했습니다. 잠시 후 다시 시도해주세요.');
                 } else {
@@ -84,11 +71,7 @@ class GeminiConfig {
 
     async makeRequest(messages, systemPrompt = '') {
         if (!this.initialized) {
-            throw new Error('Gemini 설정이 초기화되지 않았습니다.');
-        }
-
-        if (!this.hasApiKey()) {
-            throw new Error('유효한 Gemini API 키가 필요합니다.');
+            throw new Error('OpenRouter 설정이 초기화되지 않았습니다.');
         }
 
         // 사용량 제한 확인
@@ -97,38 +80,15 @@ class GeminiConfig {
             throw new Error(`일일 또는 월간 사용량 한도에 도달했습니다. 남은 요청: ${remaining}회`);
         }
 
-        // 메시지를 Gemini 형식으로 변환
-        const history = [];
-        let currentPrompt = '';
-
-        // 시스템 프롬프트가 있으면 첫 번째 사용자 메시지에 포함
-        const fullMessages = [...messages];
-
-        if (systemPrompt && fullMessages.length > 0) {
-            fullMessages[0] = {
-                ...fullMessages[0],
-                content: `${systemPrompt}\n\n${fullMessages[0].content}`
-            };
-        }
-
-        // 마지막 메시지를 현재 프롬프트로, 나머지는 히스토리로
-        for (let i = 0; i < fullMessages.length; i++) {
-            const msg = fullMessages[i];
-            if (i === fullMessages.length - 1) {
-                currentPrompt = msg.content;
-            } else {
-                history.push({
-                    role: msg.role === 'assistant' ? 'model' : 'user',
-                    parts: [{ text: msg.content }]
-                });
-            }
-        }
+        const requestMessages = systemPrompt ?
+            [{ role: 'system', content: systemPrompt }, ...messages] :
+            messages;
 
         try {
-            const response = await fetch('/api/gemini', {
+            const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: currentPrompt, history })
+                body: JSON.stringify({ messages: requestMessages })
             });
 
             if (!response.ok) {
@@ -147,7 +107,7 @@ class GeminiConfig {
 
             return data.output || '';
         } catch (error) {
-            console.error('Gemini API 요청 실패:', error);
+            console.error('OpenRouter API 요청 실패:', error);
             throw error;
         }
     }
@@ -221,9 +181,7 @@ const MEDICAL_PROMPTS = {
 응답은 '응급상황' 또는 '일반관리' 중 하나로 시작하고, 간단한 이유를 제시해주세요.`
 };
 
-// 전역 Gemini 설정 인스턴스
-window.geminiConfig = new GeminiConfig();
+window.openRouterConfig = new OpenRouterConfig();
 window.MEDICAL_PROMPTS = MEDICAL_PROMPTS;
-
-// 이전 코드와의 호환성을 위한 alias
-window.openaiConfig = window.geminiConfig;
+window.openaiConfig = window.openRouterConfig;
+window.geminiConfig = window.openRouterConfig;

@@ -1,4 +1,3 @@
-// Vercel Serverless Function for environment variables (Gemini API)
 export default function handler(req, res) {
     // CORS 헤더 설정
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,14 +17,15 @@ export default function handler(req, res) {
     try {
         // Vercel 환경변수에서 로드
         const envData = {
-            GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
-            GEMINI_MODEL: process.env.GEMINI_MODEL,
-            MAX_OUTPUT_TOKENS: parseInt(process.env.MAX_OUTPUT_TOKENS || '8192'),
+            OPENROUTER_MODEL: process.env.OPENROUTER_MODEL || 'openrouter/auto',
+            MAX_TOKENS: parseInt(process.env.MAX_TOKENS || '1500'),
             TEMPERATURE: parseFloat(process.env.TEMPERATURE || '1'),
-            TOP_P: parseFloat(process.env.TOP_P || '0.95'),
-            TOP_K: parseInt(process.env.TOP_K || '40'),
             DAILY_LIMIT: parseInt(process.env.DAILY_REQUEST_LIMIT || '50'),
-            MONTHLY_LIMIT: parseInt(process.env.MONTHLY_REQUEST_LIMIT || '1000')
+            MONTHLY_LIMIT: parseInt(process.env.MONTHLY_REQUEST_LIMIT || '1000'),
+            ENABLE_AI_QA: process.env.ENABLE_AI_QA || 'true',
+            ENABLE_DETAILED_ANALYSIS: process.env.ENABLE_DETAILED_ANALYSIS || 'true',
+            OPENROUTER_SITE_URL: process.env.OPENROUTER_SITE_URL || '',
+            OPENROUTER_APP_NAME: process.env.OPENROUTER_APP_NAME || ''
         };
 
         console.log('✅ Vercel에서 환경변수를 성공적으로 로드했습니다.');

@@ -1,5 +1,3 @@
-// 통증 가이드 도우미 - 메인 JavaScript (OpenAI API 통합)
-
 // 모듈에서 필요한 함수 import
 import { getAreaDisplayName, formatAIResponse, validateStep1 as validateStep1Pure } from './lib/utils.js';
 import { analyzeTriggerPoints as analyzeTriggerPointsLib, analyzeFascialLines as analyzeFascialLinesLib } from './lib/analysis.js';
@@ -53,18 +51,16 @@ async function initializeApp() {
 
 async function initializeAPI() {
     if (!window.openaiConfig) {
-        throw new Error('OpenAI 설정이 로드되지 않았습니다.');
+        throw new Error('OpenRouter 설정이 로드되지 않았습니다.');
     }
 
-    const hasApiKey = await window.openaiConfig.initialize();
-    
-    if (!hasApiKey) {
-        // API 키가 없으면 필수 설정 다이얼로그 표시
-        showMandatoryAPIKeyDialog();
-        throw new Error('API 키 설정이 필요합니다.');
+    const ready = await window.openaiConfig.initialize();
+
+    if (!ready) {
+        throw new Error('AI 서버 설정을 로드할 수 없습니다.');
     }
 
-    console.log('✅ OpenAI API 설정 완료');
+    console.log('✅ OpenRouter API 설정 완료');
 }
 
 function showStartupError(message) {
@@ -153,12 +149,12 @@ function updateAIStatus() {
     // Only update if elements exist (footer present)
     if (!indicator || !text) return;
     
-    if (window.openaiConfig && window.openaiConfig.hasApiKey()) {
+    if (window.openaiConfig && window.openaiConfig.isReady && window.openaiConfig.isReady()) {
         indicator.textContent = '🤖✅';
         text.textContent = 'AI 분석 활성화';
     } else {
         indicator.textContent = '🤖❌';
-        text.textContent = '.env.local 파일에 API 키 설정 필요';
+        text.textContent = 'AI 서버 설정 확인 필요';
     }
 }
 
@@ -879,7 +875,6 @@ function resetApp() {
     currentStep = 1;
 }
 
-// OpenAI API 관련 유틸리티 함수들
 function showLoadingIndicator() {
     const loadingDiv = document.createElement('div');
     loadingDiv.id = 'loading-indicator';
@@ -948,31 +943,31 @@ function showMandatoryAPIKeyDialog(errorMessage = null) {
     
     // 오류 메시지에 따른 제목과 내용 변경
     let title = '🔑 .env.local 파일 설정 필요';
-    let description = '이 앱을 사용하려면 .env.local 파일에 OpenAI API 키를 설정해야 합니다.';
+    let description = '이 앱을 사용하려면 서버에 OpenRouter API 키를 설정해야 합니다.';
     let troubleshootingSection = '';
     
     if (errorMessage && errorMessage.includes('유효하지 않거나 만료')) {
         title = '❌ API 키 오류';
-        description = 'OpenAI API 키가 유효하지 않거나 만료되었습니다.';
+        description = 'OpenRouter API 키가 유효하지 않거나 만료되었습니다.';
         troubleshootingSection = `
             <div class="troubleshooting">
                 <h4>🔧 문제 해결:</h4>
                 <ul>
                     <li>✅ <strong>새 API 키 발급:</strong> 기존 키가 만료되었을 수 있습니다</li>
-                    <li>✅ <strong>결제 정보 확인:</strong> OpenAI 계정에 크레딧이 있는지 확인</li>
-                    <li>✅ <strong>키 형식 확인:</strong> sk-proj- 또는 sk- 로 시작하는지 확인</li>
+                    <li>✅ <strong>결제 정보 확인:</strong> OpenRouter 계정에 크레딧이 있는지 확인</li>
+                    <li>✅ <strong>키 형식 확인:</strong> OpenRouter 키 형식인지 확인</li>
                     <li>✅ <strong>공백 제거:</strong> API 키 앞뒤 공백이 없는지 확인</li>
                 </ul>
             </div>
         `;
     } else if (errorMessage && errorMessage.includes('사용량 한도')) {
         title = '📊 사용량 한도 초과';
-        description = 'OpenAI API 사용량 한도를 초과했습니다.';
+        description = 'OpenRouter API 사용량 한도를 초과했습니다.';
         troubleshootingSection = `
             <div class="troubleshooting">
                 <h4>🔧 해결 방법:</h4>
                 <ul>
-                    <li>💳 <strong>결제 정보 추가:</strong> OpenAI 계정에 결제 방법 등록</li>
+                    <li>💳 <strong>결제 정보 추가:</strong> OpenRouter 계정에 결제 방법 등록</li>
                     <li>💰 <strong>크레딧 충전:</strong> 계정에 충분한 크레딧 추가</li>
                     <li>⏰ <strong>잠시 대기:</strong> 무료 한도 초기화까지 대기</li>
                     <li>📈 <strong>플랜 업그레이드:</strong> 더 높은 사용량 플랜으로 변경</li>
@@ -989,10 +984,10 @@ function showMandatoryAPIKeyDialog(errorMessage = null) {
             <div class="api-key-info mandatory">
                 <p><strong>설정 방법:</strong></p>
                 <ol>
-                    <li><a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a>에서 새 API 키 발급</li>
+                    <li><a href="https://openrouter.ai/settings/keys" target="_blank">OpenRouter</a>에서 새 API 키 발급</li>
                     <li>프로젝트 폴더의 <code>.env.local</code> 파일 수정</li>
                     <li>파일에서 API 키 업데이트:<br>
-                        <code>OPENAI_API_KEY=sk-your-new-api-key-here</code>
+                        <code>OPENROUTER_API_KEY=sk-or-your-api-key-here</code>
                     </li>
                     <li>서버 재시작: <code>npm start</code></li>
                 </ol>
@@ -1001,22 +996,22 @@ function showMandatoryAPIKeyDialog(errorMessage = null) {
             ${troubleshootingSection}
             <div class="env-file-example">
                 <h4>📄 .env.local 파일 예시:</h4>
-                <pre><code># OpenAI API 설정 (새 키로 교체)
-OPENAI_API_KEY=sk-proj-새로운키를여기에입력
+                <pre><code># OpenRouter API 설정 (새 키로 교체)
+OPENROUTER_API_KEY=sk-or-새로운키를여기에입력
 DAILY_REQUEST_LIMIT=50
 MONTHLY_REQUEST_LIMIT=1000
-OPENAI_MODEL=gpt-4o-mini</code></pre>
+OPENROUTER_MODEL=openrouter/auto</code></pre>
             </div>
             <div class="api-key-actions">
                 <button onclick="location.reload()" class="primary-btn">설정 후 새로고침</button>
-                <button onclick="window.open('https://platform.openai.com/api-keys', '_blank')" class="secondary-btn">새 API 키 발급</button>
-                <button onclick="window.open('https://platform.openai.com/account/billing', '_blank')" class="secondary-btn">결제 정보 확인</button>
+                <button onclick="window.open('https://openrouter.ai/settings/keys', '_blank')" class="secondary-btn">새 API 키 발급</button>
+                <button onclick="window.open('https://openrouter.ai/settings/credits', '_blank')" class="secondary-btn">결제 정보 확인</button>
             </div>
             <div class="api-key-help">
                 <p><small>
                     💡 Node.js 서버를 실행 중인지 확인하세요: <code>npm start</code><br>
                     🔒 API 키는 절대 코드에 직접 입력하지 마세요.<br>
-                    💰 OpenAI API는 유료 서비스입니다. 계정에 크레딧이 필요합니다.
+                    💰 OpenRouter API는 유료 서비스입니다. 계정에 크레딧이 필요합니다.
                 </small></p>
             </div>
         </div>
@@ -1069,8 +1064,8 @@ function showSuccessMessage(message) {
 
 // AI 질문 도우미 기능
 async function askAIQuestion(question) {
-    if (!window.openaiConfig.hasApiKey()) {
-        showErrorMessage('AI 질문 기능을 사용하려면 OpenAI API 키가 필요합니다.');
+    if (window.openaiConfig.isReady && !window.openaiConfig.isReady()) {
+        showErrorMessage('AI 질문 기능을 사용하려면 서버 설정이 필요합니다.');
         return;
     }
     

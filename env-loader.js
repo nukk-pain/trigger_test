@@ -1,4 +1,3 @@
-// Environment 변수 로더 및 설정 관리 (Gemini API용)
 class EnvLoader {
     constructor() {
         this.config = {};
@@ -24,13 +23,12 @@ class EnvLoader {
                     if (this.isTestEnvironment()) {
                         console.log('✅ Vercel에서 환경변수를 성공적으로 로드했습니다.');
                         console.log('📊 로드된 설정:', {
-                            GEMINI_API_KEY: result.data.GEMINI_API_KEY ? `${result.data.GEMINI_API_KEY.substring(0, 10)}...` : '없음',
                             DAILY_LIMIT: result.data.DAILY_LIMIT,
                             MONTHLY_LIMIT: result.data.MONTHLY_LIMIT,
-                            GEMINI_MODEL: result.data.GEMINI_MODEL
+                            OPENROUTER_MODEL: result.data.OPENROUTER_MODEL
                         });
                     }
-                    return this.loaded || this.hasApiKey();
+                    return this.loaded;
                 }
             }
         } catch (error) {
@@ -47,10 +45,9 @@ class EnvLoader {
                 if (this.isTestEnvironment()) {
                     console.log('✅ 로컬 서버에서 환경변수를 성공적으로 로드했습니다.');
                     console.log('📊 로드된 설정:', {
-                        GEMINI_API_KEY: serverConfig.GEMINI_API_KEY ? `${serverConfig.GEMINI_API_KEY.substring(0, 10)}...` : '없음',
                         DAILY_REQUEST_LIMIT: serverConfig.DAILY_REQUEST_LIMIT,
                         MONTHLY_REQUEST_LIMIT: serverConfig.MONTHLY_REQUEST_LIMIT,
-                        GEMINI_MODEL: serverConfig.GEMINI_MODEL
+                        OPENROUTER_MODEL: serverConfig.OPENROUTER_MODEL
                     });
                 }
             } else {
@@ -64,7 +61,7 @@ class EnvLoader {
         // localStorage에서 설정 로드 (서버 설정보다 우선순위 낮음)
         this.loadFromLocalStorage();
 
-        return this.loaded || this.hasApiKey();
+        return this.loaded;
     }
 
     parseEnvContent(content) {
@@ -87,8 +84,9 @@ class EnvLoader {
         if (savedConfig) {
             try {
                 const parsed = JSON.parse(savedConfig);
-                // API 키는 제외하고 다른 설정만 로드
+                delete parsed.OPENROUTER_API_KEY;
                 delete parsed.GEMINI_API_KEY;
+                delete parsed.OPENAI_API_KEY;
                 this.config = { ...this.config, ...parsed };
             } catch (error) {
                 console.error('localStorage 설정 파싱 오류:', error);
@@ -97,9 +95,10 @@ class EnvLoader {
     }
 
     saveToLocalStorage() {
-        // API 키는 절대 저장하지 않음
         const safeConfig = { ...this.config };
+        delete safeConfig.OPENROUTER_API_KEY;
         delete safeConfig.GEMINI_API_KEY;
+        delete safeConfig.OPENAI_API_KEY;
 
         localStorage.setItem('pain_guide_config', JSON.stringify(safeConfig));
     }
@@ -114,18 +113,16 @@ class EnvLoader {
     }
 
     getApiKey() {
-        // .env.local에서만 API 키 로드
-        return this.config.GEMINI_API_KEY || '';
+        return '';
     }
 
     setApiKey(key) {
-        // API 키 설정 금지 - .env.local에서만 로드
         console.error('🚫 보안 정책: API 키는 .env.local 파일에서만 설정할 수 있습니다.');
         throw new Error('API 키는 .env.local 파일을 통해서만 설정할 수 있습니다.');
     }
 
     hasApiKey() {
-        return !!this.getApiKey();
+        return this.loaded;
     }
 
     // 사용량 제한 관련
@@ -139,23 +136,19 @@ class EnvLoader {
 
     // AI 모델 설정
     getModel() {
-        return this.get('GEMINI_MODEL');
+        return this.get('OPENROUTER_MODEL', 'openrouter/auto');
+    }
+
+    getMaxTokens() {
+        return parseInt(this.get('MAX_TOKENS', '1500'));
     }
 
     getMaxOutputTokens() {
-        return parseInt(this.get('MAX_OUTPUT_TOKENS', '8192'));
+        return this.getMaxTokens();
     }
 
     getTemperature() {
         return parseFloat(this.get('TEMPERATURE', '1'));
-    }
-
-    getTopP() {
-        return parseFloat(this.get('TOP_P', '0.95'));
-    }
-
-    getTopK() {
-        return parseInt(this.get('TOP_K', '40'));
     }
 
     // 기능 활성화 여부

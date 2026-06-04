@@ -17,11 +17,10 @@
     "trigger-points",
     "fascial-lines",
     "ai",
-    "openai",
+    "openrouter",
     "healthcare"
   ],
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "express": "^4.18.0"
   },
   "author": "Pain Guide Team",

@@ -98,9 +98,9 @@ describe('EnvLoader', () => {
   });
 
   describe('getApiKey', () => {
-    it('should return API key when set', () => {
-      envLoader.config.OPENAI_API_KEY = 'sk-test123';
-      expect(envLoader.getApiKey()).toBe('sk-test123');
+    it('should not return API key when set', () => {
+      envLoader.config.OPENROUTER_API_KEY = 'sk-test123';
+      expect(envLoader.getApiKey()).toBe('');
     });
 
     it('should return empty string when not set', () => {
@@ -117,8 +117,8 @@ describe('EnvLoader', () => {
   });
 
   describe('hasApiKey', () => {
-    it('should return true when API key exists', () => {
-      envLoader.config.OPENAI_API_KEY = 'sk-test123';
+    it('should return true when server config is loaded', () => {
+      envLoader.loaded = true;
       expect(envLoader.hasApiKey()).toBe(true);
     });
 
@@ -151,12 +151,12 @@ describe('EnvLoader', () => {
 
   describe('getModel', () => {
     it('should return configured model', () => {
-      envLoader.config.OPENAI_MODEL = 'gpt-4o';
-      expect(envLoader.getModel()).toBe('gpt-4o');
+      envLoader.config.OPENROUTER_MODEL = 'anthropic/claude-sonnet-4.5';
+      expect(envLoader.getModel()).toBe('anthropic/claude-sonnet-4.5');
     });
 
     it('should return default model when not configured', () => {
-      expect(envLoader.getModel()).toBe('o4-mini-2025-04-16');
+      expect(envLoader.getModel()).toBe('openrouter/auto');
     });
   });
 
@@ -216,22 +216,22 @@ describe('EnvLoader', () => {
 
   describe('loadFromLocalStorage', () => {
     it('should load config from localStorage', () => {
-      const savedConfig = { DAILY_REQUEST_LIMIT: '75', OPENAI_MODEL: 'gpt-4' };
+      const savedConfig = { DAILY_REQUEST_LIMIT: '75', OPENROUTER_MODEL: 'openrouter/auto' };
       localStorage.getItem.mockReturnValue(JSON.stringify(savedConfig));
 
       envLoader.loadFromLocalStorage();
 
       expect(envLoader.config.DAILY_REQUEST_LIMIT).toBe('75');
-      expect(envLoader.config.OPENAI_MODEL).toBe('gpt-4');
+      expect(envLoader.config.OPENROUTER_MODEL).toBe('openrouter/auto');
     });
 
     it('should not load API key from localStorage', () => {
-      const savedConfig = { OPENAI_API_KEY: 'sk-secret', DAILY_REQUEST_LIMIT: '75' };
+      const savedConfig = { OPENROUTER_API_KEY: 'sk-secret', DAILY_REQUEST_LIMIT: '75' };
       localStorage.getItem.mockReturnValue(JSON.stringify(savedConfig));
 
       envLoader.loadFromLocalStorage();
 
-      expect(envLoader.config.OPENAI_API_KEY).toBeUndefined();
+      expect(envLoader.config.OPENROUTER_API_KEY).toBeUndefined();
       expect(envLoader.config.DAILY_REQUEST_LIMIT).toBe('75');
     });
 
@@ -252,8 +252,9 @@ describe('EnvLoader', () => {
     it('should save config without API key', () => {
       envLoader.config = {
         OPENAI_API_KEY: 'sk-secret',
+        OPENROUTER_API_KEY: 'sk-or-secret',
         DAILY_REQUEST_LIMIT: '75',
-        OPENAI_MODEL: 'gpt-4'
+        OPENROUTER_MODEL: 'openrouter/auto'
       };
 
       envLoader.saveToLocalStorage();
@@ -262,15 +263,16 @@ describe('EnvLoader', () => {
       const savedConfig = JSON.parse(savedCall[1]);
 
       expect(savedConfig.OPENAI_API_KEY).toBeUndefined();
+      expect(savedConfig.OPENROUTER_API_KEY).toBeUndefined();
       expect(savedConfig.DAILY_REQUEST_LIMIT).toBe('75');
-      expect(savedConfig.OPENAI_MODEL).toBe('gpt-4');
+      expect(savedConfig.OPENROUTER_MODEL).toBe('openrouter/auto');
     });
   });
 
   describe('loadEnv', () => {
     it('should load from Vercel API first', async () => {
       const mockData = {
-        OPENAI_API_KEY: 'sk-test',
+        OPENROUTER_MODEL: 'openrouter/auto',
         DAILY_LIMIT: 100
       };
 
@@ -282,11 +284,11 @@ describe('EnvLoader', () => {
       await envLoader.loadEnv();
 
       expect(envLoader.loaded).toBe(true);
-      expect(envLoader.config.OPENAI_API_KEY).toBe('sk-test');
+      expect(envLoader.config.OPENROUTER_API_KEY).toBeUndefined();
     });
 
     it('should fallback to local server when Vercel fails', async () => {
-      const mockConfig = { OPENAI_API_KEY: 'sk-local' };
+      const mockConfig = { OPENROUTER_MODEL: 'openrouter/auto' };
 
       globalThis.fetch
         .mockRejectedValueOnce(new Error('Vercel failed'))
@@ -297,7 +299,7 @@ describe('EnvLoader', () => {
 
       await envLoader.loadEnv();
 
-      expect(envLoader.config.OPENAI_API_KEY).toBe('sk-local');
+      expect(envLoader.config.OPENROUTER_MODEL).toBe('openrouter/auto');
     });
 
     it('should fallback to localStorage when both APIs fail', async () => {

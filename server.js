@@ -1,8 +1,6 @@
-// Simple Node.js server to serve the app with Gemini API
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -35,7 +33,7 @@ function loadEnvFile() {
             if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
                 console.log('📊 설정된 환경변수:');
                 Object.keys(envConfig).forEach(key => {
-                    if (key === 'GEMINI_API_KEY') {
+                    if (key === 'OPENROUTER_API_KEY') {
                         console.log(`   ${key}: ${envConfig[key].substring(0, 10)}...`);
                     } else {
                         console.log(`   ${key}: ${envConfig[key]}`);
@@ -53,98 +51,124 @@ function loadEnvFile() {
 }
 
 // Load environment variables
-const envConfig = loadEnvFile();
+const envConfig = { ...process.env, ...loadEnvFile() };
 
-// System instruction for medical consultation
-const SYSTEM_INSTRUCTION = `근골격계 물리치료 전문가로서 통증 부위와 악화 상황을 분석해 셀프 마사지 방법을 안내하세요.
+function getOpenRouterBaseUrl() {
+    return (envConfig.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
+}
 
-규칙:
-- 질문은 환자가 이해하기 쉽게 작성
-- 신체 부위는 구체적으로 설명
-- 안전 우선 원칙 적용
-- 응급 상황 시 즉시 병원 방문 권고`;
+function getClientConfig() {
+    return {
+        DAILY_REQUEST_LIMIT: envConfig.DAILY_REQUEST_LIMIT || '50',
+        MONTHLY_REQUEST_LIMIT: envConfig.MONTHLY_REQUEST_LIMIT || '1000',
+        OPENROUTER_MODEL: envConfig.OPENROUTER_MODEL || 'openrouter/auto',
+        MAX_TOKENS: envConfig.MAX_TOKENS || '1500',
+        TEMPERATURE: envConfig.TEMPERATURE || '1',
+        ENABLE_AI_QA: envConfig.ENABLE_AI_QA || 'true',
+        ENABLE_DETAILED_ANALYSIS: envConfig.ENABLE_DETAILED_ANALYSIS || 'true',
+        OPENROUTER_SITE_URL: envConfig.OPENROUTER_SITE_URL || '',
+        OPENROUTER_APP_NAME: envConfig.OPENROUTER_APP_NAME || ''
+    };
+}
 
-// Get Gemini model
-function getModel() {
-    const apiKey = envConfig.GEMINI_API_KEY;
-    if (!apiKey) {
-        throw new Error('GEMINI API key is not configured');
+function isValidMessage(message) {
+    return message &&
+        ['system', 'user', 'assistant'].includes(message.role) &&
+        typeof message.content === 'string' &&
+        message.content.trim().length > 0;
+}
+
+function validateMessages(messages) {
+    return Array.isArray(messages) && messages.length > 0 && messages.every(isValidMessage);
+}
+
+function buildOpenRouterHeaders() {
+    const headers = {
+        Authorization: `Bearer ${envConfig.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json'
+    };
+
+    if (envConfig.OPENROUTER_SITE_URL) {
+        headers['HTTP-Referer'] = envConfig.OPENROUTER_SITE_URL;
     }
-    const genAI = new GoogleGenerativeAI(apiKey);
-    return genAI.getGenerativeModel({
-        model: envConfig.GEMINI_MODEL,
-        systemInstruction: SYSTEM_INSTRUCTION,
-    });
+
+    if (envConfig.OPENROUTER_APP_NAME) {
+        headers['X-Title'] = envConfig.OPENROUTER_APP_NAME;
+    }
+
+    return headers;
+}
+
+function buildOpenRouterBody(messages) {
+    return {
+        model: envConfig.OPENROUTER_MODEL || 'openrouter/auto',
+        messages,
+        max_tokens: parseInt(envConfig.MAX_TOKENS || '1500'),
+        temperature: parseFloat(envConfig.TEMPERATURE || '1'),
+        stream: false
+    };
 }
 
 // Serve static files
 app.use(express.static(__dirname));
 
-// API endpoint to get environment config
 app.get('/api/config', (req, res) => {
-    const clientConfig = {
-        GEMINI_API_KEY: envConfig.GEMINI_API_KEY || '',
-        DAILY_REQUEST_LIMIT: envConfig.DAILY_REQUEST_LIMIT || '50',
-        MONTHLY_REQUEST_LIMIT: envConfig.MONTHLY_REQUEST_LIMIT || '1000',
-        GEMINI_MODEL: envConfig.GEMINI_MODEL,
-        MAX_OUTPUT_TOKENS: envConfig.MAX_OUTPUT_TOKENS || '8192',
-        TEMPERATURE: envConfig.TEMPERATURE || '1',
-        TOP_P: envConfig.TOP_P || '0.95',
-        TOP_K: envConfig.TOP_K || '40',
-        ENABLE_AI_QA: envConfig.ENABLE_AI_QA || 'true',
-        ENABLE_DETAILED_ANALYSIS: envConfig.ENABLE_DETAILED_ANALYSIS || 'true'
-    };
-
-    res.json(clientConfig);
+    res.json(getClientConfig());
 });
 
-// Gemini API endpoint
-app.post('/api/gemini', async (req, res) => {
+app.get('/api/env', (req, res) => {
+    const config = getClientConfig();
+    res.json({
+        success: true,
+        data: {
+            ...config,
+            MAX_TOKENS: parseInt(config.MAX_TOKENS),
+            TEMPERATURE: parseFloat(config.TEMPERATURE),
+            DAILY_LIMIT: parseInt(config.DAILY_REQUEST_LIMIT),
+            MONTHLY_LIMIT: parseInt(config.MONTHLY_REQUEST_LIMIT)
+        }
+    });
+});
+
+app.post('/api/chat', async (req, res) => {
     try {
-        const { prompt, history = [] } = req.body;
-        console.log('API 요청 받음. 프롬프트:', prompt?.substring(0, 50) + '...');
-        console.log('히스토리 메시지 수:', history.length);
+        const { messages } = req.body || {};
+        if (!validateMessages(messages)) {
+            return res.status(400).json({ error: '유효한 messages 배열이 필요합니다.' });
+        }
 
-        const generationConfig = {
-            temperature: parseFloat(envConfig.TEMPERATURE || '1'),
-            topP: parseFloat(envConfig.TOP_P || '0.95'),
-            topK: parseInt(envConfig.TOP_K || '40'),
-            maxOutputTokens: parseInt(envConfig.MAX_OUTPUT_TOKENS || '8192'),
-            responseMimeType: 'text/plain',
-        };
+        if (!envConfig.OPENROUTER_API_KEY) {
+            return res.status(401).json({ error: 'OpenRouter API 키가 서버에 설정되지 않았습니다.' });
+        }
 
-        const model = getModel();
-        const chatSession = model.startChat({ generationConfig, history });
-        const result = await chatSession.sendMessage(prompt);
-        const responseText = result.response.text();
+        const upstreamResponse = await fetch(`${getOpenRouterBaseUrl()}/chat/completions`, {
+            method: 'POST',
+            headers: buildOpenRouterHeaders(),
+            body: JSON.stringify(buildOpenRouterBody(messages))
+        });
+        const data = await upstreamResponse.json().catch(() => ({}));
 
-        // 토큰 사용량 로깅
-        const usage = result.response.usageMetadata;
-        if (usage) {
+        if (!upstreamResponse.ok) {
+            const message = data.error?.message || data.error || `HTTP ${upstreamResponse.status}`;
+            return res.status(upstreamResponse.status).json({ error: message });
+        }
+
+        const responseText = data.choices?.[0]?.message?.content || '';
+        if (data.usage) {
             console.log('━━━━━━━━ 토큰 사용량 ━━━━━━━━');
-            console.log(`  입력 토큰: ${usage.promptTokenCount}`);
-            console.log(`  출력 토큰: ${usage.candidatesTokenCount}`);
-            console.log(`  총 토큰: ${usage.totalTokenCount}`);
+            console.log(`  입력 토큰: ${data.usage.prompt_tokens}`);
+            console.log(`  출력 토큰: ${data.usage.completion_tokens}`);
+            console.log(`  총 토큰: ${data.usage.total_tokens}`);
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         }
 
         console.log('API 응답:', responseText.substring(0, 100) + '...');
-
-        res.json({ output: responseText });
+        res.json({ output: responseText, usage: data.usage });
     } catch (error) {
-        console.error('Gemini API 호출 오류:', error);
+        console.error('OpenRouter API 호출 오류:', error);
         console.error('오류 세부 정보:', error.message);
-
-        // API 키 유효성 여부 확인 메시지
-        if (error.message?.includes('API key')) {
-            console.error('API 키 관련 오류가 발생했습니다. 키가 유효한지 확인하세요.');
-            return res.status(401).json({
-                error: 'API 키 관련 오류가 발생했습니다. .env.local 파일을 확인하세요.'
-            });
-        }
-
         res.status(500).json({
-            error: 'Gemini API 호출 중 오류 발생',
+            error: 'OpenRouter API 호출 중 오류 발생',
             details: error.message || '알 수 없는 오류'
         });
     }
@@ -155,14 +179,16 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(port, () => {
-    console.log(`🚀 통증 가이드 도우미가 http://localhost:${port} 에서 실행 중입니다.`);
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`🚀 통증 가이드 도우미가 http://localhost:${port} 에서 실행 중입니다.`);
 
-    if (envConfig.GEMINI_API_KEY) {
-        console.log('✅ Gemini API 키가 설정되었습니다.');
-    } else {
-        console.log('⚠️ Gemini API 키가 설정되지 않았습니다. .env.local 파일을 확인해주세요.');
-    }
-});
+        if (envConfig.OPENROUTER_API_KEY) {
+            console.log('✅ OpenRouter API 키가 설정되었습니다.');
+        } else {
+            console.log('⚠️ OpenRouter API 키가 설정되지 않았습니다. .env.local 파일을 확인해주세요.');
+        }
+    });
+}
 
 module.exports = app;

@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { OpenAIConfig, MEDICAL_PROMPTS } from '../lib/config.js';
+import { OpenRouterConfig, MEDICAL_PROMPTS } from '../lib/config.js';
 
-describe('OpenAIConfig', () => {
+describe('OpenRouterConfig', () => {
   let config;
 
   beforeEach(() => {
-    config = new OpenAIConfig();
+    config = new OpenRouterConfig();
     // Mock window.envLoader
     window.envLoader = {
       loadEnv: vi.fn().mockResolvedValue(true),
-      getModel: vi.fn().mockReturnValue('gpt-4o-mini'),
+      getModel: vi.fn().mockReturnValue('openrouter/auto'),
       getMaxTokens: vi.fn().mockReturnValue(1500),
       getTemperature: vi.fn().mockReturnValue(1),
       getApiKey: vi.fn().mockReturnValue('')
@@ -19,7 +19,7 @@ describe('OpenAIConfig', () => {
 
   describe('constructor', () => {
     it('should initialize with correct default values', () => {
-      expect(config.baseURL).toBe('https://api.openai.com/v1');
+      expect(config.baseURL).toBe('/api');
       expect(config.initialized).toBe(false);
     });
   });
@@ -37,13 +37,13 @@ describe('OpenAIConfig', () => {
       await config.initialize();
 
       expect(config.initialized).toBe(true);
-      expect(config.model).toBe('gpt-4o-mini');
+      expect(config.model).toBe('openrouter/auto');
       expect(config.maxTokens).toBe(1500);
       expect(config.temperature).toBe(1);
     });
 
-    it('should set higher maxTokens for o4 models', async () => {
-      window.envLoader.getModel.mockReturnValue('o4-mini-2025-04-16');
+    it('should keep configured token limits for routed models', async () => {
+      window.envLoader.getMaxTokens.mockReturnValue(4000);
 
       await config.initialize();
 
@@ -60,10 +60,10 @@ describe('OpenAIConfig', () => {
   });
 
   describe('getApiKey', () => {
-    it('should return API key from envLoader', () => {
+    it('should not return API key from envLoader', () => {
       window.envLoader.getApiKey.mockReturnValue('sk-test123');
 
-      expect(config.getApiKey()).toBe('sk-test123');
+      expect(config.getApiKey()).toBe('');
     });
 
     it('should return empty string when envLoader not available', () => {
@@ -74,8 +74,8 @@ describe('OpenAIConfig', () => {
   });
 
   describe('hasApiKey', () => {
-    it('should return true for valid API key', () => {
-      window.envLoader.getApiKey.mockReturnValue('sk-proj-test123456');
+    it('should return true after server config initialization', async () => {
+      await config.initialize();
 
       expect(config.hasApiKey()).toBe(true);
     });
@@ -94,19 +94,16 @@ describe('OpenAIConfig', () => {
   });
 
   describe('testApiKey', () => {
-    it('should throw error when no API key', async () => {
-      await expect(config.testApiKey()).rejects.toThrow(
-        'API 키가 설정되지 않았습니다.'
-      );
-    });
-
-    it('should return true for valid API key', async () => {
-      window.envLoader.getApiKey.mockReturnValue('sk-test123');
-      globalThis.fetch.mockResolvedValueOnce({ ok: true });
+    it('should return true when server proxy accepts a test request', async () => {
+      globalThis.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ output: 'OK' })
+      });
 
       const result = await config.testApiKey();
 
       expect(result).toBe(true);
+      expect(globalThis.fetch).toHaveBeenCalledWith('/api/chat', expect.any(Object));
     });
 
     it('should throw error for 401 response', async () => {
@@ -118,7 +115,7 @@ describe('OpenAIConfig', () => {
       });
 
       await expect(config.testApiKey()).rejects.toThrow(
-        'API 키가 유효하지 않거나 만료되었습니다.'
+        'OpenRouter API 키가 서버에 설정되지 않았거나 유효하지 않습니다.'
       );
     });
 
@@ -166,14 +163,14 @@ describe('OpenAIConfig', () => {
   });
 });
 
-describe('OpenAIConfig makeRequest', () => {
+describe('OpenRouterConfig makeRequest', () => {
   let config;
 
   beforeEach(async () => {
-    config = new OpenAIConfig();
+    config = new OpenRouterConfig();
     window.envLoader = {
       loadEnv: vi.fn().mockResolvedValue(true),
-      getModel: vi.fn().mockReturnValue('gpt-4o-mini'),
+      getModel: vi.fn().mockReturnValue('openrouter/auto'),
       getMaxTokens: vi.fn().mockReturnValue(1500),
       getTemperature: vi.fn().mockReturnValue(1),
       getApiKey: vi.fn().mockReturnValue('sk-test123'),
@@ -189,13 +186,8 @@ describe('OpenAIConfig makeRequest', () => {
   });
 
   it('should throw error if not initialized', async () => {
-    const newConfig = new OpenAIConfig();
-    await expect(newConfig.makeRequest([])).rejects.toThrow('OpenAI 설정이 초기화되지 않았습니다.');
-  });
-
-  it('should throw error if no API key', async () => {
-    window.envLoader.getApiKey.mockReturnValue('');
-    await expect(config.makeRequest([])).rejects.toThrow('유효한 OpenAI API 키가 필요합니다.');
+    const newConfig = new OpenRouterConfig();
+    await expect(newConfig.makeRequest([])).rejects.toThrow('OpenRouter 설정이 초기화되지 않았습니다.');
   });
 
   it('should throw error if usage limit reached', async () => {
@@ -206,9 +198,7 @@ describe('OpenAIConfig makeRequest', () => {
   it('should make successful request', async () => {
     globalThis.fetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({
-        choices: [{ message: { content: 'Response' }, finish_reason: 'stop' }]
-      })
+      json: () => Promise.resolve({ output: 'Response' })
     });
 
     const result = await config.makeRequest([{ role: 'user', content: 'test' }]);
@@ -228,9 +218,7 @@ describe('OpenAIConfig makeRequest', () => {
   it('should include system prompt for non-o4 models', async () => {
     globalThis.fetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({
-        choices: [{ message: { content: 'Response' }, finish_reason: 'stop' }]
-      })
+      json: () => Promise.resolve({ output: 'Response' })
     });
 
     await config.makeRequest([{ role: 'user', content: 'test' }], 'System prompt');
@@ -240,34 +228,32 @@ describe('OpenAIConfig makeRequest', () => {
     expect(body.messages[0].role).toBe('system');
   });
 
-  it('should combine system prompt for o4 models', async () => {
-    window.envLoader.getModel.mockReturnValue('o4-mini-2025-04-16');
+  it('should keep system prompt as a standard system message for routed models', async () => {
+    window.envLoader.getModel.mockReturnValue('openrouter/auto');
     await config.initialize();
 
     globalThis.fetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({
-        choices: [{ message: { content: 'Response' }, finish_reason: 'stop' }]
-      })
+      json: () => Promise.resolve({ output: 'Response' })
     });
 
     await config.makeRequest([{ role: 'user', content: 'test' }], 'System prompt');
 
     const fetchCall = globalThis.fetch.mock.calls[0];
     const body = JSON.parse(fetchCall[1].body);
-    expect(body.messages[0].content).toContain('System prompt');
-    expect(body.messages[0].content).toContain('test');
+    expect(body.messages).toEqual([
+      { role: 'system', content: 'System prompt' },
+      { role: 'user', content: 'test' }
+    ]);
   });
 
   it('should handle empty response', async () => {
     globalThis.fetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({
-        choices: [{ message: { content: '' }, finish_reason: 'length' }]
-      })
+      json: () => Promise.resolve({ output: '' })
     });
 
-    await expect(config.makeRequest([{ role: 'user', content: 'test' }])).rejects.toThrow('토큰 제한으로 인해 응답이 생성되지 않았습니다.');
+    await expect(config.makeRequest([{ role: 'user', content: 'test' }])).resolves.toBe('');
   });
 });
 

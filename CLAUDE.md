@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AI-powered pain analysis and self-massage guide web application. Users select pain areas on an interactive SVG body map (60+ regions), describe aggravating factors, and receive OpenAI-powered analysis with trigger point identification and massage instructions.
+AI-powered pain analysis and self-massage guide web application. Users select pain areas on an interactive SVG body map (60+ regions), describe aggravating factors, and receive OpenRouter-powered analysis with trigger point identification and massage instructions.
 
-**Tech Stack**: Vanilla JS + HTML + CSS, Express.js (dev server), OpenAI o4-mini, Vercel serverless deployment
+**Tech Stack**: Vanilla JS + HTML + CSS, Express.js (dev server), OpenRouter Chat Completions, Vercel serverless deployment
 
 ## Development Commands
 
@@ -26,14 +26,14 @@ curl http://localhost:3000/api/env
 ### Global State Objects
 All state is managed via global window objects initialized on page load:
 - `window.envLoader` - Environment variable loader (EnvLoader class in env-loader.js)
-- `window.openaiConfig` - OpenAI API wrapper (OpenAIConfig class in config.js)
+- `window.openaiConfig` - backward-compatible alias for the OpenRouter API wrapper in config.js
 - `window.usageTracker` - Usage statistics tracker (UsageTracker class in config.js)
 - `window.MEDICAL_PROMPTS` - System prompts for AI analysis
 
 ### Data Flow
 1. User selects body areas on SVG map → stored in `selectedAreas` Set
 2. User enters pain description → stored in `document.getElementById('pain-situation').value`
-3. Click "Analyze" → `openaiConfig.analyzePain()` sends to OpenAI with `MEDICAL_PROMPTS.PAIN_ANALYSIS`
+3. Click "Analyze" → `openaiConfig.makeRequest()` sends to server `/api/chat` with `MEDICAL_PROMPTS.PAIN_ANALYSIS`
 4. Response parsed and displayed → usage tracked in localStorage
 
 ### Key Data Structures (embedded in script.js)
@@ -54,10 +54,10 @@ All state is managed via global window objects initialized on page load:
 ## Environment Variables (.env.local)
 
 ```
-OPENAI_API_KEY=sk-...          # Required
-OPENAI_MODEL=o4-mini           # Reasoning model
-MAX_TOKENS=4000                # For o4 inference
-TEMPERATURE=1.0                # o4 model optimized
+OPENROUTER_API_KEY=sk-or-...   # Required, server-side only
+OPENROUTER_MODEL=openrouter/auto
+MAX_TOKENS=1500
+TEMPERATURE=1.0
 DAILY_REQUEST_LIMIT=50         # localStorage tracked
 MONTHLY_REQUEST_LIMIT=1000
 ```
@@ -66,7 +66,7 @@ MONTHLY_REQUEST_LIMIT=1000
 
 - **API key exposure**: API key must NEVER be exposed client-side. Always proxy through serverless function (`api/env.js`) which returns only non-sensitive config
 - The `/api/env` endpoint returns `{ model, maxTokens, temperature, dailyLimit, monthlyLimit }` but NOT the API key
-- OpenAI calls happen client-side using key loaded via secure env endpoint pattern
+- OpenRouter calls happen server-side through `/api/chat`; the browser never receives the key
 
 ## Guardrails (from ~/.ai/global-rules.md)
 
