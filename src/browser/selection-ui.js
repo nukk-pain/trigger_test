@@ -7,7 +7,7 @@ import {
     setPainQuestionnaire,
 } from './selection-state.js';
 import { renderSelectedAreas, syncBodyMapSelection } from './selection-renderer.js';
-import { setupBodyMapEvents as setupSelectionEvents } from './selection-events.js';
+import { setupBodyMapEvents as setupSelectionEvents, updateAreaTabindex } from './selection-events.js';
 
 export function setupBodyMapEvents() {
     setupSelectionEvents(removeSelectedArea);
@@ -50,5 +50,6 @@ export function switchBodyView(view) {
         bodyView.classList.remove('active');
     });
     document.getElementById(`${view}-view`).classList.add('active');
+    updateAreaTabindex();
     syncBodyMapSelection(getSelectedAreas());
 }

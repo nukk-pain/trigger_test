@@ -14,11 +14,11 @@
 
 .question-card {
     background: white;
-    border-radius: 20px;
+    border-radius: var(--radius-lg);
     padding: 30px;
     margin-bottom: 25px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-    border-left: 5px solid #4CAF50;
+    border-left: 5px solid var(--color-primary);
     transition: all 0.3s ease;
 }
 
@@ -29,7 +29,7 @@
 
 .question-card.sub-question {
     margin-left: 20px;
-    border-left-color: #2196F3;
+    border-left-color: var(--color-secondary);
     background: #f8f9ff;
 }
 
@@ -53,7 +53,7 @@
 }
 
 .question-number {
-    background: #4CAF50;
+    background: var(--color-primary);
     color: white;
     width: 35px;
     height: 35px;
@@ -85,7 +85,7 @@
 .multiple-choice {
     color: #666;
     font-size: 0.9rem;
-    background: #e8f5e9;
+    background: var(--color-primary-soft);
     padding: 4px 12px;
     border-radius: 12px;
     margin-left: auto;
@@ -116,9 +116,9 @@
 
 .text-input:focus {
     outline: none;
-    border-color: #4CAF50;
+    border-color: var(--color-primary);
     background: white;
-    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    box-shadow: 0 0 0 3px rgba(221, 107, 77, 0.1);
 }
 
 .input-hint {
@@ -149,8 +149,8 @@
 }
 
 .radio-option:hover {
-    background: #e3f2fd;
-    border-color: #2196F3;
+    background: var(--color-primary-soft);
+    border-color: var(--color-secondary);
     transform: translateX(5px);
 }
 
@@ -170,8 +170,8 @@
 }
 
 .radio-option input[type="radio"]:checked + .radio-button {
-    border-color: #4CAF50;
-    background: #4CAF50;
+    border-color: var(--color-primary);
+    background: var(--color-primary);
 }
 
 .radio-option input[type="radio"]:checked + .radio-button::after {
@@ -208,7 +208,7 @@
     padding: 20px;
     background: #f8f9fa;
     border: 2px solid #e9ecef;
-    border-radius: 15px;
+    border-radius: var(--radius-md);
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -221,15 +221,15 @@
 }
 
 .injury-option:hover .injury-card {
-    background: #e3f2fd;
-    border-color: #2196F3;
+    background: var(--color-primary-soft);
+    border-color: var(--color-secondary);
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(33, 150, 243, 0.2);
+    box-shadow: 0 5px 15px rgba(95, 168, 154, 0.2);
 }
 
 .injury-option input[type="radio"]:checked + .injury-card {
-    background: #e8f5e9;
-    border-color: #4CAF50;
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
     color: #2e7d32;
 }
 
@@ -264,7 +264,7 @@
     padding: 20px 15px;
     background: #f8f9fa;
     border: 2px solid #e9ecef;
-    border-radius: 15px;
+    border-radius: var(--radius-md);
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -276,14 +276,14 @@
 }
 
 .timeline-option:hover .timeline-card {
-    background: #e3f2fd;
-    border-color: #2196F3;
+    background: var(--color-primary-soft);
+    border-color: var(--color-secondary);
     transform: translateY(-3px);
 }
 
 .timeline-option input[type="radio"]:checked + .timeline-card {
-    background: #e8f5e9;
-    border-color: #4CAF50;
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
     color: #2e7d32;
 }
 
@@ -305,7 +305,7 @@
 .pain-scale-container {
     background: #f8f9fa;
     padding: 25px;
-    border-radius: 15px;
+    border-radius: var(--radius-md);
     border: 1px solid #e0e0e0;
 }
 
@@ -354,14 +354,14 @@
 }
 
 .nrs-option:hover .nrs-number {
-    border-color: #2196F3;
-    background: #e3f2fd;
+    border-color: var(--color-secondary);
+    background: var(--color-primary-soft);
     transform: scale(1.1);
 }
 
 .nrs-option[data-level="mild"] input[type="radio"]:checked + .nrs-number {
-    background: #4CAF50;
-    border-color: #4CAF50;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
     color: white;
 }
 
@@ -393,7 +393,7 @@
 }
 
 .pain-desc.mild {
-    background: #e8f5e9;
+    background: var(--color-primary-soft);
     color: #2e7d32;
 }
 
@@ -436,14 +436,14 @@
 }
 
 .quality-option:hover .quality-card {
-    background: #e3f2fd;
-    border-color: #2196F3;
+    background: var(--color-primary-soft);
+    border-color: var(--color-secondary);
     transform: translateY(-2px);
 }
 
 .quality-option input[type="checkbox"]:checked + .quality-card {
-    background: #e8f5e9;
-    border-color: #4CAF50;
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
     color: #2e7d32;
 }
 
@@ -485,14 +485,14 @@
 }
 
 .pattern-option:hover .pattern-card {
-    background: #e3f2fd;
-    border-color: #2196F3;
+    background: var(--color-primary-soft);
+    border-color: var(--color-secondary);
     transform: translateY(-2px);
 }
 
 .pattern-option input[type="checkbox"]:checked + .pattern-card {
-    background: #e8f5e9;
-    border-color: #4CAF50;
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
     color: #2e7d32;
 }
 
@@ -526,7 +526,7 @@
     padding: 20px;
     background: #f8f9fa;
     border: 2px solid #e9ecef;
-    border-radius: 15px;
+    border-radius: var(--radius-md);
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -539,14 +539,14 @@
 }
 
 .sleep-option:hover .sleep-card {
-    background: #e3f2fd;
-    border-color: #2196F3;
+    background: var(--color-primary-soft);
+    border-color: var(--color-secondary);
     transform: translateY(-2px);
 }
 
 .sleep-option input[type="radio"]:checked + .sleep-card {
-    background: #e8f5e9;
-    border-color: #4CAF50;
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
     color: #2e7d32;
 }
 
@@ -622,7 +622,7 @@
 }
 
 .next-btn.enhanced {
-    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-strong) 100%);
     color: white;
     border: none;
     padding: 18px 35px;
@@ -634,12 +634,12 @@
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 4px 15px rgba(221, 107, 77, 0.3);
 }
 
 .next-btn.enhanced:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+    box-shadow: 0 8px 25px rgba(221, 107, 77, 0.4);
 }
 
 .btn-text {
@@ -658,7 +658,7 @@
 /* AI 결과 표시 스타일 */
 .ai-result-content {
     background: #f8f9fa;
-    border-radius: 15px;
+    border-radius: var(--radius-md);
     padding: 25px;
     line-height: 1.8;
     font-size: 1.1rem;
@@ -699,7 +699,7 @@
 .safety-notice {
     background: #fff3cd;
     border: 2px solid #ffeaa7;
-    border-radius: 15px;
+    border-radius: var(--radius-md);
     padding: 25px;
     margin-top: 30px;
 }

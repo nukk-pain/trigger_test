@@ -10,7 +10,11 @@ export function renderSelectedAreas(selectedAreas, onRemove) {
 
 export function syncBodyMapSelection(selectedAreas) {
     document.querySelectorAll('.clickable-area').forEach(element => {
-        element.classList.toggle('selected', selectedAreas.includes(element.dataset.area));
+        const isSelected = selectedAreas.includes(element.dataset.area);
+        element.classList.toggle('selected', isSelected);
+        if (element.hasAttribute('role')) {
+            element.setAttribute('aria-pressed', String(isSelected));
+        }
     });
 }
 

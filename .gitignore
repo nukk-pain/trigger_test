@@ -36,3 +36,10 @@ docs/
 
 # Vercel
 .vercel
+
+# Playwright
+test-results/
+playwright-report/
+
+# Task soul-doc screenshots (keep PLAN/PROGRESS md, drop large pngs)
+.tasks/**/*.png

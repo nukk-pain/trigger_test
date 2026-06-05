@@ -5,10 +5,10 @@
 }
 
 body {
-    font-family: 'Segoe UI', 'Malgun Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: var(--font-sans);
+    line-height: var(--line-height-body);
+    color: var(--color-text);
+    background: var(--color-bg);
     min-height: 100vh;
 }
 

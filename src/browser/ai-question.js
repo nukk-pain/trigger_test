@@ -1,4 +1,5 @@
 import { formatAIResponse } from '../../lib/utils.js';
+import { appendChipText } from '../../lib/chip-insert.js';
 import { appState } from './app-state.js';
 import { showErrorMessage } from './notifications.js';
 import { setSafeHtml } from './safe-html.js';
@@ -61,6 +62,24 @@ export function setupDynamicFormEvents() {
             } else {
                 counter.classList.remove('warning');
             }
+        });
+    }
+
+    // 입력 보조 칩: 클릭 시 textarea에 문구 추가하고 글자수 카운터 동기화
+    const quickChips = document.getElementById('quick-chips');
+    if (quickChips && painDescriptionTextarea) {
+        quickChips.querySelectorAll('.quick-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                const maxLength = Number(painDescriptionTextarea.getAttribute('maxlength')) || 500;
+                painDescriptionTextarea.value = appendChipText(
+                    painDescriptionTextarea.value,
+                    this.dataset.chip,
+                    maxLength
+                );
+                // input 이벤트로 char-counter 등 기존 리스너 재사용
+                painDescriptionTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                painDescriptionTextarea.focus();
+            });
         });
     }
 }

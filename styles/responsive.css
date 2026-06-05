@@ -58,7 +58,14 @@
     }
     
     #body-svg {
-        max-width: 300px;
+        /* 모바일: 작은 부위 탭을 위해 가용 폭을 최대한 사용 */
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .body-map {
+        max-width: 100%;
+        width: 100%;
     }
 }
 

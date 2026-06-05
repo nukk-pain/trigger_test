@@ -3,7 +3,7 @@
 .back-btn {
     padding: 15px 30px;
     border: none;
-    border-radius: 25px;
+    border-radius: var(--radius-full);
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
@@ -12,14 +12,14 @@
 }
 
 .next-btn {
-    background: #4CAF50;
+    background: var(--color-primary);
     color: white;
 }
 
 .next-btn:hover {
-    background: #45a049;
+    background: var(--color-primary-strong);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 5px 15px rgba(221, 107, 77, 0.3);
 }
 
 .back-btn {
@@ -45,9 +45,9 @@
 /* 일반 정보 섹션 */
 #general-info {
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
+    border-radius: var(--radius-lg);
     padding: 40px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--elevation-raised);
 }
 
 .info-grid {
@@ -60,9 +60,9 @@
 .info-card {
     background: #f8f9fa;
     padding: 20px;
-    border-radius: 15px;
+    border-radius: var(--radius-md);
     text-align: center;
-    border-top: 4px solid #4CAF50;
+    border-top: 4px solid var(--color-primary);
 }
 
 .info-card h4 {
@@ -78,7 +78,7 @@
 /* Footer 스타일 */
 .footer-status {
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 15px;
+    border-radius: var(--radius-md);
     margin-top: 40px;
     padding: 20px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -98,9 +98,9 @@
 }
 
 .footer-status .ai-status-bar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-strong) 100%);
     color: white;
     padding: 10px 15px;
-    border-radius: 20px;
-    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 10px rgba(221, 107, 77, 0.3);
 }

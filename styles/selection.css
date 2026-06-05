@@ -1,6 +1,6 @@
 /* 실시간 선택 상태 표시 개선 */
 .selection-status-bar {
-    background: linear-gradient(135deg, #4CAF50, #45a049);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
     color: white;
     padding: 15px 20px;
     border-radius: 12px;
@@ -8,7 +8,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 4px 15px rgba(221, 107, 77, 0.3);
     position: sticky;
     top: 20px;
     z-index: 100;
@@ -42,7 +42,7 @@
     background: rgba(255, 255, 255, 0.2);
     color: white;
     padding: 5px 12px;
-    border-radius: 20px;
+    border-radius: var(--radius-lg);
     font-size: 0.85rem;
     font-weight: 500;
     display: flex;
@@ -93,7 +93,7 @@
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 8px 16px;
-    border-radius: 20px;
+    border-radius: var(--radius-lg);
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -107,49 +107,21 @@
 }
 
 /* 클릭 영역 개선 */
-.clickable-area {
-    cursor: pointer;
-    transition: all 0.3s ease;
-    stroke-width: 2;
-    opacity: 0.8;
-    filter: brightness(1);
-}
-
-.clickable-area:hover {
-    stroke: #2196F3;
-    stroke-width: 3;
-    fill: rgba(33, 150, 243, 0.4) !important;
-    opacity: 1;
-    transform-origin: center;
-    transform: scale(1.1);
-    filter: brightness(1.1) drop-shadow(0 2px 4px rgba(33, 150, 243, 0.3));
-}
-
+/* 클릭 영역 상태는 body-map.css가 SSOT. 여기서는 펄스 애니메이션만 토큰 기반으로 유지. */
 .clickable-area.selected {
-    fill: rgba(255, 87, 34, 0.8) !important;
-    stroke: #ff5722;
-    stroke-width: 3.5;
-    opacity: 1;
-    animation: selectedPulse 0.5s ease;
+    animation: selectedPulse 0.4s ease;
 }
 
 @keyframes selectedPulse {
     0% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-    100% { transform: scale(1.08); }
-}
-
-.clickable-area.selected:hover {
-    fill: rgba(255, 87, 34, 0.9) !important;
-    stroke: #e64a19;
-    transform: scale(1.12);
-    filter: brightness(1.1) drop-shadow(0 3px 6px rgba(255, 87, 34, 0.4));
+    50% { transform: scale(1.12); }
+    100% { transform: scale(1); }
 }
 
 /* 바디맵 컨테이너 개선 */
 .body-map {
     background: white;
-    border-radius: 15px;
+    border-radius: var(--radius-md);
     padding: 30px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     max-width: 550px;
@@ -173,7 +145,7 @@
     header {
         padding: 20px 15px;
         margin-bottom: 15px;
-        border-radius: 15px;
+        border-radius: var(--radius-md);
     }
     
     header h1 {
@@ -231,13 +203,13 @@
     .selection-badge {
         font-size: 0.8rem;
         padding: 6px 10px;
-        border-radius: 15px;
+        border-radius: var(--radius-md);
     }
     
     .quick-clear-btn {
         padding: 10px 20px;
         font-size: 0.9rem;
-        border-radius: 20px;
+        border-radius: var(--radius-lg);
         width: 100%;
         margin-top: 5px;
     }
@@ -259,7 +231,7 @@
         flex: 1;
         padding: 12px 15px;
         font-size: 0.9rem;
-        border-radius: 20px;
+        border-radius: var(--radius-lg);
     }
     
     .body-map {

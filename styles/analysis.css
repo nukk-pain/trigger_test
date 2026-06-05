@@ -1,29 +1,29 @@
 /* 3단계: 결과 */
 .warning-section {
-    background: #f8d7da;
-    border: 2px solid #f5c6cb;
-    border-radius: 15px;
+    background: var(--color-alert-soft);
+    border: 2px solid var(--color-alert);
+    border-radius: var(--radius-md);
     padding: 30px;
     margin-bottom: 30px;
     text-align: center;
 }
 
 .warning-section h2 {
-    color: #721c24;
+    color: var(--color-alert);
     margin-bottom: 20px;
 }
 
 .emergency-notice {
-    background: white;
+    background: var(--color-surface);
     padding: 20px;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     margin-top: 20px;
 }
 
 .emergency-notice p {
     font-size: 1.2rem;
     margin-bottom: 15px;
-    color: #721c24;
+    color: var(--color-alert);
 }
 
 .emergency-contacts {
@@ -40,13 +40,13 @@
 }
 
 .medical-safety-notice {
-    background: #fff7ed;
-    border: 1px solid #fed7aa;
-    border-left: 4px solid #ea580c;
-    border-radius: 8px;
-    color: #7c2d12;
-    margin-bottom: 18px;
-    padding: 14px 16px;
+    background: var(--color-alert-soft);
+    border: 1px solid var(--color-alert);
+    border-left: 4px solid var(--color-alert);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
+    padding: var(--space-md);
 }
 
 .medical-safety-notice p {
@@ -83,10 +83,10 @@
 .trigger-point-card,
 .fascial-line-card {
     background: #f8f9fa;
-    border-radius: 15px;
+    border-radius: var(--radius-md);
     padding: 25px;
     margin-bottom: 20px;
-    border-left: 5px solid #4CAF50;
+    border-left: 5px solid var(--color-primary);
     position: relative;
 }
 
@@ -115,7 +115,7 @@
     top: 15px;
     right: 15px;
     padding: 5px 12px;
-    border-radius: 15px;
+    border-radius: var(--radius-md);
     font-size: 0.8rem;
     font-weight: 600;
 }
@@ -131,7 +131,7 @@
 }
 
 .massage-instruction {
-    background: #e3f2fd;
+    background: var(--color-primary-soft);
     padding: 20px;
     border-radius: 10px;
     margin-bottom: 20px;
