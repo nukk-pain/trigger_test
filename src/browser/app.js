@@ -9,12 +9,10 @@ import {
 } from './notifications.js';
 import { setSafeHtml } from './safe-html.js';
 import {
-    clearSelection,
     collectActionData,
-    setupBodyMapEvents,
-    switchBodyView,
     validateStep1
 } from './selection-ui.js';
+import { initRegionSelect, resetRegionSelect } from './region-select.js';
 
 const painData = appState.painData;
 configureGuideModal();
@@ -106,24 +104,8 @@ function setupEventListeners() {
         }
     });
 
-    // 인체 지도 이벤트
-    setupBodyMapEvents();
-
-    // 뷰 전환 (앞면/뒷면)
-    document.querySelectorAll('.view-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            switchBodyView(this.dataset.view);
-        });
-    });
-
-    // 선택 초기화
-    document.getElementById('clear-selection').addEventListener('click', clearSelection);
-
-    // 상단 빠른 지우기 버튼
-    const quickClearBtn = document.getElementById('quick-clear');
-    if (quickClearBtn) {
-        quickClearBtn.addEventListener('click', clearSelection);
-    }
+    // 부위 선택 2단계 UI (그룹 → 세부). clear-selection/quick-clear 배선도 내부에서 처리.
+    initRegionSelect();
 
     // 처음부터 다시
     document.getElementById('start-over').addEventListener('click', function() {
@@ -186,8 +168,8 @@ function resetApp() {
         charCount.textContent = '0';
     }
 
-    // 선택 영역 초기화
-    clearSelection();
+    // 선택 영역 초기화 (그룹 단계로 복귀 + selectedAreas 비우기)
+    resetRegionSelect();
 
     // 경고 숨기기
     const redFlagWarning = document.getElementById('red-flag-warning');

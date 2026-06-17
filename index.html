@@ -33,314 +33,73 @@
                 <button type="button" id="quick-clear" class="quick-clear-btn" hidden>지우기</button>
             </div>
 
-            <div class="body-map-container">
-                <div class="body-view-tabs">
-                    <button type="button" class="view-tab active" data-view="front">앞면</button>
-                    <button type="button" class="view-tab" data-view="back">뒷면</button>
-                </div>
-
+            <div class="region-select" id="region-select">
                 <div class="body-map" id="body-map">
-                    <!-- SVG 인체 그림이 여기에 삽입됩니다 -->
                     <svg id="body-svg" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
                         <title>통증 부위 선택 인체 지도</title>
-                        <!-- 앞면 body outline -->
-                        <g id="front-view" class="body-view active">
-                            <!-- 사람 형태 실루엣 (장식, 클릭 불가) -->
-                            <g class="body-silhouette" aria-hidden="true">
-                                <ellipse cx="200" cy="50" rx="33" ry="40" />
-                                <rect x="186" y="84" width="28" height="26" rx="10" />
-                                <ellipse cx="200" cy="152" rx="90" ry="30" />
-                                <rect x="150" y="140" width="100" height="172" rx="34" />
-                                <ellipse cx="200" cy="306" rx="54" ry="30" />
-                                <rect x="103" y="150" width="28" height="96" rx="14" />
-                                <rect x="104" y="232" width="25" height="86" rx="12" />
-                                <ellipse cx="117" cy="326" rx="15" ry="21" />
-                                <rect x="269" y="150" width="28" height="96" rx="14" />
-                                <rect x="271" y="232" width="25" height="86" rx="12" />
-                                <ellipse cx="283" cy="326" rx="15" ry="21" />
-                                <rect x="156" y="298" width="40" height="238" rx="20" />
-                                <ellipse cx="176" cy="540" rx="22" ry="12" />
-                                <rect x="204" y="298" width="40" height="238" rx="20" />
-                                <ellipse cx="224" cy="540" rx="22" ry="12" />
-                            </g>
-                            <!-- 머리 부위 -->
-                            <ellipse class="clickable-area" data-area="head-front" cx="200" cy="50" rx="35" ry="25"
- title="이마/앞머리" />
-                            <ellipse class="clickable-area" data-area="head-temple-left" cx="170" cy="55" rx="15"
-                                ry="20" title="왼쪽 관자놀이" />
-                            <ellipse class="clickable-area" data-area="head-temple-right" cx="230" cy="55" rx="15"
-                                ry="20" title="오른쪽 관자놀이" />
-                            <ellipse class="clickable-area" data-area="jaw-left" cx="180" cy="80" rx="12" ry="15"
- title="왼쪽 턱" />
-                            <ellipse class="clickable-area" data-area="jaw-right" cx="220" cy="80" rx="12" ry="15"
- title="오른쪽 턱" />
-
-                            <!-- 목 부위 -->
-                            <rect class="clickable-area" data-area="neck-front" x="185" y="100" width="30" height="25"
- title="목 앞쪽" />
-                            <rect class="clickable-area" data-area="neck-left" x="165" y="105" width="20" height="20"
- title="목 왼쪽" />
-                            <rect class="clickable-area" data-area="neck-right" x="215" y="105" width="20" height="20"
- title="목 오른쪽" />
-
-                            <!-- 어깨 부위 상세 -->
-                            <ellipse class="clickable-area" data-area="shoulder-left-front" cx="140" cy="135" rx="25"
-                                ry="18" title="왼쪽 어깨 앞" />
-                            <ellipse class="clickable-area" data-area="shoulder-right-front" cx="260" cy="135" rx="25"
-                                ry="18" title="오른쪽 어깨 앞" />
-                            <ellipse class="clickable-area" data-area="collar-left" cx="170" cy="125" rx="15" ry="10"
- title="왼쪽 쇄골" />
-                            <ellipse class="clickable-area" data-area="collar-right" cx="230" cy="125" rx="15" ry="10"
- title="오른쪽 쇄골" />
-
-                            <!-- 가슴 부위 상세 -->
-                            <rect class="clickable-area" data-area="chest-upper" x="170" y="130" width="60" height="40"
- title="가슴 윗부분" />
-                            <rect class="clickable-area" data-area="chest-left" x="160" y="150" width="35" height="50"
- title="왼쪽 가슴" />
-                            <rect class="clickable-area" data-area="chest-right" x="205" y="150" width="35" height="50"
- title="오른쪽 가슴" />
-                            <rect class="clickable-area" data-area="sternum" x="190" y="140" width="20" height="60"
- title="가슴뼈" />
-
-                            <!-- 복부 부위 상세 -->
-                            <rect class="clickable-area" data-area="upper-abdomen" x="170" y="200" width="60"
-                                height="30" title="명치/상복부" />
-                            <rect class="clickable-area" data-area="abdomen-left" x="160" y="230" width="35" height="40"
- title="왼쪽 배" />
-                            <rect class="clickable-area" data-area="abdomen-right" x="205" y="230" width="35"
-                                height="40" title="오른쪽 배" />
-                            <rect class="clickable-area" data-area="navel" x="185" y="240" width="30" height="25"
- title="배꼽 주변" />
-                            <rect class="clickable-area" data-area="lower-abdomen" x="175" y="265" width="50"
-                                height="30" title="아랫배" />
-
-                            <!-- 팔 부위 상세 -->
-                            <rect class="clickable-area" data-area="upper-arm-left" x="100" y="150" width="25"
-                                height="60" title="왼쪽 윗팔" />
-                            <rect class="clickable-area" data-area="upper-arm-right" x="275" y="150" width="25"
-                                height="60" title="오른쪽 윗팔" />
-                            <circle class="clickable-area" data-area="elbow-left" cx="112" cy="220" r="12"
- title="왼쪽 팔꿈치" />
-                            <circle class="clickable-area" data-area="elbow-right" cx="288" cy="220" r="12"
- title="오른쪽 팔꿈치" />
-                            <rect class="clickable-area" data-area="forearm-left" x="105" y="235" width="20" height="50"
- title="왼쪽 아래팔" />
-                            <rect class="clickable-area" data-area="forearm-right" x="280" y="235" width="20"
-                                height="50" title="오른쪽 아래팔" />
-                            <circle class="clickable-area" data-area="wrist-left" cx="115" cy="295" r="10"
- title="왼쪽 손목" />
-                            <circle class="clickable-area" data-area="wrist-right" cx="285" cy="295" r="10"
- title="오른쪽 손목" />
-                            <ellipse class="clickable-area" data-area="hand-left" cx="115" cy="315" rx="12" ry="20"
- title="왼손" />
-                            <ellipse class="clickable-area" data-area="hand-right" cx="285" cy="315" rx="12" ry="20"
- title="오른손" />
-
-                            <!-- 골반 부위 -->
-                            <rect class="clickable-area" data-area="pelvis-left" x="160" y="295" width="30" height="25"
- title="왼쪽 골반" />
-                            <rect class="clickable-area" data-area="pelvis-right" x="210" y="295" width="30" height="25"
- title="오른쪽 골반" />
-                            <rect class="clickable-area" data-area="groin-left" x="165" y="315" width="20" height="15"
- title="왼쪽 사타구니" />
-                            <rect class="clickable-area" data-area="groin-right" x="215" y="315" width="20" height="15"
- title="오른쪽 사타구니" />
-
-                            <!-- 허벅지 부위 상세 -->
-                            <rect class="clickable-area" data-area="thigh-front-left" x="160" y="330" width="25"
-                                height="50" title="왼쪽 허벅지 앞" />
-                            <rect class="clickable-area" data-area="thigh-front-right" x="210" y="330" width="25"
-                                height="50" title="오른쪽 허벅지 앞" />
-                            <rect class="clickable-area" data-area="thigh-inner-left" x="185" y="340" width="12"
-                                height="40" title="왼쪽 허벅지 안쪽" />
-                            <rect class="clickable-area" data-area="thigh-inner-right" x="203" y="340" width="12"
-                                height="40" title="오른쪽 허벅지 안쪽" />
-                            <rect class="clickable-area" data-area="thigh-outer-left" x="145" y="340" width="15"
-                                height="40" title="왼쪽 허벅지 바깥" />
-                            <rect class="clickable-area" data-area="thigh-outer-right" x="240" y="340" width="15"
-                                height="40" title="오른쪽 허벅지 바깥" />
-
-                            <!-- 무릎 부위 상세 -->
-                            <circle class="clickable-area" data-area="knee-front-left" cx="172" cy="400" r="15"
- title="왼쪽 무릎 앞" />
-                            <circle class="clickable-area" data-area="knee-front-right" cx="228" cy="400" r="15"
- title="오른쪽 무릎 앞" />
-
-                            <!-- 정강이/종아리 부위 상세 -->
-                            <rect class="clickable-area" data-area="shin-left" x="165" y="420" width="15" height="60"
- title="왼쪽 정강이" />
-                            <rect class="clickable-area" data-area="shin-right" x="220" y="420" width="15" height="60"
- title="오른쪽 정강이" />
-                            <rect class="clickable-area" data-area="calf-front-left" x="180" y="430" width="12"
-                                height="50" title="왼쪽 종아리 앞" />
-                            <rect class="clickable-area" data-area="calf-front-right" x="208" y="430" width="12"
-                                height="50" title="오른쪽 종아리 앞" />
-
-                            <!-- 발목/발 부위 -->
-                            <circle class="clickable-area" data-area="ankle-left" cx="175" cy="490" r="10"
- title="왼쪽 발목" />
-                            <circle class="clickable-area" data-area="ankle-right" cx="225" cy="490" r="10"
- title="오른쪽 발목" />
-                            <ellipse class="clickable-area" data-area="foot-top-left" cx="175" cy="520" rx="15" ry="25"
- title="왼발 등" />
-                            <ellipse class="clickable-area" data-area="foot-top-right" cx="225" cy="520" rx="15" ry="25"
- title="오른발 등" />
+                        <!-- 사람 형태 단일 실루엣 (후면, 장식) -->
+                        <ellipse class="body-silhouette" cx="200" cy="74" rx="36" ry="42" />
+                        <path class="body-silhouette" d="
+                            M182 110 C182 124 184 134 176 142 C150 150 132 166 122 196
+                            L104 262 C100 280 122 286 128 270 L150 214
+                            C150 238 150 270 152 300 C153 336 152 366 158 392
+                            C150 440 150 500 156 556 C157 572 183 572 185 556
+                            C189 504 194 452 200 416 C206 452 211 504 215 556
+                            C217 572 243 572 244 556 C250 500 250 440 242 392
+                            C248 366 247 336 248 300 C250 270 250 238 250 214
+                            L272 270 C278 286 300 280 296 262 L278 196
+                            C268 166 250 150 224 142 C216 134 218 124 218 110
+                            C218 110 200 118 182 110 Z" />
+                        <path class="accent-line" d="M200 150 L200 320" />
+                        <path class="accent-line" d="M180 176 C170 188 170 208 182 218" />
+                        <path class="accent-line" d="M220 176 C230 188 230 208 218 218" />
+                        <!-- 3개 그룹 zone (클릭 가능) -->
+                        <g class="region-zones" id="region-zones">
+                            <rect class="region-zone" data-group="neck-shoulder"
+                                x="120" y="118" width="160" height="76" rx="20" />
+                            <rect class="region-zone" data-group="back-waist"
+                                x="148" y="200" width="104" height="110" rx="20" />
+                            <rect class="region-zone" data-group="pelvis-hip"
+                                x="150" y="312" width="100" height="74" rx="20" />
                         </g>
-
-                        <!-- 뒷면 body outline -->
-                        <g id="back-view" class="body-view">
-                            <!-- 사람 형태 실루엣 (장식, 클릭 불가) -->
-                            <g class="body-silhouette" aria-hidden="true">
-                                <ellipse cx="200" cy="50" rx="33" ry="40" />
-                                <rect x="186" y="84" width="28" height="26" rx="10" />
-                                <ellipse cx="200" cy="152" rx="90" ry="30" />
-                                <rect x="150" y="140" width="100" height="172" rx="34" />
-                                <ellipse cx="200" cy="306" rx="54" ry="30" />
-                                <rect x="103" y="150" width="28" height="96" rx="14" />
-                                <rect x="104" y="232" width="25" height="86" rx="12" />
-                                <ellipse cx="117" cy="326" rx="15" ry="21" />
-                                <rect x="269" y="150" width="28" height="96" rx="14" />
-                                <rect x="271" y="232" width="25" height="86" rx="12" />
-                                <ellipse cx="283" cy="326" rx="15" ry="21" />
-                                <rect x="156" y="298" width="40" height="238" rx="20" />
-                                <ellipse cx="176" cy="540" rx="22" ry="12" />
-                                <rect x="204" y="298" width="40" height="238" rx="20" />
-                                <ellipse cx="224" cy="540" rx="22" ry="12" />
-                            </g>
-                            <!-- 머리 뒷부분 -->
-                            <ellipse class="clickable-area" data-area="head-back" cx="200" cy="45" rx="35" ry="25"
- title="뒷머리" />
-                            <ellipse class="clickable-area" data-area="head-crown" cx="200" cy="35" rx="25" ry="15"
- title="정수리" />
-                            <ellipse class="clickable-area" data-area="occipital" cx="200" cy="70" rx="30" ry="20"
- title="후두부" />
-
-                            <!-- 목 뒷부분 상세 -->
-                            <rect class="clickable-area" data-area="neck-back-upper" x="185" y="95" width="30"
-                                height="15" title="목 뒤 윗부분" />
-                            <rect class="clickable-area" data-area="neck-back-lower" x="185" y="110" width="30"
-                                height="20" title="목 뒤 아래부분" />
-                            <rect class="clickable-area" data-area="neck-side-left-back" x="165" y="105" width="20"
-                                height="20" title="목 뒤 왼쪽" />
-                            <rect class="clickable-area" data-area="neck-side-right-back" x="215" y="105" width="20"
-                                height="20" title="목 뒤 오른쪽" />
-
-                            <!-- 어깨 뒷부분 상세 -->
-                            <ellipse class="clickable-area" data-area="shoulder-blade-left" cx="140" cy="150" rx="25"
-                                ry="35" title="왼쪽 어깨뼈" />
-                            <ellipse class="clickable-area" data-area="shoulder-blade-right" cx="260" cy="150" rx="25"
-                                ry="35" title="오른쪽 어깨뼈" />
-                            <ellipse class="clickable-area" data-area="shoulder-top-left" cx="130" cy="130" rx="20"
-                                ry="15" title="왼쪽 어깨 윗부분" />
-                            <ellipse class="clickable-area" data-area="shoulder-top-right" cx="270" cy="130" rx="20"
-                                ry="15" title="오른쪽 어깨 윗부분" />
-
-                            <!-- 등 상부 상세 -->
-                            <rect class="clickable-area" data-area="upper-back-center" x="175" y="130" width="50"
-                                height="40" title="등 윗부분 중앙" />
-                            <rect class="clickable-area" data-area="upper-back-left" x="160" y="135" width="35"
-                                height="35" title="등 윗부분 왼쪽" />
-                            <rect class="clickable-area" data-area="upper-back-right" x="205" y="135" width="35"
-                                height="35" title="등 윗부분 오른쪽" />
-                            <rect class="clickable-area" data-area="mid-back-center" x="175" y="170" width="50"
-                                height="40" title="등 중간 부분" />
-
-                            <!-- 허리 부위 상세 -->
-                            <rect class="clickable-area" data-area="lower-back-upper" x="170" y="210" width="60"
-                                height="30" title="허리 윗부분" />
-                            <rect class="clickable-area" data-area="lower-back-left" x="160" y="220" width="35"
-                                height="40" title="허리 왼쪽" />
-                            <rect class="clickable-area" data-area="lower-back-right" x="205" y="220" width="35"
-                                height="40" title="허리 오른쪽" />
-                            <rect class="clickable-area" data-area="lower-back-center" x="180" y="240" width="40"
-                                height="30" title="허리 중앙" />
-                            <rect class="clickable-area" data-area="sacral" x="185" y="270" width="30" height="25"
- title="천골 부위" />
-
-                            <!-- 엉덩이 부위 상세 -->
-                            <rect class="clickable-area" data-area="buttock-left-upper" x="160" y="295" width="35"
-                                height="25" title="왼쪽 엉덩이 위" />
-                            <rect class="clickable-area" data-area="buttock-right-upper" x="205" y="295" width="35"
-                                height="25" title="오른쪽 엉덩이 위" />
-                            <rect class="clickable-area" data-area="buttock-left-lower" x="160" y="320" width="35"
-                                height="25" title="왼쪽 엉덩이 아래" />
-                            <rect class="clickable-area" data-area="buttock-right-lower" x="205" y="320" width="35"
-                                height="25" title="오른쪽 엉덩이 아래" />
-                            <rect class="clickable-area" data-area="tailbone" x="190" y="340" width="20" height="15"
- title="꼬리뼈" />
-
-                            <!-- 팔 뒷부분 상세 -->
-                            <rect class="clickable-area" data-area="upper-arm-back-left" x="100" y="150" width="25"
-                                height="60" title="왼쪽 윗팔 뒤" />
-                            <rect class="clickable-area" data-area="upper-arm-back-right" x="275" y="150" width="25"
-                                height="60" title="오른쪽 윗팔 뒤" />
-                            <circle class="clickable-area" data-area="elbow-back-left" cx="112" cy="220" r="12"
- title="왼쪽 팔꿈치 뒤" />
-                            <circle class="clickable-area" data-area="elbow-back-right" cx="288" cy="220" r="12"
- title="오른쪽 팔꿈치 뒤" />
-                            <rect class="clickable-area" data-area="forearm-back-left" x="105" y="235" width="20"
-                                height="50" title="왼쪽 아래팔 뒤" />
-                            <rect class="clickable-area" data-area="forearm-back-right" x="280" y="235" width="20"
-                                height="50" title="오른쪽 아래팔 뒤" />
-
-                            <!-- 허벅지 뒷부분 상세 -->
-                            <rect class="clickable-area" data-area="thigh-back-left" x="160" y="355" width="25"
-                                height="50" title="왼쪽 허벅지 뒤" />
-                            <rect class="clickable-area" data-area="thigh-back-right" x="215" y="355" width="25"
-                                height="50" title="오른쪽 허벅지 뒤" />
-                            <rect class="clickable-area" data-area="hamstring-left" x="165" y="365" width="20"
-                                height="35" title="왼쪽 햄스트링" />
-                            <rect class="clickable-area" data-area="hamstring-right" x="215" y="365" width="20"
-                                height="35" title="오른쪽 햄스트링" />
-
-                            <!-- 무릎 뒷부분 -->
-                            <circle class="clickable-area" data-area="knee-back-left" cx="172" cy="410" r="15"
- title="왼쪽 무릎 뒤" />
-                            <circle class="clickable-area" data-area="knee-back-right" cx="228" cy="410" r="15"
- title="오른쪽 무릎 뒤" />
-
-                            <!-- 종아리 뒷부분 상세 -->
-                            <rect class="clickable-area" data-area="calf-back-left" x="165" y="430" width="20"
-                                height="50" title="왼쪽 종아리 뒤" />
-                            <rect class="clickable-area" data-area="calf-back-right" x="215" y="430" width="20"
-                                height="50" title="오른쪽 종아리 뒤" />
-                            <rect class="clickable-area" data-area="achilles-left" x="170" y="475" width="10"
-                                height="15" title="왼쪽 아킬레스건" />
-                            <rect class="clickable-area" data-area="achilles-right" x="220" y="475" width="10"
-                                height="15" title="오른쪽 아킬레스건" />
-
-                            <!-- 발뒤꿈치/발바닥 -->
-                            <circle class="clickable-area" data-area="heel-left" cx="175" cy="495" r="12"
- title="왼쪽 발뒤꿈치" />
-                            <circle class="clickable-area" data-area="heel-right" cx="225" cy="495" r="12"
- title="오른쪽 발뒤꿈치" />
-                            <ellipse class="clickable-area" data-area="foot-sole-left" cx="175" cy="520" rx="15" ry="25"
- title="왼발 바닥" />
-                            <ellipse class="clickable-area" data-area="foot-sole-right" cx="225" cy="520" rx="15"
-                                ry="25" title="오른발 바닥" />
-                        </g>
-
-                        <!-- 선택된 영역 표시용 overlay -->
-                        <g id="selected-areas"></g>
                     </svg>
                 </div>
 
+                <!-- 1단계: 큰 부위군 선택 -->
+                <div class="region-step active" id="region-step-group">
+                    <p class="region-prompt">어디가 불편하세요?</p>
+                    <p class="region-sub">지금은 목·어깨, 등·허리, 골반·엉덩이 셀프 마사지를 도와드려요.</p>
+                    <div class="region-group-cards" id="region-group-cards" role="group" aria-label="부위 그룹 선택"></div>
+                </div>
+
+                <!-- 2단계: 세부 부위 선택 -->
+                <div class="region-step" id="region-step-detail" hidden>
+                    <button type="button" class="region-back" id="region-back">‹ 부위 다시 고르기</button>
+                    <p class="region-prompt" id="region-detail-title">세부 위치를 골라주세요</p>
+                    <div class="region-detail-buttons" id="region-detail-buttons" role="group" aria-label="세부 부위 선택"></div>
+                </div>
+
+                <!-- 선택 요약 -->
                 <div class="selected-areas-panel">
                     <div class="panel-header">
-                        <h4>🎯 선택된 통증 부위</h4>
+                        <h4>선택한 통증 부위</h4>
                         <span id="selection-count" class="selection-count">0개 선택됨</span>
                     </div>
                     <div class="selected-areas-content">
                         <ul id="selected-list" class="selected-areas-list"></ul>
                         <div class="panel-actions">
                             <button type="button" id="clear-selection" class="clear-btn">
-                                <span class="btn-icon">🗑️</span>
                                 <span class="btn-text">전체 초기화</span>
                             </button>
                         </div>
                     </div>
                 </div>
+
+                <!-- 미지원 부위 보조 흐름 -->
+                <details class="other-region-note">
+                    <summary>다른 부위가 불편해요</summary>
+                    <p>지금은 목·어깨·등·허리·골반 주변만 도와드려요. 필요한 부위를 적어주시면 다음 업데이트에 반영할게요.</p>
+                </details>
             </div>
 
             <!-- 악화 동작 선택 -->

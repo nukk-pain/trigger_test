@@ -28,8 +28,9 @@ pids
 # Coverage directory used by tools like istanbul
 coverage/
 
-# Local docs and repo assessments
-docs/
+# Local docs and repo assessments (but keep ADRs tracked)
+docs/*
+!docs/decisions/
 
 # Local agent evidence
 .omo/ulw-loop/

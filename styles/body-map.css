@@ -102,6 +102,175 @@
     display: block;
 }
 
+/* ── 2단계 부위 선택 (그룹 → 세부) ───────────────────────── */
+.region-select {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+    width: 100%;
+}
+
+/* 사람 실루엣 (단일 path) */
+.body-silhouette {
+    fill: var(--color-primary-soft);
+}
+
+.accent-line {
+    fill: none;
+    stroke: var(--color-primary-strong);
+    stroke-opacity: 0.2;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+/* 그림 위 그룹 zone */
+.region-zone {
+    fill: var(--color-primary);
+    fill-opacity: 0.16;
+    stroke: var(--color-primary);
+    stroke-opacity: 0.5;
+    stroke-width: 2;
+    cursor: pointer;
+    transition: fill-opacity 0.2s ease, stroke-opacity 0.2s ease;
+}
+
+.region-zone:hover,
+.region-zone:focus-visible {
+    fill-opacity: 0.4;
+    stroke-opacity: 1;
+    outline: none;
+}
+
+/* 단계 컨테이너 */
+.region-step {
+    width: 100%;
+    max-width: 460px;
+    text-align: center;
+}
+
+.region-step[hidden] {
+    display: none;
+}
+
+.region-prompt {
+    font-size: var(--font-size-h3);
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-xs);
+}
+
+.region-sub {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+}
+
+/* 1단계: 그룹 카드 */
+.region-group-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.region-group-card {
+    min-height: var(--tap-min);
+    padding: var(--space-md) var(--space-lg);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: var(--font-size-label);
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.1s ease;
+}
+
+.region-group-card:hover,
+.region-group-card:focus-visible {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+    outline: none;
+}
+
+.region-group-card:active {
+    transform: scale(0.99);
+}
+
+/* 2단계: 뒤로가기 + 세부 버튼 그리드 */
+.region-back {
+    display: inline-block;
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    min-height: var(--tap-min);
+    border: none;
+    background: none;
+    color: var(--color-primary-strong);
+    font-size: var(--font-size-label);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.region-back:hover,
+.region-back:focus-visible {
+    text-decoration: underline;
+    outline: none;
+}
+
+.region-detail-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+}
+
+.region-detail-btn {
+    min-height: var(--tap-min);
+    padding: var(--space-sm) var(--space-md);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-sunken);
+    color: var(--color-text);
+    font-size: var(--font-size-label);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.region-detail-btn:hover,
+.region-detail-btn:focus-visible {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+    outline: none;
+}
+
+.region-detail-btn.selected {
+    background: var(--color-primary);
+    border-color: var(--color-primary-strong);
+    color: var(--color-surface);
+    font-weight: 600;
+}
+
+/* 미지원 부위 보조 흐름 */
+.other-region-note {
+    width: 100%;
+    max-width: 460px;
+    font-size: var(--font-size-caption);
+    color: var(--color-text-muted);
+}
+
+.other-region-note summary {
+    cursor: pointer;
+    padding: var(--space-sm) 0;
+    color: var(--color-primary-strong);
+    min-height: var(--tap-min);
+    display: flex;
+    align-items: center;
+}
+
+.other-region-note p {
+    padding: var(--space-sm) 0;
+    line-height: var(--line-height-body);
+}
+
 /* 사람 형태 실루엣: 항상 몸을 보여준다. 클릭은 위의 핫스팟이 받으므로 이벤트 통과 */
 .body-silhouette {
     pointer-events: none;
