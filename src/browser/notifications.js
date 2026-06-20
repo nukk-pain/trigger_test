@@ -123,7 +123,7 @@ export function showServerProxyDialog(errorMessage = null) {
             <div class="env-file-example">
                 <h4>📄 .env.local 파일 예시:</h4>
                 <pre><code># OpenRouter API 설정 (새 키로 교체)
-OPENROUTER_API_KEY=sk-or-새로운키를여기에입력
+OPENROUTER_API_KEY=sk-or-your-server-proxy-here
 DAILY_REQUEST_LIMIT=50
 MONTHLY_REQUEST_LIMIT=1000
 OPENROUTER_MODEL=openrouter/auto</code></pre>
