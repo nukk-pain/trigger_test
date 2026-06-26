@@ -1,0 +1,22 @@
+# 셀프 마사지 가이드
+
+> AI-powered self-massage guide that recommends massage techniques based on pain location.
+
+## About
+
+셀프 마사지 가이드 (massage.nukk.net) is a Korean-language web tool built by a physician. Users select a painful body region on an interactive human body map, and the AI provides step-by-step self-massage instructions that can be followed at home.
+
+## Audience
+
+Patients and individuals in South Korea experiencing muscle pain, joint pain, or tension headaches who want guided self-massage relief at home.
+
+## Key Features
+
+- Interactive body map for pain location selection
+- AI-generated massage instructions per body region
+- Step-by-step guidance in Korean
+- Covers common pain areas: neck, shoulders, back, legs, head
+
+## Source
+
+Built by Nukk-pain (nukkpain.vercel.app), a Korean physician-developer.

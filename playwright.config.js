@@ -10,7 +10,7 @@ module.exports = defineConfig({
   },
   reporter: [['list']],
   use: {
-    baseURL: `http://127.0.0.1:${port}`,
+    baseURL: process.env.BASE_URL || `http://127.0.0.1:${port}`,
     trace: 'retain-on-failure'
   },
   projects: [
@@ -19,10 +19,12 @@ module.exports = defineConfig({
       use: { ...devices['Desktop Chrome'] }
     }
   ],
-  webServer: {
-    command: `PORT=${port} OPENROUTER_MODEL=test/model npm start`,
-    url: `http://127.0.0.1:${port}`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 30_000
-  }
+  ...(process.env.BASE_URL ? {} : {
+    webServer: {
+      command: `PORT=${port} OPENROUTER_MODEL=test/model npm start`,
+      url: `http://127.0.0.1:${port}`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 30_000
+    }
+  })
 });

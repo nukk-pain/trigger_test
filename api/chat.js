@@ -1,6 +1,3 @@
-import { createRequire } from 'node:module';
-
-const require = createRequire(import.meta.url);
 const { handleChatRequest } = require('../lib/openrouter-proxy.cjs');
 
 function getAllowedOrigins(env) {
@@ -42,7 +39,7 @@ function isSameOriginRequest(origin, headers = {}) {
   }
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const originAllowed = applyCors(req, res, process.env);
   if (!originAllowed) {
     res.status(403).json({ error: 'Origin not allowed' });
@@ -64,4 +61,4 @@ export default async function handler(req, res) {
     res.setHeader(key, value);
   }
   res.status(result.status).json(result.body);
-}
+};
