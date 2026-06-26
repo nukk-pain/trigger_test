@@ -19,10 +19,9 @@ function structuredOutput() {
   });
 }
 
-// 2단계 동선 헬퍼: 그룹 선택 → 세부 버튼 클릭 → selectedAreas에 data-area 반영
-async function selectArea(page, groupId, area) {
-  await page.locator(`.region-group-card[data-group="${groupId}"]`).click();
-  await page.locator(`.region-detail-btn[data-area="${area}"]`).click();
+// SVG 직접 클릭: 앞면 기준 data-area 속성으로 부위 선택
+async function selectArea(page, area) {
+  await page.locator(`.clickable-area[data-area="${area}"]`).click();
 }
 
 test.beforeEach(async ({ page }) => {
@@ -38,7 +37,7 @@ test('safe happy path renders structured guidance', async ({ page }) => {
     body: JSON.stringify({ output: structuredOutput() })
   }));
 
-  await selectArea(page, 'neck-shoulder', 'neck-front');
+  await selectArea(page, 'neck-front');
   await page.locator('#pain-description').fill('컴퓨터 작업 뒤 목 뒤가 뻐근합니다.');
   await page.locator('#analyze-pain').click();
 
@@ -54,7 +53,7 @@ test('red flag path blocks chat requests', async ({ page }) => {
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ output: 'unexpected' }) });
   });
 
-  await selectArea(page, 'neck-shoulder', 'neck-front');
+  await selectArea(page, 'neck-front');
   await page.locator('#pain-description').fill('목이 아프고 숨이 차며 가슴 통증이 있습니다.');
   await page.locator('#analyze-pain').click();
 
@@ -64,14 +63,10 @@ test('red flag path blocks chat requests', async ({ page }) => {
 });
 
 test('unsupported areas are not selectable (no false affordance)', async ({ page }) => {
-  // 미지원 부위(손목/무릎/머리 등)는 선택 버튼으로 아예 노출되지 않는다.
+  // 미지원 부위는 SVG에 clickable-area 요소가 아예 없어 선택 불가
   await expect(page.locator('[data-area="wrist-left"]')).toHaveCount(0);
-  // 빈 분석 부위(천골/허리 윗부분)도 노출되지 않는다 (doubt 결정).
-  await page.locator('.region-group-card[data-group="back-waist"]').click();
-  await expect(page.locator('.region-detail-btn[data-area="sacral"]')).toHaveCount(0);
-  await expect(page.locator('.region-detail-btn[data-area="lower-back-upper"]')).toHaveCount(0);
-  // 대신 보조 흐름이 제공된다.
-  await expect(page.locator('.other-region-note')).toContainText('다른 부위가 불편해요');
+  await expect(page.locator('[data-area="sacral"]')).toHaveCount(0);
+  await expect(page.locator('[data-area="lower-back-upper"]')).toHaveCount(0);
   await page.screenshot({ path: `${evidenceDir}/task-11-unsupported-area.png`, fullPage: true });
 });
 
@@ -99,7 +94,7 @@ test('malformed AI output renders safe fallback', async ({ page }) => {
     body: JSON.stringify({ output: '<script>alert(1)</script>bad' })
   }));
 
-  await selectArea(page, 'neck-shoulder', 'neck-front');
+  await selectArea(page, 'neck-front');
   await page.locator('#pain-description').fill('목 뒤가 뻐근합니다.');
   await page.locator('#analyze-pain').click();
 
