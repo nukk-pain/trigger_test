@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { appState } from '../src/browser/app-state.js';
-import { initRegionSelect } from '../src/browser/region-select.js';
+import { initRegionSelect, resetRegionSelect } from '../src/browser/region-select.js';
 
 vi.mock('../src/browser/notifications.js', () => ({
   showNotification: vi.fn()
@@ -9,20 +9,25 @@ vi.mock('../src/browser/notifications.js', () => ({
 function setupDom() {
   document.body.innerHTML = `
     <div id="region-select">
-      <svg>
-        <g id="region-zones">
-          <rect class="region-zone" data-group="neck-shoulder"></rect>
-          <rect class="region-zone" data-group="back-waist"></rect>
-          <rect class="region-zone" data-group="pelvis-hip"></rect>
-        </g>
-      </svg>
-      <div class="region-step active" id="region-step-group">
-        <div id="region-group-cards"></div>
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="front">앞면</button>
+        <button class="view-btn" data-view="back">뒷면</button>
       </div>
-      <div class="region-step" id="region-step-detail" hidden>
-        <button id="region-back"></button>
-        <p id="region-detail-title"></p>
-        <div id="region-detail-buttons"></div>
+      <div id="body-map">
+        <svg id="body-svg">
+          <g id="front-view" class="body-view active">
+            <ellipse class="clickable-area" data-area="head-front" data-group="head" aria-label="이마/앞머리" tabindex="0" role="button" aria-pressed="false" />
+            <rect class="clickable-area" data-area="lower-back-center" data-group="back-waist" aria-label="허리 중앙" tabindex="0" role="button" aria-pressed="false" />
+            <rect class="clickable-area" data-area="lower-back-left" data-group="back-waist" aria-label="허리 왼쪽" tabindex="0" role="button" aria-pressed="false" />
+            <rect class="clickable-area" data-area="lower-back-right" data-group="back-waist" aria-label="허리 오른쪽" tabindex="0" role="button" aria-pressed="false" />
+            <rect class="clickable-area" data-area="mid-back-center" data-group="back-waist" aria-label="등 중간" tabindex="0" role="button" aria-pressed="false" />
+          </g>
+          <g id="back-view" class="body-view">
+            <ellipse class="clickable-area" data-area="head-back" data-group="head" aria-label="뒷머리" tabindex="0" role="button" aria-pressed="false" />
+            <ellipse class="clickable-area" data-area="shoulder-blade-left" data-group="neck-shoulder" aria-label="왼쪽 어깨뼈" tabindex="0" role="button" aria-pressed="false" />
+          </g>
+        </svg>
+        <div id="area-tooltip" class="area-tooltip" aria-hidden="true"></div>
       </div>
       <span id="live-selection-text"></span>
       <button id="quick-clear" hidden></button>
@@ -32,49 +37,54 @@ function setupDom() {
   `;
 }
 
-describe('region-select (2-step UI)', () => {
+describe('region-select (SVG 직접 선택)', () => {
   beforeEach(() => {
     appState.painData.selectedAreas = [];
     setupDom();
     initRegionSelect();
   });
 
-  it('renders 3 group cards at start', () => {
-    const cards = document.querySelectorAll('#region-group-cards .region-group-card');
-    expect(cards.length).toBe(3);
-    expect([...cards].map(c => c.dataset.group)).toEqual(['neck-shoulder', 'back-waist', 'pelvis-hip']);
-    expect(document.getElementById('region-step-detail').hidden).toBe(true);
+  it('초기 상태: 앞면이 활성화되어 있음', () => {
+    expect(document.getElementById('front-view').classList.contains('active')).toBe(true);
+    expect(document.getElementById('back-view').classList.contains('active')).toBe(false);
   });
 
-  it('selecting a group card shows detail step with that group sub-area buttons', () => {
-    document.querySelector('[data-group="back-waist"].region-group-card')
+  it('뒷면 버튼 클릭 시 뷰 전환', () => {
+    document.querySelector('.view-btn[data-view="back"]')
       .dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
-    expect(document.getElementById('region-step-detail').hidden).toBe(false);
-    expect(document.getElementById('region-step-group').hidden).toBe(true);
-    const btns = document.querySelectorAll('#region-detail-buttons .region-detail-btn');
-    expect(btns.length).toBe(7); // back-waist has 7 areas
-    expect([...btns].map(b => b.dataset.area)).toContain('lower-back-center');
+    expect(document.getElementById('back-view').classList.contains('active')).toBe(true);
+    expect(document.getElementById('front-view').classList.contains('active')).toBe(false);
   });
 
-  it('clicking a detail button adds the exact data-area to selectedAreas', () => {
-    document.querySelector('[data-group="back-waist"].region-group-card')
-      .dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    document.querySelector('[data-area="lower-back-center"].region-detail-btn')
+  it('SVG 영역 클릭 시 selectedAreas에 area 추가', () => {
+    document.querySelector('[data-area="lower-back-center"]')
       .dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
     expect(appState.painData.selectedAreas).toContain('lower-back-center');
-    const btn = document.querySelector('[data-area="lower-back-center"].region-detail-btn');
-    expect(btn.getAttribute('aria-pressed')).toBe('true');
-    expect(btn.classList.contains('selected')).toBe(true);
   });
 
-  it('supports multi-select of two detail buttons', () => {
-    document.querySelector('[data-group="back-waist"].region-group-card')
+  it('선택된 영역은 selected 클래스 + aria-pressed=true', () => {
+    const area = document.querySelector('[data-area="lower-back-center"]');
+    area.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(area.classList.contains('selected')).toBe(true);
+    expect(area.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('다시 클릭하면 선택 해제 (토글)', () => {
+    const area = document.querySelector('[data-area="lower-back-center"]');
+    area.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    area.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(appState.painData.selectedAreas).not.toContain('lower-back-center');
+    expect(area.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('다중 선택 가능', () => {
+    document.querySelector('[data-area="lower-back-left"]')
       .dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    document.querySelector('[data-area="lower-back-left"].region-detail-btn')
-      .dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    document.querySelector('[data-area="lower-back-right"].region-detail-btn')
+    document.querySelector('[data-area="lower-back-right"]')
       .dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
     expect(appState.painData.selectedAreas).toEqual(
@@ -82,39 +92,26 @@ describe('region-select (2-step UI)', () => {
     );
   });
 
-  it('clicking a selected detail button again toggles it off', () => {
-    document.querySelector('[data-group="back-waist"].region-group-card')
-      .dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    const btn = document.querySelector('[data-area="lower-back-center"].region-detail-btn');
-    btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  it('키보드 Enter로 선택 가능', () => {
+    const area = document.querySelector('[data-area="mid-back-center"]');
+    area.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 
-    expect(appState.painData.selectedAreas).not.toContain('lower-back-center');
-    expect(btn.getAttribute('aria-pressed')).toBe('false');
-  });
-
-  it('back button returns to group step', () => {
-    document.querySelector('[data-group="pelvis-hip"].region-group-card')
-      .dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    document.getElementById('region-back').dispatchEvent(new MouseEvent('click', { bubbles: true }));
-
-    expect(document.getElementById('region-step-group').hidden).toBe(false);
-    expect(document.getElementById('region-step-detail').hidden).toBe(true);
-  });
-
-  it('an SVG group zone behaves like the matching group card', () => {
-    document.querySelector('.region-zone[data-group="neck-shoulder"]')
-      .dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(document.getElementById('region-step-detail').hidden).toBe(false);
-    const btns = document.querySelectorAll('#region-detail-buttons .region-detail-btn');
-    expect(btns.length).toBe(11); // neck-shoulder has 11 areas
-  });
-
-  it('keyboard Enter on a detail button selects it', () => {
-    document.querySelector('[data-group="back-waist"].region-group-card')
-      .dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    const btn = document.querySelector('[data-area="mid-back-center"].region-detail-btn');
-    btn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     expect(appState.painData.selectedAreas).toContain('mid-back-center');
+  });
+
+  it('키보드 Space로 선택 가능', () => {
+    const area = document.querySelector('[data-area="head-front"]');
+    area.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+
+    expect(appState.painData.selectedAreas).toContain('head-front');
+  });
+
+  it('resetRegionSelect 호출 시 선택 초기화', () => {
+    document.querySelector('[data-area="lower-back-center"]')
+      .dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    resetRegionSelect();
+
+    expect(appState.painData.selectedAreas).toHaveLength(0);
   });
 });

@@ -27,11 +27,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 async function initializeApp() {
+    // 부위 선택 UI는 API 초기화 성공 여부와 무관하게 항상 먼저 초기화
+    initRegionSelect();
+
     try {
         // 환경 설정 및 API 초기화
         await initializeAPI();
 
-        // 이벤트 리스너 설정
+        // 이벤트 리스너 설정 (analyze-pain 등 API 의존 기능)
         setupEventListeners();
 
         // 진행률 표시 업데이트
@@ -103,9 +106,6 @@ function setupEventListeners() {
             goToStep(2);
         }
     });
-
-    // 부위 선택 2단계 UI (그룹 → 세부). clear-selection/quick-clear 배선도 내부에서 처리.
-    initRegionSelect();
 
     // 처음부터 다시
     document.getElementById('start-over').addEventListener('click', function() {

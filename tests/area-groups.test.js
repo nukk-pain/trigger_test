@@ -19,9 +19,11 @@ const LEGACY_KEYS = [
 ];
 
 describe('REGION_GROUPS contract', () => {
-  it('exposes exactly 3 groups with labels and ids', () => {
+  it('exposes groups with labels and ids', () => {
     const groups = getGroups();
-    expect(groups.map(g => g.id).sort()).toEqual(['back-waist', 'neck-shoulder', 'pelvis-hip']);
+    expect(groups.map(g => g.id).sort()).toEqual([
+      'arm', 'back-waist', 'chest-abdomen', 'head', 'leg', 'neck-shoulder', 'pelvis-hip'
+    ]);
     groups.forEach(g => {
       expect(typeof g.label).toBe('string');
       expect(g.label.length).toBeGreaterThan(0);

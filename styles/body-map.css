@@ -1,108 +1,4 @@
-/* 2단계: 개선된 인체 지도 */
-.body-map-guide {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin-bottom: 30px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: var(--radius-md);
-    flex-wrap: wrap;
-}
-
-.guide-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 15px;
-    background: white;
-    border-radius: var(--radius-full);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e0e0e0;
-}
-
-.guide-icon {
-    font-size: 1.2rem;
-}
-
-.guide-text {
-    font-size: 0.9rem;
-    color: #666;
-    font-weight: 500;
-}
-
-/* 2단계: 인체 지도 */
-.body-map-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-}
-
-.body-view-tabs {
-    display: flex;
-    gap: 10px;
-}
-
-.view-tab {
-    padding: 12px 25px;
-    background: #e0e0e0;
-    border: none;
-    border-radius: var(--radius-full);
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.view-tab {
-    padding: 15px 25px;
-    background: #f8f9fa;
-    border: 2px solid #e9ecef;
-    border-radius: var(--radius-full);
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    color: #666;
-}
-
-.view-tab:hover {
-    background: var(--color-primary-soft);
-    border-color: var(--color-secondary);
-    color: var(--color-secondary-strong);
-    transform: translateY(-2px);
-}
-
-.view-tab.active {
-    background: var(--color-primary);
-    color: white;
-    border-color: var(--color-primary);
-    box-shadow: 0 4px 15px rgba(221, 107, 77, 0.3);
-}
-
-.body-map {
-    background: white;
-    border-radius: var(--radius-md);
-    padding: 20px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    max-width: 500px;
-}
-
-#body-svg {
-    width: 100%;
-    height: auto;
-    max-width: 400px;
-}
-
-.body-view {
-    display: none;
-}
-
-.body-view.active {
-    display: block;
-}
-
-/* ── 2단계 부위 선택 (그룹 → 세부) ───────────────────────── */
+/* ── 인체 지도 레이아웃 ────────────────────────────────── */
 .region-select {
     display: flex;
     flex-direction: column;
@@ -111,277 +7,172 @@
     width: 100%;
 }
 
-/* 사람 실루엣 (단일 path) */
-.body-silhouette {
-    fill: var(--color-primary-soft);
-}
-
-.accent-line {
-    fill: none;
-    stroke: var(--color-primary-strong);
-    stroke-opacity: 0.2;
-    stroke-width: 2;
-    stroke-linecap: round;
-}
-
-/* 그림 위 그룹 zone */
-.region-zone {
-    fill: var(--color-primary);
-    fill-opacity: 0.16;
-    stroke: var(--color-primary);
-    stroke-opacity: 0.5;
-    stroke-width: 2;
-    cursor: pointer;
-    transition: fill-opacity 0.2s ease, stroke-opacity 0.2s ease;
-}
-
-.region-zone:hover,
-.region-zone:focus-visible {
-    fill-opacity: 0.4;
-    stroke-opacity: 1;
-    outline: none;
-}
-
-/* 단계 컨테이너 */
-.region-step {
-    width: 100%;
-    max-width: 460px;
-    text-align: center;
-}
-
-.region-step[hidden] {
-    display: none;
-}
-
-.region-prompt {
-    font-size: var(--font-size-h3);
-    font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: var(--space-xs);
-}
-
-.region-sub {
-    font-size: var(--font-size-caption);
-    color: var(--color-text-muted);
-    margin-bottom: var(--space-md);
-}
-
-/* 1단계: 그룹 카드 */
-.region-group-cards {
+/* 앞/뒷면 전환 토글 */
+.view-toggle {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-}
-
-.region-group-card {
-    min-height: var(--tap-min);
-    padding: var(--space-md) var(--space-lg);
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
-    color: var(--color-text);
-    font-size: var(--font-size-label);
-    font-weight: 600;
-    cursor: pointer;
-    transition: border-color 0.2s ease, background 0.2s ease, transform 0.1s ease;
-}
-
-.region-group-card:hover,
-.region-group-card:focus-visible {
-    border-color: var(--color-primary);
-    background: var(--color-primary-soft);
-    outline: none;
-}
-
-.region-group-card:active {
-    transform: scale(0.99);
-}
-
-/* 2단계: 뒤로가기 + 세부 버튼 그리드 */
-.region-back {
-    display: inline-block;
-    margin-bottom: var(--space-md);
-    padding: var(--space-sm) var(--space-md);
-    min-height: var(--tap-min);
-    border: none;
-    background: none;
-    color: var(--color-primary-strong);
-    font-size: var(--font-size-label);
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.region-back:hover,
-.region-back:focus-visible {
-    text-decoration: underline;
-    outline: none;
-}
-
-.region-detail-buttons {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-sm);
-}
-
-.region-detail-btn {
-    min-height: var(--tap-min);
-    padding: var(--space-sm) var(--space-md);
-    border: 1.5px solid var(--color-border);
+    gap: 6px;
+    background: var(--color-surface-sunken, #f5f5f5);
     border-radius: var(--radius-full);
-    background: var(--color-surface-sunken);
-    color: var(--color-text);
-    font-size: var(--font-size-label);
-    cursor: pointer;
-    transition: border-color 0.2s ease, background 0.2s ease;
+    padding: 4px;
 }
 
-.region-detail-btn:hover,
-.region-detail-btn:focus-visible {
-    border-color: var(--color-primary);
-    background: var(--color-primary-soft);
-    outline: none;
-}
-
-.region-detail-btn.selected {
-    background: var(--color-primary);
-    border-color: var(--color-primary-strong);
-    color: var(--color-surface);
-    font-weight: 600;
-}
-
-/* 미지원 부위 보조 흐름 */
-.other-region-note {
-    width: 100%;
-    max-width: 460px;
-    font-size: var(--font-size-caption);
+.view-btn {
+    padding: 8px 28px;
+    border: none;
+    border-radius: var(--radius-full);
+    background: transparent;
     color: var(--color-text-muted);
-}
-
-.other-region-note summary {
+    font-size: var(--font-size-label);
+    font-weight: 600;
     cursor: pointer;
-    padding: var(--space-sm) 0;
-    color: var(--color-primary-strong);
-    min-height: var(--tap-min);
-    display: flex;
-    align-items: center;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
 
-.other-region-note p {
-    padding: var(--space-sm) 0;
-    line-height: var(--line-height-body);
+.view-btn.active {
+    background: white;
+    color: var(--color-primary-strong, #c0392b);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
 }
 
-/* 사람 형태 실루엣: 항상 몸을 보여준다. 클릭은 위의 핫스팟이 받으므로 이벤트 통과 */
-.body-silhouette {
-    pointer-events: none;
+.view-btn:hover:not(.active) {
+    color: var(--color-text);
 }
 
+/* SVG 컨테이너 */
+.body-map {
+    position: relative;
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0,0,0,0.06);
+    max-width: 420px;
+    width: 100%;
+}
+
+#body-svg {
+    width: 100%;
+    height: auto;
+    max-width: 380px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* 앞/뒷면 전환 */
+.body-view { display: none; }
+.body-view.active { display: block; }
+
+/* 실루엣 */
 .body-silhouette > * {
-    /* 분절선 없이 한 덩어리 실루엣으로 보이게 같은 fill, stroke 없음 */
-    fill: var(--color-primary-soft);
+    fill: #f0ece8;
+    stroke: #d4cbc4;
+    stroke-width: 0.5;
 }
 
-/* 클릭 영역: 평상시 투명(실루엣이 몸을 보여줌), hover/포커스/선택 때만 강조 */
+/* ── 그룹별 색상 토큰 ─────────────────────────────────── */
+.clickable-area[data-group="head"]           { --ac: #8e44ad; }
+.clickable-area[data-group="neck-shoulder"]  { --ac: #e67e22; }
+.clickable-area[data-group="chest-abdomen"]  { --ac: #16a085; }
+.clickable-area[data-group="back-waist"]     { --ac: #2980b9; }
+.clickable-area[data-group="pelvis-hip"]     { --ac: #d68910; }
+.clickable-area[data-group="arm"]            { --ac: #c0392b; }
+.clickable-area[data-group="leg"]            { --ac: #1a5276; }
+
+/* ── 클릭 가능 영역 스타일 ──────────────────────────────── */
 .clickable-area {
-    fill: transparent;
-    stroke: transparent;
+    fill: var(--ac);
+    fill-opacity: 0.10;
+    stroke: var(--ac);
+    stroke-opacity: 0.28;
     stroke-width: 1;
-    outline: none;
-    pointer-events: all;
     cursor: pointer;
-    transition: fill-opacity 0.2s ease, stroke 0.2s ease, transform 0.2s ease;
+    outline: none;
+    transition: fill-opacity 0.14s, stroke-opacity 0.14s, stroke-width 0.14s;
 }
 
 .clickable-area:hover {
-    fill: var(--color-primary);
-    fill-opacity: 0.45;
-    stroke: var(--color-primary-strong);
-    stroke-opacity: 1;
-    stroke-width: 2;
-    transform-origin: center;
-    transform: scale(1.04);
+    fill-opacity: 0.38;
+    stroke-opacity: 0.90;
+    stroke-width: 1.5;
 }
 
-/* 키보드 포커스: SVG는 기본 포커스 링이 안 보이므로 명시 */
 .clickable-area:focus-visible {
-    outline: none;
-    fill: var(--color-primary);
-    fill-opacity: 0.45;
-    stroke: var(--color-primary-strong);
+    fill-opacity: 0.38;
     stroke-opacity: 1;
-    stroke-width: 3;
+    stroke-width: 2;
 }
 
 .clickable-area.selected {
-    fill: var(--color-primary);
-    fill-opacity: 0.72;
-    stroke: var(--color-selected-stroke);
+    fill-opacity: 0.64;
     stroke-opacity: 1;
-    stroke-width: 2.5;
+    stroke-width: 2;
 }
 
 .clickable-area.selected:hover {
-    fill-opacity: 0.82;
-    stroke: var(--color-primary-strong);
-    transform: scale(1.06);
+    fill-opacity: 0.78;
 }
 
-/* 툴팁 스타일 */
-.body-area-tooltip {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.85rem;
+/* ── 툴팁 ────────────────────────────────────────────── */
+.area-tooltip {
+    position: fixed;
+    background: rgba(24, 24, 28, 0.90);
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
     pointer-events: none;
-    z-index: 1000;
+    z-index: 9999;
     white-space: nowrap;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transform: translateY(3px);
+    transition: opacity 0.12s, transform 0.12s;
 }
 
-.body-area-tooltip.show {
+.area-tooltip.visible {
     opacity: 1;
+    transform: translateY(0);
 }
 
-/* 개선된 선택 영역 패널 */
+/* ── 선택 요약 패널 ──────────────────────────────────── */
 .selected-areas-panel {
     background: white;
     border-radius: var(--radius-lg);
-    padding: 25px;
-    min-width: 350px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e0e0e0;
+    padding: 20px 24px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+    border: 1px solid rgba(0,0,0,0.06);
 }
 
 .panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #f0f0f0;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .panel-header h4 {
     margin: 0;
-    color: #2c3e50;
-    font-size: 1.3rem;
-    font-weight: 600;
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: 700;
 }
 
 .selection-count {
-    background: var(--color-primary-soft);
-    color: #2e7d32;
-    padding: 6px 12px;
-    border-radius: var(--radius-lg);
-    font-size: 0.9rem;
+    background: var(--color-primary-soft, #fdecea);
+    color: var(--color-primary-strong, #c0392b);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
     font-weight: 600;
 }
 
 .selected-areas-content {
-    max-height: 300px;
+    max-height: 280px;
     overflow-y: auto;
 }
 
@@ -392,84 +183,82 @@
 }
 
 .selected-areas-list li {
-    padding: 12px 15px;
-    background: #f8f9fa;
-    margin-bottom: 8px;
-    border-radius: 12px;
-    border-left: 4px solid var(--color-primary);
+    padding: 10px 14px;
+    background: #f8f8f8;
+    margin-bottom: 6px;
+    border-radius: 10px;
+    border-left: 3px solid var(--color-primary, #e74c3c);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: all 0.3s ease;
+    transition: background 0.15s;
 }
 
 .selected-areas-list li:hover {
-    background: var(--color-primary-soft);
-    transform: translateX(3px);
+    background: var(--color-primary-soft, #fdecea);
 }
 
 .area-name {
     font-weight: 500;
-    color: #333;
+    color: var(--color-text);
+    font-size: 0.9rem;
 }
 
 .remove-area {
-    background: #ffebee;
-    color: #f44336;
+    background: #ffecec;
+    color: #e74c3c;
     border: none;
-    width: 25px;
-    height: 25px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.8rem;
-    transition: all 0.3s ease;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
 }
 
 .remove-area:hover {
-    background: #f44336;
+    background: #e74c3c;
     color: white;
-    transform: scale(1.1);
 }
 
 .panel-actions {
-    margin-top: 20px;
-    padding-top: 15px;
+    margin-top: 16px;
+    padding-top: 12px;
     border-top: 1px solid #f0f0f0;
     text-align: center;
 }
 
 .clear-btn {
-    background: #ff5722;
-    color: white;
-    border: none;
-    padding: 12px 20px;
+    background: #fff;
+    color: #888;
+    border: 1.5px solid #e0e0e0;
+    padding: 8px 20px;
     border-radius: var(--radius-full);
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 0.85rem;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: border-color 0.15s, color 0.15s;
 }
 
 .clear-btn:hover {
-    background: #e64a19;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);
+    border-color: #e74c3c;
+    color: #e74c3c;
 }
 
 .empty-selection {
     text-align: center;
-    color: #999;
-    font-style: italic;
-    padding: 40px 20px;
+    color: #aaa;
+    padding: 28px 16px;
+    font-size: 0.9rem;
 }
 
 .empty-selection-icon {
-    font-size: 3rem;
-    margin-bottom: 15px;
+    font-size: 2.4rem;
+    margin-bottom: 10px;
     opacity: 0.5;
 }

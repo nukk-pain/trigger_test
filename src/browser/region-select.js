@@ -1,137 +1,83 @@
-// 부위 선택 2단계 UI 렌더 + 이벤트 (그룹 → 세부).
-// 상태는 region-flow가, 세부 area 선택은 selection-state가, 요약 패널은 selection-renderer가 담당.
+// SVG 인체 지도 직접 선택 UI.
+// 앞/뒷면 전환 + clickable-area 클릭 → 선택 상태 토글.
 
-import { createRegionFlow } from './region-flow.js';
-import { getGroups } from '../../lib/area-groups.js';
-import {
-    getSelectedAreas,
-    toggleSelectedArea,
-    resetAreaSelection
-} from './selection-state.js';
+import { getSelectedAreas, toggleSelectedArea, resetAreaSelection } from './selection-state.js';
 import { renderSelectedAreas } from './selection-renderer.js';
 
-const flow = createRegionFlow();
+let tooltipEl = null;
 
 function el(id) {
     return document.getElementById(id);
 }
 
-function onActivate(node, handler) {
-    node.addEventListener('click', handler);
-    node.addEventListener('keydown', event => {
-        if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
-            event.preventDefault();
-            handler(event);
-        }
-    });
+function showTooltip(label, clientX, clientY) {
+    if (!tooltipEl) return;
+    tooltipEl.textContent = label;
+    tooltipEl.style.left = (clientX + 14) + 'px';
+    tooltipEl.style.top = (clientY - 38) + 'px';
+    tooltipEl.removeAttribute('aria-hidden');
+    tooltipEl.classList.add('visible');
 }
 
-function syncStepVisibility() {
-    const { step } = flow.getState();
-    const groupStep = el('region-step-group');
-    const detailStep = el('region-step-detail');
-    if (groupStep) groupStep.hidden = step !== 'group';
-    if (detailStep) detailStep.hidden = step !== 'detail';
+function hideTooltip() {
+    if (!tooltipEl) return;
+    tooltipEl.classList.remove('visible');
+    tooltipEl.setAttribute('aria-hidden', 'true');
 }
 
-function removeSelectedArea(area) {
+function removeArea(area) {
     toggleSelectedArea(area);
-    renderSelectedAreas(getSelectedAreas(), removeSelectedArea);
-    syncDetailButtons();
+    renderSelectedAreas(getSelectedAreas(), removeArea);
 }
 
-function syncDetailButtons() {
-    const selected = getSelectedAreas();
-    document.querySelectorAll('.region-detail-btn').forEach(btn => {
-        const isSel = selected.includes(btn.dataset.area);
-        btn.classList.toggle('selected', isSel);
-        btn.setAttribute('aria-pressed', String(isSel));
+function handleAreaClick(area) {
+    toggleSelectedArea(area.dataset.area);
+    renderSelectedAreas(getSelectedAreas(), removeArea);
+}
+
+function switchView(view) {
+    el('front-view')?.classList.toggle('active', view === 'front');
+    el('back-view')?.classList.toggle('active', view === 'back');
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === view);
+        btn.setAttribute('aria-pressed', String(btn.dataset.view === view));
     });
-}
-
-function renderGroupCards() {
-    const container = el('region-group-cards');
-    if (!container) return;
-    container.replaceChildren();
-    getGroups().forEach(group => {
-        const card = document.createElement('button');
-        card.type = 'button';
-        card.className = 'region-group-card';
-        card.dataset.group = group.id;
-        card.textContent = group.label;
-        card.addEventListener('click', () => enterGroup(group.id));
-        container.appendChild(card);
-    });
-}
-
-function renderDetailButtons() {
-    const container = el('region-detail-buttons');
-    if (!container) return;
-    container.replaceChildren();
-    const selected = getSelectedAreas();
-    flow.getCurrentSubAreas().forEach(({ area, label }) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'region-detail-btn';
-        btn.dataset.area = area;
-        btn.textContent = label;
-        const isSel = selected.includes(area);
-        btn.classList.toggle('selected', isSel);
-        btn.setAttribute('aria-pressed', String(isSel));
-        onActivate(btn, () => toggleArea(area));
-        container.appendChild(btn);
-    });
-}
-
-function enterGroup(groupId) {
-    flow.selectGroup(groupId);
-    if (flow.getState().step !== 'detail') return;
-    const title = el('region-detail-title');
-    if (title) {
-        const group = getGroups().find(g => g.id === groupId);
-        title.textContent = group ? `${group.label} — 아픈 곳을 모두 골라주세요` : '세부 위치를 골라주세요';
-    }
-    renderDetailButtons();
-    syncStepVisibility();
-}
-
-function toggleArea(area) {
-    toggleSelectedArea(area);
-    renderSelectedAreas(getSelectedAreas(), removeSelectedArea);
-    syncDetailButtons();
-}
-
-function goBack() {
-    flow.back();
-    syncStepVisibility();
 }
 
 export function resetRegionSelect() {
-    flow.reset();
     resetAreaSelection();
-    renderSelectedAreas(getSelectedAreas(), removeSelectedArea);
-    syncStepVisibility();
+    renderSelectedAreas(getSelectedAreas(), removeArea);
 }
 
 export function initRegionSelect() {
-    renderGroupCards();
-    syncStepVisibility();
+    tooltipEl = el('area-tooltip');
 
-    // SVG 그룹 zone = 그룹 카드와 동일 동작
-    document.querySelectorAll('.region-zone').forEach(zone => {
-        zone.setAttribute('role', 'button');
-        zone.setAttribute('tabindex', '0');
-        onActivate(zone, () => enterGroup(zone.dataset.group));
+    document.querySelectorAll('.clickable-area').forEach(area => {
+        area.addEventListener('click', () => handleAreaClick(area));
+        area.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleAreaClick(area);
+            }
+        });
+        area.addEventListener('mousemove', e => {
+            showTooltip(area.getAttribute('aria-label') || area.dataset.area, e.clientX, e.clientY);
+        });
+        area.addEventListener('mouseleave', hideTooltip);
+        area.addEventListener('focus', () => {
+            const label = area.getAttribute('aria-label') || area.dataset.area;
+            const rect = area.getBoundingClientRect();
+            showTooltip(label, rect.left + rect.width / 2, rect.top);
+        });
+        area.addEventListener('blur', hideTooltip);
     });
 
-    const backBtn = el('region-back');
-    if (backBtn) backBtn.addEventListener('click', goBack);
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchView(btn.dataset.view));
+    });
 
-    const clearBtn = el('clear-selection');
-    if (clearBtn) clearBtn.addEventListener('click', () => resetRegionSelect());
+    el('clear-selection')?.addEventListener('click', () => resetRegionSelect());
+    el('quick-clear')?.addEventListener('click', () => resetRegionSelect());
 
-    const quickClear = el('quick-clear');
-    if (quickClear) quickClear.addEventListener('click', () => resetRegionSelect());
-
-    renderSelectedAreas(getSelectedAreas(), removeSelectedArea);
+    renderSelectedAreas(getSelectedAreas(), removeArea);
 }

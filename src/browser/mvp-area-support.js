@@ -2,15 +2,28 @@ export const unsupportedAreaNotice =
     '이 부위는 현재 MVP에서 지원 준비 중입니다. 응급 증상이 있으면 의료기관에 문의하세요.';
 
 const supportedPrefixes = [
+    'head-',
+    'occipital',
     'neck-',
     'shoulder-',
     'shoulder-blade-',
     'shoulder-top-',
+    'chest-',
+    'sternum',
+    'upper-abdomen',
+    'abdomen-',
+    'lower-abdomen',
     'upper-back-',
     'mid-back-',
     'lower-back-',
     'pelvis-',
-    'buttock-'
+    'buttock-',
+    'upper-arm-',
+    'thigh-front-',
+    'knee-front-',
+    'shin-',
+    'calf-',
+    'heel-'
 ];
 
 const supportedExactAreas = new Set([

@@ -50,49 +50,128 @@
             </div>
 
             <div class="region-select" id="region-select">
+                <!-- 앞/뒷면 전환 -->
+                <div class="view-toggle" role="group" aria-label="보기 방향 선택">
+                    <button type="button" class="view-btn active" data-view="front">앞면</button>
+                    <button type="button" class="view-btn" data-view="back">뒷면</button>
+                </div>
+
                 <div class="body-map" id="body-map">
                     <svg id="body-svg" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
                         <title>통증 부위 선택 인체 지도</title>
-                        <!-- 사람 형태 단일 실루엣 (후면, 장식) -->
-                        <ellipse class="body-silhouette" cx="200" cy="74" rx="36" ry="42" />
-                        <path class="body-silhouette" d="
-                            M182 110 C182 124 184 134 176 142 C150 150 132 166 122 196
-                            L104 262 C100 280 122 286 128 270 L150 214
-                            C150 238 150 270 152 300 C153 336 152 366 158 392
-                            C150 440 150 500 156 556 C157 572 183 572 185 556
-                            C189 504 194 452 200 416 C206 452 211 504 215 556
-                            C217 572 243 572 244 556 C250 500 250 440 242 392
-                            C248 366 247 336 248 300 C250 270 250 238 250 214
-                            L272 270 C278 286 300 280 296 262 L278 196
-                            C268 166 250 150 224 142 C216 134 218 124 218 110
-                            C218 110 200 118 182 110 Z" />
-                        <path class="accent-line" d="M200 150 L200 320" />
-                        <path class="accent-line" d="M180 176 C170 188 170 208 182 218" />
-                        <path class="accent-line" d="M220 176 C230 188 230 208 218 218" />
-                        <!-- 3개 그룹 zone (클릭 가능) -->
-                        <g class="region-zones" id="region-zones">
-                            <rect class="region-zone" data-group="neck-shoulder"
-                                x="120" y="118" width="160" height="76" rx="20" />
-                            <rect class="region-zone" data-group="back-waist"
-                                x="148" y="200" width="104" height="110" rx="20" />
-                            <rect class="region-zone" data-group="pelvis-hip"
-                                x="150" y="312" width="100" height="74" rx="20" />
+
+                        <!-- ── 앞면 ── -->
+                        <g id="front-view" class="body-view active">
+                            <g class="body-silhouette" aria-hidden="true">
+                                <ellipse cx="200" cy="50" rx="33" ry="40" />
+                                <rect x="186" y="84" width="28" height="26" rx="10" />
+                                <ellipse cx="200" cy="152" rx="90" ry="30" />
+                                <rect x="150" y="140" width="100" height="172" rx="34" />
+                                <ellipse cx="200" cy="306" rx="54" ry="30" />
+                                <rect x="103" y="150" width="28" height="96" rx="14" />
+                                <rect x="104" y="232" width="25" height="86" rx="12" />
+                                <ellipse cx="117" cy="326" rx="15" ry="21" />
+                                <rect x="269" y="150" width="28" height="96" rx="14" />
+                                <rect x="271" y="232" width="25" height="86" rx="12" />
+                                <ellipse cx="283" cy="326" rx="15" ry="21" />
+                                <rect x="156" y="298" width="40" height="238" rx="20" />
+                                <ellipse cx="176" cy="540" rx="22" ry="12" />
+                                <rect x="204" y="298" width="40" height="238" rx="20" />
+                                <ellipse cx="224" cy="540" rx="22" ry="12" />
+                            </g>
+                            <!-- 머리 -->
+                            <ellipse class="clickable-area" data-area="head-crown" data-group="head" cx="200" cy="16" rx="22" ry="12" aria-label="정수리" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="head-front" data-group="head" cx="200" cy="42" rx="28" ry="22" aria-label="이마/앞머리" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="head-temple-left" data-group="head" cx="173" cy="52" rx="13" ry="17" aria-label="왼쪽 관자놀이" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="head-temple-right" data-group="head" cx="227" cy="52" rx="13" ry="17" aria-label="오른쪽 관자놀이" tabindex="0" role="button" aria-pressed="false" />
+                            <!-- 목·어깨 (앞) -->
+                            <rect class="clickable-area" data-area="neck-front" data-group="neck-shoulder" x="186" y="86" width="28" height="20" rx="6" aria-label="목 앞쪽" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="neck-left" data-group="neck-shoulder" x="167" y="91" width="20" height="15" rx="5" aria-label="목 왼쪽" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="neck-right" data-group="neck-shoulder" x="213" y="91" width="20" height="15" rx="5" aria-label="목 오른쪽" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="shoulder-top-left" data-group="neck-shoulder" cx="138" cy="132" rx="20" ry="12" aria-label="왼쪽 어깨 윗부분" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="shoulder-top-right" data-group="neck-shoulder" cx="262" cy="132" rx="20" ry="12" aria-label="오른쪽 어깨 윗부분" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="shoulder-left-front" data-group="neck-shoulder" cx="115" cy="154" rx="22" ry="15" aria-label="왼쪽 어깨 앞" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="shoulder-right-front" data-group="neck-shoulder" cx="285" cy="154" rx="22" ry="15" aria-label="오른쪽 어깨 앞" tabindex="0" role="button" aria-pressed="false" />
+                            <!-- 가슴·복부 -->
+                            <rect class="clickable-area" data-area="chest-upper" data-group="chest-abdomen" x="174" y="130" width="52" height="28" rx="8" aria-label="가슴 윗부분" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="sternum" data-group="chest-abdomen" x="191" y="136" width="18" height="60" rx="6" aria-label="가슴뼈" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="chest-left" data-group="chest-abdomen" x="158" y="145" width="34" height="50" rx="8" aria-label="왼쪽 가슴" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="chest-right" data-group="chest-abdomen" x="208" y="145" width="34" height="50" rx="8" aria-label="오른쪽 가슴" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="upper-abdomen" data-group="chest-abdomen" x="172" y="196" width="56" height="28" rx="8" aria-label="명치/상복부" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="abdomen-left" data-group="chest-abdomen" x="160" y="224" width="32" height="38" rx="8" aria-label="왼쪽 배" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="abdomen-right" data-group="chest-abdomen" x="208" y="224" width="32" height="38" rx="8" aria-label="오른쪽 배" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="lower-abdomen" data-group="chest-abdomen" x="173" y="262" width="54" height="28" rx="8" aria-label="아랫배" tabindex="0" role="button" aria-pressed="false" />
+                            <!-- 골반 (앞) -->
+                            <rect class="clickable-area" data-area="pelvis-left" data-group="pelvis-hip" x="157" y="292" width="34" height="26" rx="8" aria-label="왼쪽 골반" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="pelvis-right" data-group="pelvis-hip" x="209" y="292" width="34" height="26" rx="8" aria-label="오른쪽 골반" tabindex="0" role="button" aria-pressed="false" />
+                            <!-- 팔 (앞) -->
+                            <rect class="clickable-area" data-area="upper-arm-left" data-group="arm" x="99" y="148" width="22" height="72" rx="10" aria-label="왼쪽 윗팔" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="upper-arm-right" data-group="arm" x="279" y="148" width="22" height="72" rx="10" aria-label="오른쪽 윗팔" tabindex="0" role="button" aria-pressed="false" />
+                            <!-- 다리 (앞) -->
+                            <rect class="clickable-area" data-area="thigh-front-left" data-group="leg" x="158" y="328" width="28" height="60" rx="10" aria-label="왼쪽 허벅지 앞" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="thigh-front-right" data-group="leg" x="214" y="328" width="28" height="60" rx="10" aria-label="오른쪽 허벅지 앞" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="knee-front-left" data-group="leg" cx="172" cy="400" rx="16" ry="12" aria-label="왼쪽 무릎 앞" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="knee-front-right" data-group="leg" cx="228" cy="400" rx="16" ry="12" aria-label="오른쪽 무릎 앞" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="shin-left" data-group="leg" x="163" y="418" width="16" height="58" rx="7" aria-label="왼쪽 정강이" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="shin-right" data-group="leg" x="221" y="418" width="16" height="58" rx="7" aria-label="오른쪽 정강이" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="calf-front-left" data-group="leg" x="179" y="428" width="14" height="48" rx="6" aria-label="왼쪽 종아리 앞" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="calf-front-right" data-group="leg" x="207" y="428" width="14" height="48" rx="6" aria-label="오른쪽 종아리 앞" tabindex="0" role="button" aria-pressed="false" />
+                        </g>
+
+                        <!-- ── 뒷면 ── -->
+                        <g id="back-view" class="body-view">
+                            <g class="body-silhouette" aria-hidden="true">
+                                <ellipse cx="200" cy="50" rx="33" ry="40" />
+                                <rect x="186" y="84" width="28" height="26" rx="10" />
+                                <ellipse cx="200" cy="152" rx="90" ry="30" />
+                                <rect x="150" y="140" width="100" height="172" rx="34" />
+                                <ellipse cx="200" cy="306" rx="54" ry="30" />
+                                <rect x="103" y="150" width="28" height="96" rx="14" />
+                                <rect x="104" y="232" width="25" height="86" rx="12" />
+                                <ellipse cx="117" cy="326" rx="15" ry="21" />
+                                <rect x="269" y="150" width="28" height="96" rx="14" />
+                                <rect x="271" y="232" width="25" height="86" rx="12" />
+                                <ellipse cx="283" cy="326" rx="15" ry="21" />
+                                <rect x="156" y="298" width="40" height="238" rx="20" />
+                                <ellipse cx="176" cy="540" rx="22" ry="12" />
+                                <rect x="204" y="298" width="40" height="238" rx="20" />
+                                <ellipse cx="224" cy="540" rx="22" ry="12" />
+                            </g>
+                            <!-- 머리 (뒤) -->
+                            <ellipse class="clickable-area" data-area="head-crown" data-group="head" cx="200" cy="16" rx="22" ry="12" aria-label="정수리" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="head-back" data-group="head" cx="200" cy="42" rx="28" ry="22" aria-label="뒷머리" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="occipital" data-group="head" cx="200" cy="68" rx="24" ry="14" aria-label="후두부" tabindex="0" role="button" aria-pressed="false" />
+                            <!-- 목·어깨 (뒤) -->
+                            <rect class="clickable-area" data-area="neck-back-upper" data-group="neck-shoulder" x="186" y="84" width="28" height="14" rx="6" aria-label="목 뒤 윗부분" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="neck-back-lower" data-group="neck-shoulder" x="186" y="98" width="28" height="14" rx="6" aria-label="목 뒤 아래부분" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="shoulder-top-left" data-group="neck-shoulder" cx="138" cy="132" rx="20" ry="12" aria-label="왼쪽 어깨 윗부분" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="shoulder-top-right" data-group="neck-shoulder" cx="262" cy="132" rx="20" ry="12" aria-label="오른쪽 어깨 윗부분" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="shoulder-blade-left" data-group="neck-shoulder" cx="140" cy="170" rx="26" ry="34" aria-label="왼쪽 어깨뼈" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="shoulder-blade-right" data-group="neck-shoulder" cx="260" cy="170" rx="26" ry="34" aria-label="오른쪽 어깨뼈" tabindex="0" role="button" aria-pressed="false" />
+                            <!-- 등·허리 -->
+                            <rect class="clickable-area" data-area="upper-back-center" data-group="back-waist" x="181" y="128" width="38" height="40" rx="8" aria-label="등 윗부분 중앙" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="upper-back-left" data-group="back-waist" x="156" y="132" width="26" height="36" rx="8" aria-label="등 윗부분 왼쪽" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="upper-back-right" data-group="back-waist" x="218" y="132" width="26" height="36" rx="8" aria-label="등 윗부분 오른쪽" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="mid-back-center" data-group="back-waist" x="170" y="170" width="60" height="40" rx="8" aria-label="등 중간" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="lower-back-center" data-group="back-waist" x="183" y="212" width="34" height="42" rx="8" aria-label="허리 중앙" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="lower-back-left" data-group="back-waist" x="156" y="214" width="28" height="40" rx="8" aria-label="허리 왼쪽" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="lower-back-right" data-group="back-waist" x="216" y="214" width="28" height="40" rx="8" aria-label="허리 오른쪽" tabindex="0" role="button" aria-pressed="false" />
+                            <!-- 골반·엉덩이 (뒤) -->
+                            <rect class="clickable-area" data-area="buttock-left-upper" data-group="pelvis-hip" x="155" y="292" width="40" height="26" rx="10" aria-label="왼쪽 엉덩이 윗부분" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="buttock-right-upper" data-group="pelvis-hip" x="205" y="292" width="40" height="26" rx="10" aria-label="오른쪽 엉덩이 윗부분" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="buttock-left-lower" data-group="pelvis-hip" x="156" y="318" width="38" height="22" rx="10" aria-label="왼쪽 엉덩이 아랫부분" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="buttock-right-lower" data-group="pelvis-hip" x="206" y="318" width="38" height="22" rx="10" aria-label="오른쪽 엉덩이 아랫부분" tabindex="0" role="button" aria-pressed="false" />
+                            <!-- 팔 (뒤) -->
+                            <rect class="clickable-area" data-area="upper-arm-back-left" data-group="arm" x="99" y="148" width="22" height="72" rx="10" aria-label="왼쪽 윗팔 뒤" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="upper-arm-back-right" data-group="arm" x="279" y="148" width="22" height="72" rx="10" aria-label="오른쪽 윗팔 뒤" tabindex="0" role="button" aria-pressed="false" />
+                            <!-- 다리 (뒤) -->
+                            <rect class="clickable-area" data-area="calf-back-left" data-group="leg" x="159" y="418" width="28" height="60" rx="10" aria-label="왼쪽 종아리 뒤" tabindex="0" role="button" aria-pressed="false" />
+                            <rect class="clickable-area" data-area="calf-back-right" data-group="leg" x="213" y="418" width="28" height="60" rx="10" aria-label="오른쪽 종아리 뒤" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="heel-left" data-group="leg" cx="172" cy="490" rx="17" ry="11" aria-label="왼쪽 발뒤꿈치" tabindex="0" role="button" aria-pressed="false" />
+                            <ellipse class="clickable-area" data-area="heel-right" data-group="leg" cx="228" cy="490" rx="17" ry="11" aria-label="오른쪽 발뒤꿈치" tabindex="0" role="button" aria-pressed="false" />
                         </g>
                     </svg>
-                </div>
-
-                <!-- 1단계: 큰 부위군 선택 -->
-                <div class="region-step active" id="region-step-group">
-                    <p class="region-prompt">어디가 불편하세요?</p>
-                    <p class="region-sub">지금은 목·어깨, 등·허리, 골반·엉덩이 셀프 마사지를 도와드려요.</p>
-                    <div class="region-group-cards" id="region-group-cards" role="group" aria-label="부위 그룹 선택"></div>
-                </div>
-
-                <!-- 2단계: 세부 부위 선택 -->
-                <div class="region-step" id="region-step-detail" hidden>
-                    <button type="button" class="region-back" id="region-back">‹ 부위 다시 고르기</button>
-                    <p class="region-prompt" id="region-detail-title">세부 위치를 골라주세요</p>
-                    <div class="region-detail-buttons" id="region-detail-buttons" role="group" aria-label="세부 부위 선택"></div>
+                    <div id="area-tooltip" class="area-tooltip" role="tooltip" aria-hidden="true"></div>
                 </div>
 
                 <!-- 선택 요약 -->
@@ -110,12 +189,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- 미지원 부위 보조 흐름 -->
-                <details class="other-region-note">
-                    <summary>다른 부위가 불편해요</summary>
-                    <p>지금은 목·어깨·등·허리·골반 주변만 도와드려요. 필요한 부위를 적어주시면 다음 업데이트에 반영할게요.</p>
-                </details>
             </div>
 
             <!-- 악화 동작 선택 -->
